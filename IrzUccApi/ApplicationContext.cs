@@ -15,7 +15,6 @@ namespace IrzUccApi
         public DbSet<Position> Positions { get; set; }
         public DbSet<PositionHistoricalRecord> PositionHistoricalRecords { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<Subscription> Subscriptions { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
