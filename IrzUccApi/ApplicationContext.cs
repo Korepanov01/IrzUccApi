@@ -10,8 +10,6 @@ namespace IrzUccApi
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Event> Events { get; set; }
-        public DbSet<EventListening> EventListenings { get; set; }
-        public DbSet<Like> Likes { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<NewsEntry> NewsEntries { get; set; }
         public DbSet<Position> Positions { get; set; }
@@ -23,6 +21,25 @@ namespace IrzUccApi
         {
             Database.EnsureDeleted();
             Database.EnsureCreated();
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Event>()
+                .HasMany<User>(e => e.Listeners)
+                .WithMany(u => u.ListeningEvents);
+            modelBuilder.Entity<Event>()
+                .HasOne<User>(e => e.Creator)
+                .WithMany(u => u.MyEvents);
+            modelBuilder.Entity<User>()
+                .HasMany<NewsEntry>(u => u.LikedNewsEntries)
+                .WithMany(n => n.Likers);
+            modelBuilder.Entity<User>()
+                .HasMany<NewsEntry>(u => u.MyNewsEntries)
+                .WithOne(n => n.Author);
+            modelBuilder.Entity<User>()
+                .HasMany<User>(u => u.Subscribers)
+                .WithMany(u => u.Subscriptions);
         }
     }
 }
