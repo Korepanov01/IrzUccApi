@@ -26,19 +26,22 @@ namespace IrzUccApi
         {
             modelBuilder.Entity<Event>()
                 .HasMany<User>(e => e.Listeners)
-                .WithMany(u => u.ListeningEvents);
+                .WithMany(u => u.ListeningEvents)
+                .UsingEntity(join => join.ToTable("EventListening"));
             modelBuilder.Entity<Event>()
                 .HasOne<User>(e => e.Creator)
                 .WithMany(u => u.MyEvents);
             modelBuilder.Entity<User>()
                 .HasMany<NewsEntry>(u => u.LikedNewsEntries)
-                .WithMany(n => n.Likers);
+                .WithMany(n => n.Likers)
+                .UsingEntity(join => join.ToTable("Like"));
             modelBuilder.Entity<User>()
                 .HasMany<NewsEntry>(u => u.MyNewsEntries)
                 .WithOne(n => n.Author);
             modelBuilder.Entity<User>()
                 .HasMany<User>(u => u.Subscribers)
-                .WithMany(u => u.Subscriptions);
+                .WithMany(u => u.Subscriptions)
+                .UsingEntity(join => join.ToTable("Subscription"));
         }
     }
 }
