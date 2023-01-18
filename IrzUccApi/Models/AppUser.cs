@@ -10,7 +10,6 @@ namespace IrzUccApi.Models
         public DateOnly EmploymentDate { get; set; }
         public bool IsActiveAccount { get; set; }
         public DateOnly? Birthday { get; set; }
-        public string? Patronymic { get; set; }
         public byte[]? Image { get; set; }
         public string? AboutMyself { get; set; }
         public string? MyDoings { get; set; }
