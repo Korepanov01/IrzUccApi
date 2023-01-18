@@ -1,8 +1,5 @@
 using IrzUccApi;
-using IrzUccApi.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -33,7 +30,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connection = builder.Configuration.GetConnectionString("PostgreSQLConnection");
-builder.Services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connection));
 
 var app = builder.Build();
 
@@ -50,5 +47,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/", (AppDbContext db) => db.Users.ToList());
 
 app.Run();

@@ -3,11 +3,12 @@
 namespace IrzUccApi.Models
 {
     [Table("PositionHistoricalRecord")]
-    public class PositionHistoricalRecord : BaseModel
+    public class PositionHistoricalRecord
     {
-        public DateTime DateTime { get; } = DateTime.UtcNow;
-        public string PositionName { get; set; }
+        public int Id { get; set; }
+        public DateTime DateTime { get; set; } = DateTime.UtcNow;
+        public string PositionName { get; set; } = string.Empty;
 
-        public virtual User User { get; set; }
+        public virtual AppUser User { get; set; } = new AppUser();
     }
 }

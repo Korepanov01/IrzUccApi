@@ -3,13 +3,14 @@
 namespace IrzUccApi.Models
 {
     [Table("Message")]
-    public class Message : BaseModel
+    public class Message
     {
-        public string Text { get; set; }
+        public int Id { get; set; }
+        public string Text { get; set; } = string.Empty;
         public bool IsReaded { get; set; }
-        public byte[] Image { get; set; }
-        public DateTime DateTime { get; } = DateTime.UtcNow;
+        public byte[] Image { get; set; } = Array.Empty<byte>();
+        public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
-        public virtual User Sender { get; set; }
+        public virtual AppUser Sender { get; set; } = new AppUser();
     }
 }
