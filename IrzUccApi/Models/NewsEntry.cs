@@ -3,15 +3,16 @@
 namespace IrzUccApi.Models
 {
     [Table("NewsEntry")]
-    public class NewsEntry : BaseModel
+    public class NewsEntry
     {
-        public string Title { get; set; }
-        public string Text { get; set; }
-        public byte[] Image { get; set; }
-        public DateTime DateTime { get; } = DateTime.UtcNow;
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+        public byte[] Image { get; set; } = Array.Empty<byte>();
+        public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
-        public virtual User Author { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
-        public virtual ICollection<User> Likers { get; set; }
+        public virtual AppUser Author { get; set; } = new AppUser();
+        public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+        public virtual ICollection<AppUser> Likers { get; set; } = new HashSet<AppUser>();
     }
 }

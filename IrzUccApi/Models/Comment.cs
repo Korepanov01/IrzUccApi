@@ -3,12 +3,13 @@
 namespace IrzUccApi.Models
 {
     [Table("Comment")]
-    public class Comment : BaseModel
+    public class Comment
     {
-        public string Text { get; set; }
-        public DateTime DateTime { get; } = DateTime.UtcNow;
+        public int Id { get; set; }
+        public string Text { get; set; } = string.Empty;
+        public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
-        public virtual NewsEntry NewsEntry { get; set; }
-        public virtual User User { get; set; }
+        public virtual NewsEntry NewsEntry { get; set; } = new NewsEntry();
+        public virtual AppUser User { get; set; } = new AppUser();
     }
 }

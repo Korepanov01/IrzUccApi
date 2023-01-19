@@ -3,10 +3,11 @@
 namespace IrzUccApi.Models
 {
     [Table("Position")]
-    public class Position : BaseModel
+    public class Position
     {
-        public string Name { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
 
-        public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<AppUser> Users { get; set; } = new HashSet<AppUser>();
     }
 }

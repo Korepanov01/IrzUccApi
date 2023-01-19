@@ -1,12 +1,12 @@
 ﻿using IrzUccApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IrzUccApi
 {
-    public class ApplicationContext: DbContext
+    public class AppDbContext: IdentityDbContext<AppUser>
     {
-        public DbSet<User> Users { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Event> Events { get; set; }
@@ -14,32 +14,32 @@ namespace IrzUccApi
         public DbSet<NewsEntry> NewsEntries { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<PositionHistoricalRecord> PositionHistoricalRecords { get; set; }
-        public DbSet<Role> Roles { get; set; }
 
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            Database.EnsureDeleted();
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            modelBuilder.Entity<Event>()
-                .HasMany<User>(e => e.Listeners)
+            base.OnModelCreating(builder);
+            builder.Entity<Event>()
+                .HasMany<AppUser>(e => e.Listeners)
                 .WithMany(u => u.ListeningEvents)
                 .UsingEntity(join => join.ToTable("EventListening"));
-            modelBuilder.Entity<Event>()
-                .HasOne<User>(e => e.Creator)
+            builder.Entity<Event>()
+                .HasOne<AppUser>(e => e.Creator)
                 .WithMany(u => u.MyEvents);
-            modelBuilder.Entity<User>()
+            builder.Entity<AppUser>()
                 .HasMany<NewsEntry>(u => u.LikedNewsEntries)
                 .WithMany(n => n.Likers)
                 .UsingEntity(join => join.ToTable("Like"));
-            modelBuilder.Entity<User>()
+            builder.Entity<AppUser>()
                 .HasMany<NewsEntry>(u => u.MyNewsEntries)
                 .WithOne(n => n.Author);
-            modelBuilder.Entity<User>()
-                .HasMany<User>(u => u.Subscribers)
+            builder.Entity<AppUser>()
+                .HasMany<AppUser>(u => u.Subscribers)
                 .WithMany(u => u.Subscriptions)
                 .UsingEntity(join => join.ToTable("Subscription"));
         }
