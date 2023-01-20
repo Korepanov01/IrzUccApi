@@ -1,5 +1,4 @@
 ﻿using IrzUccApi.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,6 +41,12 @@ namespace IrzUccApi
                 .HasMany<AppUser>(u => u.Subscribers)
                 .WithMany(u => u.Subscriptions)
                 .UsingEntity(join => join.ToTable("Subscription"));
+
+            builder.Entity<Position>().HasData(new Position()
+            {
+                Id = 1,
+                Name = "Рабочий"
+            });
         }
     }
 }

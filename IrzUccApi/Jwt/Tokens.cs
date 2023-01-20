@@ -1,8 +1,12 @@
-﻿namespace IrzUccApi.Jwt
+﻿using Microsoft.Build.Framework;
+
+namespace IrzUccApi.Jwt
 {
     public class Tokens
     {
-        public string Jwt { get; set; } = string.Empty;
-        public string RefreshToken { get; set; } = string.Empty;
+        [Required]
+        public string? Jwt { get; set; }
+        [Required]
+        public string? RefreshToken { get; set; }
     }
 }

@@ -8,19 +8,19 @@ namespace IrzUccApi.Jwt
 {
     public class JwtManager : IJwtManager
     {
-        private readonly IConfiguration _iconfiguration;
+        private readonly IConfiguration _iConfiguration;
 
-        public JwtManager(IConfiguration iconfiguration)
+        public JwtManager(IConfiguration iConfiguration)
         {
-            _iconfiguration = iconfiguration;
+            _iConfiguration = iConfiguration;
         }
 
         public Tokens GenerateTokens(string email)
         {
-            var tokenKey = Encoding.UTF8.GetBytes(_iconfiguration["JWT:SecurityKey"] ?? throw new ArgumentNullException("JWT:SecurityKey is empty!")); ;
+            var tokenKey = Encoding.UTF8.GetBytes(_iConfiguration["JWT:SecurityKey"] ?? throw new ArgumentNullException("JWT:SecurityKey is empty!")); ;
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
+                Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Email, email)
                 }),
@@ -38,7 +38,7 @@ namespace IrzUccApi.Jwt
 
         public ClaimsPrincipal GetPrincipalsFromJwt(string token)
         {
-            var tokenKey = Encoding.UTF8.GetBytes(_iconfiguration["JWT:SecurityKey"] ?? throw new ArgumentNullException("JWT:SecurityKey is empty!"));
+            var tokenKey = Encoding.UTF8.GetBytes(_iConfiguration["JWT:SecurityKey"] ?? throw new ArgumentNullException("JWT:SecurityKey is empty!"));
 
             var tokenValidationParameters = new TokenValidationParameters
             {

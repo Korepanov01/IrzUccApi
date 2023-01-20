@@ -2,16 +2,17 @@ using IrzUccApi;
 using IrzUccApi.Jwt;
 using IrzUccApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// builder.Services.Configure<ApiBehaviorOptions>(apiBehaviorOptions => {
+//     apiBehaviorOptions.SuppressModelStateInvalidFilter = true;
+// });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
@@ -51,6 +52,16 @@ builder.Services.AddAuthentication(options => {
     });
 builder.Services.AddAuthorization();
 builder.Services.AddTransient<IJwtManager, JwtManager>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 0;
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
