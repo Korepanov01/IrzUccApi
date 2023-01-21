@@ -7,10 +7,13 @@ namespace IrzUccApi
 {
     public class AppDbContext: IdentityDbContext<AppUser>
     {
-        static public readonly string SuperAdminRole = "SuperAdmin";
-        static public readonly string AdminRole = "Admin";
-        static public readonly string SupportRole = "Support";
-        static public readonly string СhancelleryRole = "Сhancellery";
+        private const string SuperAdminRole = "SuperAdmin";
+        private const string AdminRole = "Admin";
+        private const string SupportRole = "Support";
+        private const string СhancelleryRole = "Сhancellery";
+
+        private const string SuperAdminEmail = "user@example.com";
+        private const string SuperAdminPassword = "string";
 
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -37,21 +40,21 @@ namespace IrzUccApi
         private void ConfigureModel(ModelBuilder builder)
         {
             builder.Entity<Event>()
-               .HasMany<AppUser>(e => e.Listeners)
+               .HasMany(e => e.Listeners)
                .WithMany(u => u.ListeningEvents)
                .UsingEntity(join => join.ToTable("EventListening"));
             builder.Entity<Event>()
-                .HasOne<AppUser>(e => e.Creator)
+                .HasOne(e => e.Creator)
                 .WithMany(u => u.MyEvents);
             builder.Entity<AppUser>()
-                .HasMany<NewsEntry>(u => u.LikedNewsEntries)
+                .HasMany(u => u.LikedNewsEntries)
                 .WithMany(n => n.Likers)
                 .UsingEntity(join => join.ToTable("Like"));
             builder.Entity<AppUser>()
-                .HasMany<NewsEntry>(u => u.MyNewsEntries)
+                .HasMany(u => u.MyNewsEntries)
                 .WithOne(n => n.Author);
             builder.Entity<AppUser>()
-                .HasMany<AppUser>(u => u.Subscribers)
+                .HasMany(u => u.Subscribers)
                 .WithMany(u => u.Subscriptions)
                 .UsingEntity(join => join.ToTable("Subscription"));
         }
@@ -60,6 +63,8 @@ namespace IrzUccApi
         {
             var adminUserId = Guid.NewGuid().ToString();
             var superAdminRoleId = Guid.NewGuid().ToString();
+
+
 
             builder.Entity<IdentityRole>().HasData(new[] {
                 new IdentityRole
@@ -88,9 +93,10 @@ namespace IrzUccApi
             var superAdmin = new AppUser
             {
                 Id = adminUserId,
-                Email = "user@example.com"
+                Email = SuperAdminEmail,
+                NormalizedEmail = SuperAdminEmail.ToUpper()
             };
-            superAdmin.PasswordHash = new PasswordHasher<AppUser>().HashPassword(superAdmin, "string");
+            superAdmin.PasswordHash = new PasswordHasher<AppUser>().HashPassword(superAdmin, SuperAdminPassword);
             builder.Entity<AppUser>().HasData(superAdmin);
 
             builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
