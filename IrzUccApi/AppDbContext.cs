@@ -25,7 +25,6 @@ namespace IrzUccApi
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
@@ -93,6 +92,8 @@ namespace IrzUccApi
             var superAdmin = new AppUser
             {
                 Id = adminUserId,
+                UserName = SuperAdminEmail,
+                NormalizedUserName = SuperAdminEmail.ToUpper(),
                 Email = SuperAdminEmail,
                 NormalizedEmail = SuperAdminEmail.ToUpper()
             };

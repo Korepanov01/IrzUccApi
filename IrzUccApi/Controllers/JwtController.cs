@@ -34,7 +34,9 @@ namespace IrzUccApi.Controllers
             var tokens = await _jwtManager.GenerateTokens(user.Email);
 
             user.RefreshToken = tokens.RefreshToken;
-            await _userManager.UpdateAsync(user);
+            var identityResult = await _userManager.UpdateAsync(user);
+            if(!identityResult.Succeeded)
+                return BadRequest(identityResult.Errors);
 
             return Ok(tokens);
         }
@@ -47,15 +49,17 @@ namespace IrzUccApi.Controllers
 
             var user = await _userManager.FindByEmailAsync(email);
             if(user == null)
-                return Unauthorized("Invalid attempt!");
+                return Unauthorized("Non existing user!");
 
             if (user.RefreshToken != tokens.RefreshToken)
-                return Unauthorized("Invalid attempt!");
+                return Unauthorized("Invalid refresh token!");
 
             var newTokens = await _jwtManager.GenerateTokens(user.Email);
 
             user.RefreshToken = newTokens.RefreshToken;
-            await _userManager.UpdateAsync(user);
+            var identityResult = await _userManager.UpdateAsync(user);
+            if (!identityResult.Succeeded)
+                return BadRequest(identityResult.Errors);
 
             return Ok(newTokens);
         }
