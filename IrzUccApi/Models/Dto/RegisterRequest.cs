@@ -23,6 +23,4 @@ public class RegisterRequest
     public DateTime Birthday { get; set; }
     [Required]
     public DateTime EmploymentDate { get; set; }
-    [Required]
-    public int PositionId { get; set; }
 }
