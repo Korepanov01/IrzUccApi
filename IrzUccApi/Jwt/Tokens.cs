@@ -4,9 +4,7 @@ namespace IrzUccApi.Jwt
 {
     public class Tokens
     {
-        [Required]
-        public string? Jwt { get; set; }
-        [Required]
-        public string? RefreshToken { get; set; }
+        public string Jwt { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IrzUccApi.Models
@@ -6,12 +7,12 @@ namespace IrzUccApi.Models
     [Table("User")]
     public class AppUser : IdentityUser
     {
-        public string? FirstName { get; set; }
-        public string? Surname { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string Surname { get; set; } = string.Empty;
+        public bool IsActiveAccount { get; set; } = true;
         public string? Patronymic { get; set; }
         public DateTime? EmploymentDate { get; set; }
-        public bool? IsActiveAccount { get; set; }
-        public DateTime? Birthday { get; set; }
+        public DateTime Birthday { get; set; }
         public byte[]? Image { get; set; }
         public string? AboutMyself { get; set; }
         public string? MyDoings { get; set; }

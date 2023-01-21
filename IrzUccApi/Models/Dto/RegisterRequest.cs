@@ -1,16 +1,16 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Dbo;
+namespace IrzUccApi.Models.Dto;
 
 public class RegisterRequest
 {
     [Required(AllowEmptyStrings = false)]
     [MaxLength(50)]
-    public string? FirstName { get; set; }
+    public string FirstName { get; set; } = string.Empty;
     [Required(AllowEmptyStrings = false)]
     [MaxLength(50)]
-    public string? Surname { get; set; }
+    public string Surname { get; set; } = string.Empty;
     [MaxLength(50)]
     public string? Patronymic { get; set; }
     [Required]

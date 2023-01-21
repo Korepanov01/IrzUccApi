@@ -1,6 +1,6 @@
 ﻿using IrzUccApi.Jwt;
 using IrzUccApi.Models;
-using IrzUccApi.Models.Dbo;
+using IrzUccApi.Models.Dto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -27,11 +27,11 @@ namespace IrzUccApi.Controllers
         public async Task<IActionResult> GetTokenAsync([FromBody]LoginRequest loginRequest)
         {
             var user = await _userManager.FindByEmailAsync(loginRequest.Email);
-
+            
             if(!await _userManager.CheckPasswordAsync(user, loginRequest.Password))
-                return Unauthorized("Неправильный логин или пароль!");
+                return BadRequest("Incorrect login or password!");
 
-            var tokens = _jwtManager.GenerateTokens(user.Email);
+            var tokens = await _jwtManager.GenerateTokens(user.Email);
 
             user.RefreshToken = tokens.RefreshToken;
             await _userManager.UpdateAsync(user);
@@ -43,10 +43,7 @@ namespace IrzUccApi.Controllers
         [Route("refresh")]
         public async Task<IActionResult> GetTokenAsync([FromBody] Tokens tokens)
         {
-            var claims = _jwtManager.GetPrincipalsFromJwt(tokens.Jwt);
-            var email = claims.FindFirst(ClaimTypes.Email)?.Value;
-            if(email == null)
-                return Unauthorized("Invalid attempt!");
+            var email = _jwtManager.GetEmailFromExpiredJwt(tokens.Jwt);
 
             var user = await _userManager.FindByEmailAsync(email);
             if(user == null)
@@ -55,7 +52,7 @@ namespace IrzUccApi.Controllers
             if (user.RefreshToken != tokens.RefreshToken)
                 return Unauthorized("Invalid attempt!");
 
-            var newTokens = _jwtManager.GenerateTokens(user.Email);
+            var newTokens = await _jwtManager.GenerateTokens(user.Email);
 
             user.RefreshToken = newTokens.RefreshToken;
             await _userManager.UpdateAsync(user);
