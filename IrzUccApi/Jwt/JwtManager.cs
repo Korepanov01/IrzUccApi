@@ -33,7 +33,7 @@ namespace IrzUccApi.Jwt
                 Subject = new ClaimsIdentity((await _userManager.GetRolesAsync(user))
                     .Select(r => new Claim(ClaimTypes.Role, r))
                     .Append(new Claim(ClaimTypes.Email, email))),
-                Expires = DateTime.Now.AddMinutes(1),
+                Expires = DateTime.Now.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var tokenHandler = new JwtSecurityTokenHandler();
