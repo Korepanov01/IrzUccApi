@@ -10,7 +10,7 @@ namespace IrzUccApi
         private const string SuperAdminRole = "SuperAdmin";
         private const string AdminRole = "Admin";
         private const string SupportRole = "Support";
-        private const string СhancelleryRole = "Сhancellery";
+        private const string СhancelleryRole = "Publisher";
 
         private const string SuperAdminEmail = "user@example.com";
         private const string SuperAdminPassword = "string";

@@ -223,14 +223,14 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> AddUserRole(string id, [FromBody][Required] string newRole)
     {
         if (newRole == "SuperAdmin" || !User.IsInRole("SuperAdmin") && newRole == "Admin")
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return Forbid();
 
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
             return NotFound(UserDoesntExistsMessage);
 
         if (await _userManager.IsInRoleAsync(user, "SuperAdmin"))
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return Forbid();
 
         try
         {
@@ -251,14 +251,14 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> RemoveUserRole(string id, [FromBody][Required] string role)
     {
         if (!User.IsInRole("SuperAdmin") && role == "Admin")
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return Forbid();
 
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
             return NotFound(UserDoesntExistsMessage);
 
         if (await _userManager.IsInRoleAsync(user, "SuperAdmin"))
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return Forbid();
 
         var identityResult = await _userManager.RemoveFromRoleAsync(user, role);
         if (!identityResult.Succeeded)
