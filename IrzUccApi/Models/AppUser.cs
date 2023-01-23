@@ -13,7 +13,7 @@ namespace IrzUccApi.Models
         public string? Patronymic { get; set; }
         public DateTime? EmploymentDate { get; set; }
         public DateTime Birthday { get; set; }
-        public byte[]? Image { get; set; }
+        public string? Image { get; set; }
         public string? AboutMyself { get; set; }
         public string? MyDoings { get; set; }
         public string? Skills { get; set; }

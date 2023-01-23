@@ -26,13 +26,17 @@ namespace IrzUccApi.Jwt
                        ?? throw new ConfigurationErrorsException("JWT:SecurityKey is empty!"));
             
             var user = (await _userManager.FindByEmailAsync(email)) 
-                       ?? throw new ArgumentException("There is no such user", email);
+                       ?? throw new ArgumentException("There is no such user!", email);
             
+            if(!user.IsActiveAccount)
+                throw new ArgumentException("User is deactivated!", email);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity((await _userManager.GetRolesAsync(user))
                     .Select(r => new Claim(ClaimTypes.Role, r))
-                    .Append(new Claim(ClaimTypes.Email, email))),
+                    .Append(new Claim(ClaimTypes.Email, email))
+                    .Append(new Claim(ClaimTypes.NameIdentifier, user.Id))),
                 Expires = DateTime.Now.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
