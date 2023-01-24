@@ -31,7 +31,7 @@ namespace IrzUccApi
             SeedData(builder);
         }
 
-        private void ConfigureModel(ModelBuilder builder)
+        private static void ConfigureModel(ModelBuilder builder)
         {
             builder.Entity<Event>()
                .HasMany(e => e.Listeners)
@@ -53,7 +53,7 @@ namespace IrzUccApi
                 .UsingEntity(join => join.ToTable("Subscription"));
         }
 
-        private void SeedData(ModelBuilder builder)
+        private static void SeedData(ModelBuilder builder)
         {
             var adminUserId = Guid.NewGuid().ToString();
             var superAdminRoleId = Guid.NewGuid().ToString();

@@ -1,6 +1,6 @@
 ﻿using IrzUccApi.Jwt;
 using IrzUccApi.Models;
-using IrzUccApi.Models.Dto;
+using IrzUccApi.Models.Dtos.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

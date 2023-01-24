@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Dto
+namespace IrzUccApi.Models.Dtos.User
 {
     public class LoginRequest
     {
