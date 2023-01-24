@@ -1,5 +1,5 @@
 ﻿using IrzUccApi.Models;
-using IrzUccApi.Models.Dto;
+using IrzUccApi.Enums;
 using IrzUccApi.Models.Dtos.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,10 +15,6 @@ namespace IrzUccApi.Controllers;
 [Authorize]
 public class UsersController : ControllerBase
 {
-    private const string UserDoesntExistsMessage = "User does not exist!";
-    private const string UserAlreadyExistsMessage = "User already exists!";
-    private const string PositionDoesntExistsMessage = "Position does not exists!";
-
     private readonly AppDbContext _dbContext;
     private readonly UserManager<AppUser> _userManager;
 
@@ -62,7 +58,7 @@ public class UsersController : ControllerBase
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
-            return NotFound(UserDoesntExistsMessage);
+            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
         var userDto = new UserDto
         {
@@ -91,7 +87,7 @@ public class UsersController : ControllerBase
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
-            return NotFound(UserDoesntExistsMessage);
+            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
         user.FirstName = userRegInfo.FirstName;
         user.Surname = userRegInfo.Surname;
@@ -111,7 +107,7 @@ public class UsersController : ControllerBase
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
-            return NotFound(UserDoesntExistsMessage);
+            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
         if (User.Claims.First(c => c.ValueType == ClaimTypes.Email).Value != user.Email)
             return Forbid();
@@ -133,7 +129,7 @@ public class UsersController : ControllerBase
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
-            return NotFound(UserDoesntExistsMessage);
+            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
         if (await _userManager.IsInRoleAsync(user, "SuperAdmin") 
             || User.IsInRole("Admin") && await _userManager.IsInRoleAsync(user, "Admin"))
@@ -152,7 +148,7 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> RegisterUser([FromBody] UserRegInfo request)
     {
         if (await _userManager.FindByEmailAsync(request.Email) != null)
-            return BadRequest(UserAlreadyExistsMessage);
+            return BadRequest(RequestErrorMessages.UserAlreadyExistsMessage);
 
         var user = new AppUser
         {
@@ -177,11 +173,11 @@ public class UsersController : ControllerBase
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
-            return NotFound(UserDoesntExistsMessage);
+            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
         var newPosition = await _dbContext.Positions.FirstAsync(p => p.Id == positionId);
         if (newPosition == null)
-            return NotFound(PositionDoesntExistsMessage);
+            return NotFound(RequestErrorMessages.PositionDoesntExistsMessage);
 
         var employmentDate = DateTime.UtcNow;
         user.EmploymentDate = employmentDate;
@@ -207,62 +203,13 @@ public class UsersController : ControllerBase
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
-            return NotFound(UserDoesntExistsMessage);
+            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
         user.EmploymentDate = null;
         user.Position = null;
         _dbContext.Update(user);
 
         await _dbContext.SaveChangesAsync();
-
-        return Ok();
-    }
-
-    [HttpPut("{id}/add_role")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
-    public async Task<IActionResult> AddUserRole(string id, [FromBody][Required] string newRole)
-    {
-        if (newRole == "SuperAdmin" || !User.IsInRole("SuperAdmin") && newRole == "Admin")
-            return Forbid();
-
-        var user = await _userManager.FindByIdAsync(id);
-        if (user == null)
-            return NotFound(UserDoesntExistsMessage);
-
-        if (await _userManager.IsInRoleAsync(user, "SuperAdmin"))
-            return Forbid();
-
-        try
-        {
-            var identityResult = await _userManager.AddToRoleAsync(user, newRole);
-            if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
-        }
-        catch (InvalidOperationException e)
-        {
-            return BadRequest(e.Message);
-        }
-
-        return Ok();
-    }
-
-    [HttpPut("{id}/remove_role")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
-    public async Task<IActionResult> RemoveUserRole(string id, [FromBody][Required] string role)
-    {
-        if (!User.IsInRole("SuperAdmin") && role == "Admin")
-            return Forbid();
-
-        var user = await _userManager.FindByIdAsync(id);
-        if (user == null)
-            return NotFound(UserDoesntExistsMessage);
-
-        if (await _userManager.IsInRoleAsync(user, "SuperAdmin"))
-            return Forbid();
-
-        var identityResult = await _userManager.RemoveFromRoleAsync(user, role);
-        if (!identityResult.Succeeded)
-            return BadRequest(identityResult.Errors);
 
         return Ok();
     }

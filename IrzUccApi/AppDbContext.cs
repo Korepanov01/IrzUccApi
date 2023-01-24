@@ -7,11 +7,6 @@ namespace IrzUccApi
 {
     public class AppDbContext: IdentityDbContext<AppUser>
     {
-        private const string SuperAdminRole = "SuperAdmin";
-        private const string AdminRole = "Admin";
-        private const string SupportRole = "Support";
-        private const string СhancelleryRole = "Publisher";
-
         private const string SuperAdminEmail = "user@example.com";
         private const string SuperAdminPassword = "string";
 
@@ -63,29 +58,27 @@ namespace IrzUccApi
             var adminUserId = Guid.NewGuid().ToString();
             var superAdminRoleId = Guid.NewGuid().ToString();
 
-
-
             builder.Entity<IdentityRole>().HasData(new[] {
                 new IdentityRole
                 {
                     Id = superAdminRoleId,
-                    Name = SuperAdminRole,
-                    NormalizedName = SuperAdminRole.ToUpper()
+                    Name = Enums.Roles.SuperAdmin,
+                    NormalizedName = Enums.Roles.SuperAdmin.ToUpper()
                 },
                 new IdentityRole
                 {
-                    Name = AdminRole,
-                    NormalizedName = AdminRole.ToUpper()
+                    Name = Enums.Roles.Admin,
+                    NormalizedName = Enums.Roles.Admin.ToUpper()
                 },
                 new IdentityRole
                 {
-                    Name = SupportRole,
-                    NormalizedName = SupportRole.ToUpper()
+                    Name = Enums.Roles.Support,
+                    NormalizedName = Enums.Roles.Support.ToUpper()
                 },
                 new IdentityRole
                 {
-                    Name = СhancelleryRole,
-                    NormalizedName = СhancelleryRole.ToUpper()
+                    Name = Enums.Roles.Publisher,
+                    NormalizedName = Enums.Roles.Publisher.ToUpper()
                 }
             });
 
