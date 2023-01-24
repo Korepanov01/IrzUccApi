@@ -2,8 +2,10 @@
 
 namespace IrzUccApi.Models.Dtos.Position
 {
-    public class PositionName
+    public class UpdatePositionRequest
     {
+        [Required]
+        public int Id { get; set; }
         [Required(AllowEmptyStrings = false)]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;

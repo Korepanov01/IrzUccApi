@@ -51,6 +51,9 @@ namespace IrzUccApi
                 .HasMany(u => u.Subscribers)
                 .WithMany(u => u.Subscriptions)
                 .UsingEntity(join => join.ToTable("Subscription"));
+            builder.Entity<Position>()
+                .HasMany(p => p.Users)
+                .WithOne(u => u.Position);
         }
 
         private static void SeedData(ModelBuilder builder)
