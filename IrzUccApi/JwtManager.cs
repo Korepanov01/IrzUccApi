@@ -6,10 +6,11 @@ using System.Security.Cryptography;
 using System.Text;
 using IrzUccApi.Models;
 using Microsoft.AspNetCore.Identity;
+using IrzUccApi.Models.Dtos;
 
-namespace IrzUccApi.Jwt
+namespace IrzUccApi
 {
-    public class JwtManager : IJwtManager
+    public class JwtManager
     {
         private readonly IConfiguration _iConfiguration;
         private readonly UserManager<AppUser> _userManager;
@@ -22,13 +23,13 @@ namespace IrzUccApi.Jwt
 
         public async Task<Tokens> GenerateTokens(string email)
         {
-            var tokenKey = Encoding.UTF8.GetBytes(_iConfiguration["JWT:SecurityKey"] 
+            var tokenKey = Encoding.UTF8.GetBytes(_iConfiguration["JWT:SecurityKey"]
                        ?? throw new ConfigurationErrorsException("JWT:SecurityKey is empty!"));
-            
-            var user = (await _userManager.FindByEmailAsync(email)) 
+
+            var user = await _userManager.FindByEmailAsync(email)
                        ?? throw new ArgumentException("There is no such user!", email);
-            
-            if(!user.IsActiveAccount)
+
+            if (!user.IsActiveAccount)
                 throw new ArgumentException("User is deactivated!", email);
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -65,10 +66,10 @@ namespace IrzUccApi.Jwt
             };
 
             var principal = new JwtSecurityTokenHandler().ValidateToken(jwt, tokenValidationParameters, out var securityToken);
-            if (securityToken is not JwtSecurityToken jwtSecurityToken 
+            if (securityToken is not JwtSecurityToken jwtSecurityToken
                 || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 throw new SecurityTokenException("Invalid token");
-            
+
             return (principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ??
                     throw new SecurityTokenException("Invalid token")).Value;
         }

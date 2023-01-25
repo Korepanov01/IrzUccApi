@@ -1,5 +1,5 @@
-﻿using IrzUccApi.Jwt;
-using IrzUccApi.Models;
+﻿using IrzUccApi.Models;
+using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.Dtos.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +10,10 @@ namespace IrzUccApi.Controllers
     [ApiController]
     public class JwtController : ControllerBase
     {
-        private readonly IJwtManager _jwtManager;
+        private readonly JwtManager _jwtManager;
         private readonly UserManager<AppUser> _userManager;
 
-        public JwtController(IJwtManager jwtManager, UserManager<AppUser> userManager)
+        public JwtController(JwtManager jwtManager, UserManager<AppUser> userManager)
         {
             _jwtManager = jwtManager;
             _userManager = userManager;

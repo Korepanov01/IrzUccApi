@@ -7,9 +7,12 @@ namespace IrzUccApi.Models
     [Table("User")]
     public class AppUser : IdentityUser
     {
+        [MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
+        [MaxLength(50)]
         public string Surname { get; set; } = string.Empty;
         public bool IsActiveAccount { get; set; } = true;
+        [MaxLength(50)]
         public string? Patronymic { get; set; }
         public DateTime? EmploymentDate { get; set; }
         public DateTime Birthday { get; set; }
@@ -27,5 +30,6 @@ namespace IrzUccApi.Models
         public virtual ICollection<Event> ListeningEvents { get; set; } = new HashSet<Event>();
         public virtual ICollection<NewsEntry> LikedNewsEntries { get; set; } = new HashSet<NewsEntry>();
         public virtual ICollection<NewsEntry> MyNewsEntries { get; set; } = new HashSet<NewsEntry>();
+        public virtual ICollection<PositionHistoricalRecord> PositionHistoricalRecords { get; set; } = new HashSet<PositionHistoricalRecord>();
     }
 }

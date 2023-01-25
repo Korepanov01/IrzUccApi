@@ -1,5 +1,4 @@
 using IrzUccApi;
-using IrzUccApi.Jwt;
 using IrzUccApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -51,7 +50,8 @@ builder.Services.AddAuthentication(options => {
         };
     });
 builder.Services.AddAuthorization();
-builder.Services.AddTransient<IJwtManager, JwtManager>();
+builder.Services.AddTransient<JwtManager>();
+builder.Services.AddTransient<UserIdentifier>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace IrzUccApi.Controllers;
 
@@ -17,40 +16,44 @@ public class UsersController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
     private readonly UserManager<AppUser> _userManager;
+    private readonly UserIdentifier _userIdentifier;
 
-    public UsersController(AppDbContext dbContext, UserManager<AppUser> userManager)
+    public UsersController(AppDbContext dbContext, UserManager<AppUser> userManager, UserIdentifier userIdentifier)
     {
         _dbContext = dbContext;
         _userManager = userManager;
+        _userIdentifier = userIdentifier;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetUsers(
+            [Range(0, 50)] int pageSize = 10,
+            [Range(1, int.MaxValue)] int page = 1,
+            string? searchString = null)
     {
-        var isAdminOrSuperAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+        var isAdminOrSuperAdmin = User.IsInRole(Roles.Admin) || User.IsInRole(Roles.SuperAdmin);
         var users = await _dbContext.Users
-            .Where(u => isAdminOrSuperAdmin || u.IsActiveAccount)
-            .OrderBy(u => u.Surname).ToArrayAsync();
-        var usersDto = new List<UserDto>();
-        foreach (var u in users)
+                .Where(u => (isAdminOrSuperAdmin || u.IsActiveAccount)
+                    && (searchString == null || (u.FirstName + u.Surname + u.Patronymic ?? "" + u.Email).ToUpper().Contains(searchString.ToUpper())))
+                .OrderBy(u => (u.Surname + u.FirstName + u.Patronymic ?? ""))
+                .Skip(pageSize * (page - 1))
+                .Take(pageSize)
+                .ToArrayAsync();
+        var userListItems= new List<UserListItemDto>();
+        foreach (var user in users) 
         {
-            usersDto.Add(new UserDto
-            {
-                Id = u.Id,
-                FirstName = u.FirstName,
-                Surname = u.Surname,
-                IsActiveAccount = u.IsActiveAccount,
-                Patronymic = u.Patronymic,
-                EmploymentDate = u.EmploymentDate,
-                Birthday = u.Birthday,
-                Image = u.Image,
-                PositionName = u.Position?.Name,
-                PositionId = u.Position?.Id,
-                Roles = await _userManager.GetRolesAsync(u)
-            });
+            userListItems.Add(new UserListItemDto(
+                    user.Id,
+                    user.FirstName,
+                    user.Surname,
+                    user.Patronymic,
+                    user.Email,
+                    isAdminOrSuperAdmin ? user.IsActiveAccount : null,
+                    user.Image,
+                    isAdminOrSuperAdmin ? await _userManager.GetRolesAsync(user) : null,
+                    user.Position?.Name));
         }
-
-        return Ok(usersDto);
+        return Ok(userListItems);
     }
 
     [HttpGet("{id}")]
@@ -60,25 +63,22 @@ public class UsersController : ControllerBase
         if (user == null)
             return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
-        var userDto = new UserDto
-        {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            Surname = user.Surname,
-            IsActiveAccount = user.IsActiveAccount,
-            Patronymic = user.Patronymic,
-            EmploymentDate = user.EmploymentDate,
-            Birthday = user.Birthday,
-            Image = user.Image,
-            AboutMyself = user.AboutMyself,
-            MyDoings = user.MyDoings,
-            Skills = user.Skills,
-            Roles = await _userManager.GetRolesAsync(user),
-            PositionName = user.Position?.Name,
-            PositionId = user.Position?.Id
-        };
-
-        return Ok(userDto);
+        return Ok(new UserDto(
+            user.Id,
+            user.FirstName,
+            user.Surname,
+            user.Patronymic,
+            user.Birthday,
+            user.Image,
+            user.AboutMyself,
+            user.MyDoings,
+            user.Skills,
+            user.EmploymentDate,
+            user.Position?.Name,
+            user.PositionHistoricalRecords
+                .OrderBy(p => p.DateTime)
+                .Select(p => p.DateTime.ToString("yy.MM.dd") + " " + p.PositionName)
+                .ToArray()));
     }
 
     [HttpPut("{id}/change_reg_info")]
@@ -88,6 +88,8 @@ public class UsersController : ControllerBase
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
             return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
+        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+            return Forbid();
 
         user.FirstName = userRegInfo.FirstName;
         user.Surname = userRegInfo.Surname;
@@ -101,21 +103,21 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
-    [HttpPut("{id}/change_extra_info")]
+    [HttpPut("change_extra_info")]
     [Authorize]
-    public async Task<IActionResult> UpdateUserExtraInfo(string id, [FromBody] UserExtraInfo userExtraInfo)
+    public async Task<IActionResult> UpdateUserExtraInfo([FromBody] UserExtraInfo userExtraInfo)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var user = await _userIdentifier.GetCurrentUser(User);
         if (user == null)
-            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
+            return Unauthorized();
 
-        if (User.Claims.First(c => c.ValueType == ClaimTypes.Email).Value != user.Email)
+        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
             return Forbid();
 
-        user.Image= userExtraInfo.Image;
-        user.AboutMyself= userExtraInfo.AboutMyself;
-        user.MyDoings= userExtraInfo.MyDoings;
-        user.Skills= userExtraInfo.Skills;
+        user.Image = userExtraInfo.Image;
+        user.AboutMyself = userExtraInfo.AboutMyself;
+        user.MyDoings = userExtraInfo.MyDoings;
+        user.Skills = userExtraInfo.Skills;
         var identityResult = await _userManager.UpdateAsync(user);
         if (!identityResult.Succeeded)
             return BadRequest(identityResult.Errors);
@@ -131,8 +133,8 @@ public class UsersController : ControllerBase
         if (user == null)
             return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
-        if (await _userManager.IsInRoleAsync(user, "SuperAdmin") 
-            || User.IsInRole("Admin") && await _userManager.IsInRoleAsync(user, "Admin"))
+        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin)
+            || User.IsInRole(Roles.Admin) && await _userManager.IsInRoleAsync(user, Roles.Admin))
             return Forbid();
 
         user.IsActiveAccount = !user.IsActiveAccount;

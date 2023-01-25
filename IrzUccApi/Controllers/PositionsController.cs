@@ -32,9 +32,9 @@ namespace IrzUccApi.Controllers
             => Ok(await _dbContext.Positions
                 .Where(p => searchString == null || p.Name.ToUpper().Contains(searchString.ToUpper()))
                 .OrderBy(p => p.Name)
-                .Select(p => new PositionDto(p.Id, p.Name))
                 .Skip(pageSize * (page - 1))
                 .Take(pageSize)
+                .Select(p => new PositionDto(p.Id, p.Name))
                 .ToArrayAsync());
 
         [HttpPost]

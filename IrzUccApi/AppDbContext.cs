@@ -40,6 +40,9 @@ namespace IrzUccApi
             builder.Entity<Event>()
                 .HasOne(e => e.Creator)
                 .WithMany(u => u.MyEvents);
+            builder.Entity<AppUser>().
+                HasMany(u => u.PositionHistoricalRecords)
+                .WithOne(p => p.User);
             builder.Entity<AppUser>()
                 .HasMany(u => u.LikedNewsEntries)
                 .WithMany(n => n.Likers)

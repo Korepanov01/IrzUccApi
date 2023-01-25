@@ -17,11 +17,13 @@ namespace IrzUccApi.Controllers
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly UserIdentifier _userIdentifier;
 
-        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager, UserIdentifier userIdentifier)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _userIdentifier = userIdentifier;
         }
 
         [HttpGet]
@@ -31,7 +33,7 @@ namespace IrzUccApi.Controllers
             int page = 1
             )
         {
-            var currentUser = await GetCurrentUser();
+            var currentUser = await _userIdentifier.GetCurrentUser(User);
             IEnumerable<string> subscriptionsIds = currentUser?.Subscriptions?.Select(s => s.Id) ?? Array.Empty<string>();
             var news = await _dbContext.NewsEntries
                 .Where(n => n.IsPublic || subscriptionsIds.Contains(n.Author.Id) && n.Author.IsActiveAccount)
@@ -53,7 +55,7 @@ namespace IrzUccApi.Controllers
                 Text = request.Text,
                 Image = request.Image,
                 DateTime = DateTime.UtcNow,
-                Author = await GetCurrentUser() ?? throw new Exception(),
+                Author = await _userIdentifier.GetCurrentUser(User) ?? throw new Exception(),
                 IsPublic = request.IsPublic && User.IsInRole("Publisher")
             });
             await _dbContext.SaveChangesAsync();
@@ -67,7 +69,7 @@ namespace IrzUccApi.Controllers
             if (newsEntry == null)
                 return NotFound();
 
-            return Ok(CalcNewsEntryDto(newsEntry, await GetCurrentUser(), false));
+            return Ok(CalcNewsEntryDto(newsEntry, await _userIdentifier.GetCurrentUser(User), false));
         }
 
         [HttpDelete("{id}")]
@@ -102,19 +104,6 @@ namespace IrzUccApi.Controllers
                 AuthorName = newsEntry.Author.Surname + " " + newsEntry.Author.FirstName,
                 IsPublic= newsEntry.IsPublic
             };
-        }
-
-        private async Task<AppUser?> GetCurrentUser()
-        {
-            var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-            if (!isAuthenticated) return null;
-
-            var id = User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            if (id == null) return null;
-
-            var user = await _userManager.FindByIdAsync(id);
-
-            return user;
         }
     }
 }
