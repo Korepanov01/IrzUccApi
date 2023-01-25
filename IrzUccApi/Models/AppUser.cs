@@ -29,7 +29,12 @@ namespace IrzUccApi.Models
         public virtual ICollection<Event> MyEvents { get; set; } = new HashSet<Event>();
         public virtual ICollection<Event> ListeningEvents { get; set; } = new HashSet<Event>();
         public virtual ICollection<NewsEntry> LikedNewsEntries { get; set; } = new HashSet<NewsEntry>();
-        public virtual ICollection<NewsEntry> MyNewsEntries { get; set; } = new HashSet<NewsEntry>();
+        public virtual ICollection<NewsEntry> NewsEntries { get; set; } = new HashSet<NewsEntry>();
         public virtual ICollection<PositionHistoricalRecord> PositionHistoricalRecords { get; set; } = new HashSet<PositionHistoricalRecord>();
+
+        [NotMapped]
+        public string FullName { get => SurnameFirstName + (Patronymic != null ? " " + Patronymic : ""); }
+        [NotMapped]
+        public string SurnameFirstName { get => Surname + " " + FirstName; }
     }
 }

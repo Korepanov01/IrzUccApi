@@ -2,15 +2,39 @@
 {
     public class NewsEntryDto
     {
-        public int? Id { get; set; }
-        public string? Title { get; set; }
-        public string? Text { get; set; }
-        public string? Image { get; set; }
-        public DateTime? DateTime { get; set; }
-        public bool? IsLiked { get; set; }
-        public int? LikesCount { get; set; }
-        public string? AuthorId { get; set; }
-        public string? AuthorName { get; set; }
-        public bool? IsPublic { get; set; }
+        public NewsEntryDto(
+            int id, 
+            string title, 
+            string text, 
+            string? image, 
+            DateTime dateTime, 
+            bool isLiked, 
+            int likesCount, 
+            string authorId, 
+            string authorName, 
+            bool isPublic)
+        {
+            Id = id;
+            Title = title;
+            Text = text;
+            Image = image;
+            DateTime = dateTime;
+            IsLiked = isLiked;
+            LikesCount = likesCount;
+            AuthorId = authorId;
+            AuthorName = authorName;
+            IsPublic = isPublic;
+        }
+
+        public int Id { get; }
+        public string Title { get; }
+        public string Text { get; }
+        public string? Image { get; }
+        public DateTime DateTime { get; }
+        public bool IsLiked { get; }
+        public int LikesCount { get; }
+        public string AuthorId { get; }
+        public string AuthorName { get; }
+        public bool IsPublic { get; }
     }
 }

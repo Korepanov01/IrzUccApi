@@ -48,7 +48,7 @@ namespace IrzUccApi
                 .WithMany(n => n.Likers)
                 .UsingEntity(join => join.ToTable("Like"));
             builder.Entity<AppUser>()
-                .HasMany(u => u.MyNewsEntries)
+                .HasMany(u => u.NewsEntries)
                 .WithOne(n => n.Author);
             builder.Entity<AppUser>()
                 .HasMany(u => u.Subscribers)
