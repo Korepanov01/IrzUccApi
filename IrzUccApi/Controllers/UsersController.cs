@@ -168,4 +168,22 @@ public class UsersController : ControllerBase
 
         return Ok();
     }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<IActionResult> DeleteUser(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound();
+
+        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+            return Forbid();
+
+        var identityResult = await _userManager.DeleteAsync(user);
+        if (!identityResult.Succeeded)
+            return BadRequest(identityResult.Errors);
+
+        return Ok();
+    }
 }

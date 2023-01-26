@@ -12,6 +12,7 @@ namespace IrzUccApi.Controllers
 {
     [Route("api/news")]
     [ApiController]
+    [Authorize]
     public class NewsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
@@ -39,17 +40,16 @@ namespace IrzUccApi.Controllers
             var subscribtionsIds = currentUser.Subscriptions.Select(s => s.Id);
 
             var news = await _dbContext.NewsEntries
-                .Where(n => subscribtionsIds.Contains(n.Author.Id))
+                .Where(n => n.IsPublic || subscribtionsIds.Contains(n.Author.Id))
                 .OrderBy(n => n.DateTime)
                 .Skip(pageSize * (page - 1))
                 .Take(pageSize)
-                .Select(n => BuildNewsEntryDto(n, null, true))
+                .Select(n => BuildNewsEntryDto(n, currentUser, true))
                 .ToArrayAsync();
             return Ok(news);
         }
 
         [HttpGet("public")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetPublicNews(
             [Range(0, 50)] int pageSize = 10,
             [Range(1, int.MaxValue)] int page = 1
@@ -60,19 +60,28 @@ namespace IrzUccApi.Controllers
                 .OrderBy(n => n.DateTime)
                 .Skip(pageSize * (page - 1))
                 .Take(pageSize)
-                .Select(n => BuildNewsEntryDto(n, null, true))
+                .Select(n => new NewsEntryDto(
+                    n.Id,
+                    n.Title,
+                    true ? n.Text.Substring(0, Math.Min(100, n.Text.Length)) : n.Text,
+                    n.Image,
+                    n.DateTime,
+                    false,
+                    n.Likers.Count,
+                    n.Author.Id,
+                    n.Author.SurnameFirstName,
+                    n.IsPublic))
                 .ToArrayAsync());
         }
 
         [HttpGet("user/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetUserNews(
-            string userId,
+            string id,
             [Range(0, 50)] int pageSize = 10,
             [Range(1, int.MaxValue)] int page = 1
             )
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return NotFound();
 
@@ -89,14 +98,15 @@ namespace IrzUccApi.Controllers
         }
 
         [HttpGet("liked")]
-        [Authorize]
         public async Task<IActionResult> GetLikedNews(
             [Range(0, 50)] int pageSize = 10,
             [Range(1, int.MaxValue)] int page = 1
             )
         {
             var currentUser = await _userIdentifier.GetCurrentUser(User);
-            if (currentUser == null) return Unauthorized();
+            if (currentUser == null)
+                return Unauthorized();
+
             return Ok(currentUser.LikedNewsEntries
                 .OrderBy(n => n.DateTime)
                 .Skip(pageSize * (page - 1))
@@ -106,31 +116,39 @@ namespace IrzUccApi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> PostNewsEntry([FromBody] PostNewsEntryRequest request)
         {
+            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            if (currentUser == null)
+                return Unauthorized();
+
+            if (request.IsPublic && !User.IsInRole(Roles.Publisher))
+                return Forbid();
+
             await _dbContext.AddAsync(new NewsEntry
             {
                 Title = request.Title,
                 Text = request.Text,
                 Image = request.Image,
                 DateTime = DateTime.UtcNow,
-                Author = await _userIdentifier.GetCurrentUser(User) ?? throw new Exception(),
-                IsPublic = request.IsPublic && User.IsInRole(Roles.Publisher)
+                Author = currentUser,
+                IsPublic = request.IsPublic
             });
             await _dbContext.SaveChangesAsync();
             return Ok();
         }
 
         [HttpPost("{id}/like_unlike")]
-        [Authorize]
         public async Task<IActionResult> LikeUnlikeNewsEntry(int id)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
             if (newsEntry == null)
                 return NotFound();
 
-            var currentUser = (await _userIdentifier.GetCurrentUser(User)) ?? throw new Exception();
+            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            if (currentUser == null)
+                return Unauthorized();
+
             if (newsEntry.Likers.Contains(currentUser))
                 newsEntry.Likers.Remove(currentUser);
             else
@@ -152,7 +170,7 @@ namespace IrzUccApi.Controllers
             if (!newsEntry.IsPublic && currentUser == null)
                 return Forbid();
 
-            return Ok(BuildNewsEntryDto(newsEntry, null, false));
+            return Ok(BuildNewsEntryDto(newsEntry, currentUser, false));
         }
 
         [HttpDelete("{id}")]
@@ -163,7 +181,7 @@ namespace IrzUccApi.Controllers
                 return NotFound();
 
             var currentUserId = User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            if (newsEntry.IsPublic && !User.IsInRole(Roles.Publisher) || newsEntry.Author.Id != currentUserId)
+            if (newsEntry.Author.Id != currentUserId && !newsEntry.IsPublic || !User.IsInRole(Roles.Publisher) && newsEntry.IsPublic)
                 return Forbid();
 
             _dbContext.Remove(newsEntry);
@@ -177,9 +195,12 @@ namespace IrzUccApi.Controllers
         public async Task<IActionResult> SubUnsub([FromBody][Required] string userId)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null) return NotFound();
+            if (user == null) 
+                return NotFound();
 
-            var currentUser = (await _userIdentifier.GetCurrentUser(User)) ?? throw new Exception();
+            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            if (currentUser == null)
+                return Unauthorized();
 
             if (user.Subscribers.Contains(currentUser))
                 user.Subscribers.Remove(currentUser);
@@ -191,7 +212,7 @@ namespace IrzUccApi.Controllers
             return Ok();
         }
 
-        private NewsEntryDto BuildNewsEntryDto(NewsEntry newsEntry, AppUser? currentUser, bool isShort)
+        static private NewsEntryDto BuildNewsEntryDto(NewsEntry newsEntry, AppUser? currentUser, bool isShort)
         {
             return new NewsEntryDto(
                     newsEntry.Id,

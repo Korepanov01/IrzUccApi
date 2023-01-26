@@ -37,26 +37,46 @@ namespace IrzUccApi
                .HasMany(e => e.Listeners)
                .WithMany(u => u.ListeningEvents)
                .UsingEntity(join => join.ToTable("EventListening"));
-            builder.Entity<Event>()
-                .HasOne(e => e.Creator)
-                .WithMany(u => u.MyEvents);
-            builder.Entity<AppUser>().
-                HasMany(u => u.PositionHistoricalRecords)
-                .WithOne(p => p.User);
+
+            builder.Entity<AppUser>()
+                .HasMany(u => u.Comments)
+                .WithOne(c => c.User)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<AppUser>()
+                .HasMany(u => u.Events)
+                .WithOne(e => e.Creator)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<AppUser>()
+                .HasMany(u => u.PositionHistoricalRecords)
+                .WithOne(p => p.User)
+                .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<AppUser>()
                 .HasMany(u => u.LikedNewsEntries)
                 .WithMany(n => n.Likers)
                 .UsingEntity(join => join.ToTable("Like"));
             builder.Entity<AppUser>()
                 .HasMany(u => u.NewsEntries)
-                .WithOne(n => n.Author);
+                .WithOne(n => n.Author)
+                .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<AppUser>()
                 .HasMany(u => u.Subscribers)
                 .WithMany(u => u.Subscriptions)
                 .UsingEntity(join => join.ToTable("Subscription"));
+
             builder.Entity<Position>()
                 .HasMany(p => p.Users)
-                .WithOne(u => u.Position);
+                .WithOne(u => u.Position)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Chat>()
+                .HasMany(c => c.Messages)
+                .WithOne(m => m.Chat)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<NewsEntry>()
+                .HasMany(n => n.Comments)
+                .WithOne(c => c.NewsEntry)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private static void SeedData(ModelBuilder builder)

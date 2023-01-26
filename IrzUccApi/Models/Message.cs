@@ -12,5 +12,6 @@ namespace IrzUccApi.Models
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
         public virtual AppUser Sender { get; set; } = new AppUser();
+        public virtual Chat Chat { get; set; } = new Chat();
     }
 }
