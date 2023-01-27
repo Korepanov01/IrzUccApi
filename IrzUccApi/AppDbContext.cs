@@ -9,6 +9,8 @@ namespace IrzUccApi
     {
         private const string SuperAdminEmail = "user@example.com";
         private const string SuperAdminPassword = "string";
+        private const string SuperAdminName = "Главный";
+        private const string SuperAdminSurname = "Администратор";
 
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -111,6 +113,8 @@ namespace IrzUccApi
             var superAdmin = new AppUser
             {
                 Id = adminUserId,
+                FirstName = SuperAdminName,
+                Surname = SuperAdminSurname,
                 UserName = SuperAdminEmail,
                 NormalizedUserName = SuperAdminEmail.ToUpper(),
                 Email = SuperAdminEmail,

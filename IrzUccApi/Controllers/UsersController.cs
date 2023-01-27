@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using IrzUccApi.Models.Dtos.Position;
+using IrzUccApi.Models.Dtos;
+using System.Security.Claims;
 
 namespace IrzUccApi.Controllers;
 
@@ -16,13 +19,11 @@ public class UsersController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
     private readonly UserManager<AppUser> _userManager;
-    private readonly UserIdentifier _userIdentifier;
 
-    public UsersController(AppDbContext dbContext, UserManager<AppUser> userManager, UserIdentifier userIdentifier)
+    public UsersController(AppDbContext dbContext, UserManager<AppUser> userManager)
     {
         _dbContext = dbContext;
         _userManager = userManager;
-        _userIdentifier = userIdentifier;
     }
 
     [HttpGet]
@@ -48,20 +49,32 @@ public class UsersController : ControllerBase
                     user.Surname,
                     user.Patronymic,
                     user.Email,
-                    isAdminOrSuperAdmin ? user.IsActiveAccount : null,
+                    user.IsActiveAccount,
                     user.Image,
-                    isAdminOrSuperAdmin ? await _userManager.GetRolesAsync(user) : null,
+                    await _userManager.GetRolesAsync(user),
                     user.Position?.Name));
         }
         return Ok(userListItems);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserInfo(string id)
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMyUser()
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var myId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (myId == null)
+            return Unauthorized();
+        return await GetUser(myId);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUserById(string id)
+        => await GetUser(id);
+
+    private async Task<IActionResult> GetUser(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
-            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
+            return NotFound();
 
         return Ok(new UserDto(
             user.Id,
@@ -74,21 +87,21 @@ public class UsersController : ControllerBase
             user.MyDoings,
             user.Skills,
             user.EmploymentDate,
-            user.Position?.Name,
+            user.Position != null ? new PositionDto(user.Position.Id, user.Position.Name) : null,
             user.PositionHistoricalRecords
                 .OrderBy(p => p.DateTime)
-                .Select(p => p.DateTime.ToString("yy.MM.dd") + " " + p.PositionName)
+                .Select(p => new PositionHistoricalRecordDto(p.DateTime, p.PositionName))
                 .ToArray()));
     }
 
-    [HttpPut("{id}/change_reg_info")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [HttpPut("{id}/update_reg_info")]
+    [Authorize(Policy = "AdminRights")]
     public async Task<IActionResult> UpdateUserRegInfo(string id, [FromBody] UserRegInfo userRegInfo)
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
-            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
-        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+            return NotFound();
+        if (!User.IsInRole(Roles.SuperAdmin) && await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
             return Forbid();
 
         user.FirstName = userRegInfo.FirstName;
@@ -103,16 +116,13 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
-    [HttpPut("change_extra_info")]
+    [HttpPut("update_extra_info")]
     [Authorize]
     public async Task<IActionResult> UpdateUserExtraInfo([FromBody] UserExtraInfo userExtraInfo)
     {
-        var user = await _userIdentifier.GetCurrentUser(User);
+        var user = await _userManager.GetUserAsync(User);
         if (user == null)
             return Unauthorized();
-
-        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
-            return Forbid();
 
         user.Image = userExtraInfo.Image;
         user.AboutMyself = userExtraInfo.AboutMyself;
@@ -125,19 +135,26 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
-    [HttpPut("{id}/change_activation")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
-    public async Task<IActionResult> ChangeUserActivation(string id)
-    {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user == null)
-            return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
+    [HttpPut("{id}/activate")]
+    [Authorize(Policy = "AdminRights")]
+    public async Task<IActionResult> Acivate(string id)
+        => await ChangeActivation(id, true);
 
-        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin)
-            || User.IsInRole(Roles.Admin) && await _userManager.IsInRoleAsync(user, Roles.Admin))
+    [HttpPut("{id}/deactivate")]
+    [Authorize(Policy = "AdminRights")]
+    public async Task<IActionResult> Deactivate(string id)
+        => await ChangeActivation(id, false);
+
+    private async Task<IActionResult> ChangeActivation(string userId, bool activation)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound();
+
+        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
             return Forbid();
 
-        user.IsActiveAccount = !user.IsActiveAccount;
+        user.IsActiveAccount = activation;
         var identityResult = await _userManager.UpdateAsync(user);
         if (!identityResult.Succeeded)
             return BadRequest(identityResult.Errors);
@@ -145,12 +162,12 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [HttpPost("register")]
+    [Authorize(Policy = "AdminRights")]
     public async Task<IActionResult> RegisterUser([FromBody] UserRegInfo request)
     {
         if (await _userManager.FindByEmailAsync(request.Email) != null)
-            return BadRequest(RequestErrorMessages.UserAlreadyExistsMessage);
+            return BadRequest(RequestErrorMessages.EmailAlreadyUsed);
 
         var user = new AppUser
         {
@@ -166,7 +183,7 @@ public class UsersController : ControllerBase
         if (!identityResult.Succeeded)
             return BadRequest(identityResult.Errors);
 
-        return Ok();
+        return Ok(user.Id);
     }
 
     [HttpDelete("{id}")]

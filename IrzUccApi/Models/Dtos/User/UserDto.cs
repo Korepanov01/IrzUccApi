@@ -16,8 +16,8 @@ namespace IrzUccApi.Models.Dtos.User
             string? myDoings, 
             string? skills, 
             DateTime? employmentDate, 
-            string? positionName,
-            ICollection<string> positionsHistory)
+            PositionDto? position,
+            ICollection<PositionHistoricalRecordDto> positionsHistory)
         {
             Id = id;
             FirstName = firstName;
@@ -29,7 +29,7 @@ namespace IrzUccApi.Models.Dtos.User
             MyDoings = myDoings;
             Skills = skills;
             EmploymentDate = employmentDate;
-            PositionName = positionName;
+            Position = position;
             PositionsHistory = positionsHistory;
         }
 
@@ -43,8 +43,8 @@ namespace IrzUccApi.Models.Dtos.User
         public string? MyDoings { get; }
         public string? Skills { get; }
         public DateTime? EmploymentDate { get; }
-        public string? PositionName { get; }
+        public PositionDto? Position { get; }
 
-        public IEnumerable<string> PositionsHistory { get; }
+        public IEnumerable<PositionHistoricalRecordDto> PositionsHistory { get; }
     }
 }

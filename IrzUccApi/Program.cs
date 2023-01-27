@@ -1,4 +1,5 @@
 using IrzUccApi;
+using IrzUccApi.Enums;
 using IrzUccApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -49,7 +50,14 @@ builder.Services.AddAuthentication(options => {
             }
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminRights", policy =>
+    {
+        policy.RequireRole(new[] { Roles.Admin, Roles.SuperAdmin });
+    });
+});
+
 builder.Services.AddTransient<JwtManager>();
 builder.Services.AddTransient<UserIdentifier>();
 
