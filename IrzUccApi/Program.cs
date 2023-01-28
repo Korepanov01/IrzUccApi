@@ -60,7 +60,6 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddTransient<JwtManager>();
-builder.Services.AddTransient<UserIdentifier>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {

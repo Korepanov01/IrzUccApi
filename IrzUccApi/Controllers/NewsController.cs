@@ -18,13 +18,11 @@ namespace IrzUccApi.Controllers
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
-        private readonly UserIdentifier _userIdentifier;
 
-        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager, UserIdentifier userIdentifier)
+        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
-            _userIdentifier = userIdentifier;
         }
 
         [HttpGet("feed")]
@@ -34,7 +32,7 @@ namespace IrzUccApi.Controllers
             [Range(1, int.MaxValue)] int page = 1
             )
         {
-            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
@@ -86,7 +84,7 @@ namespace IrzUccApi.Controllers
             if (user == null)
                 return NotFound();
 
-            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
@@ -104,7 +102,7 @@ namespace IrzUccApi.Controllers
             [Range(1, int.MaxValue)] int page = 1
             )
         {
-            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
@@ -119,7 +117,7 @@ namespace IrzUccApi.Controllers
         [HttpPost]
         public async Task<IActionResult> PostNewsEntry([FromBody] PostNewsEntryRequest request)
         {
-            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
@@ -146,7 +144,7 @@ namespace IrzUccApi.Controllers
             if (newsEntry == null)
                 return NotFound();
 
-            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
@@ -167,7 +165,7 @@ namespace IrzUccApi.Controllers
             if (newsEntry == null)
                 return NotFound();
 
-            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (!newsEntry.IsPublic && currentUser == null)
                 return Forbid();
 
@@ -199,7 +197,7 @@ namespace IrzUccApi.Controllers
             if (user == null) 
                 return NotFound();
 
-            var currentUser = await _userIdentifier.GetCurrentUser(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
