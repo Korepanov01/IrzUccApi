@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Dtos.NewsEntry
+namespace IrzUccApi.Models.Requests.News
 {
     public class PostNewsEntryRequest
     {

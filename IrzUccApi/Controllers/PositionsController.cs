@@ -1,6 +1,8 @@
 ﻿using IrzUccApi.Enums;
 using IrzUccApi.Models;
-using IrzUccApi.Models.Dtos.Position;
+using IrzUccApi.Models.Db;
+using IrzUccApi.Models.Dtos;
+using IrzUccApi.Models.Requests.Position;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

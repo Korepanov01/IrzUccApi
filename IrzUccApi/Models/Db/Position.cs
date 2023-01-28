@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace IrzUccApi.Models
+namespace IrzUccApi.Models.Db
 {
     [Table("Position")]
     [Index(nameof(Name), IsUnique = true)]

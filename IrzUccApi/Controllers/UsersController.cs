@@ -1,14 +1,13 @@
-﻿using IrzUccApi.Models;
-using IrzUccApi.Enums;
-using IrzUccApi.Models.Dtos.User;
+﻿using IrzUccApi.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using IrzUccApi.Models.Dtos.Position;
 using IrzUccApi.Models.Dtos;
 using System.Security.Claims;
+using IrzUccApi.Models.Db;
+using IrzUccApi.Models.Requests.User;
+using IrzUccApi.Models.GetOptions;
 
 namespace IrzUccApi.Controllers;
 
@@ -27,19 +26,18 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUsers(
-            [Range(0, 50)] int pageSize = 10,
-            [Range(1, int.MaxValue)] int page = 1,
-            string? searchString = null)
+    public async Task<IActionResult> GetUsers([FromQuery] UserSearchParameters parameters)
     {
         var isAdminOrSuperAdmin = User.IsInRole(Roles.Admin) || User.IsInRole(Roles.SuperAdmin);
-        var users = await _dbContext.Users
-                .Where(u => (isAdminOrSuperAdmin || u.IsActiveAccount)
-                    && (searchString == null || (u.FirstName + u.Surname + u.Patronymic ?? "" + u.Email).ToUpper().Contains(searchString.ToUpper())))
-                .OrderBy(u => (u.Surname + u.FirstName + u.Patronymic ?? ""))
-                .Skip(pageSize * (page - 1))
-                .Take(pageSize)
-                .ToArrayAsync();
+
+        var normalizedSearchString = parameters.SearchString?.ToUpper();
+        parameters.IsActive = parameters.IsActive == null ? null : (!isAdminOrSuperAdmin ? true : parameters.IsActive);
+        var users = _dbContext.Users
+            .Where(u => parameters.PositionId == null || parameters.PositionId == (u.Position != null ? u.Position.Id : 0))
+            .Where(u => normalizedSearchString == null || u.FullNameEmail.Contains(normalizedSearchString))
+            .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+            .Take(parameters.PageSize)
+            .ToArray();
         var userListItems= new List<UserListItemDto>();
         foreach (var user in users) 
         {
@@ -67,8 +65,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    
     public async Task<IActionResult> GetUserById(string id)
-        => await GetUser(id);
+       => await GetUser(id);
 
     private async Task<IActionResult> GetUser(string userId)
     {

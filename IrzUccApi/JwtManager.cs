@@ -4,9 +4,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using IrzUccApi.Models;
 using Microsoft.AspNetCore.Identity;
-using IrzUccApi.Models.Dtos;
+using IrzUccApi.Models.Db;
+using IrzUccApi.Models;
 
 namespace IrzUccApi
 {

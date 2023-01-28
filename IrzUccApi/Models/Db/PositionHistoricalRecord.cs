@@ -1,15 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace IrzUccApi.Models
+namespace IrzUccApi.Models.Db
 {
-    [Table("Comment")]
-    public class Comment
+    [Table("PositionHistoricalRecord")]
+    public class PositionHistoricalRecord
     {
         public int Id { get; set; }
-        public string Text { get; set; } = string.Empty;
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
+        public string PositionName { get; set; } = string.Empty;
 
-        public virtual NewsEntry NewsEntry { get; set; } = new NewsEntry();
         public virtual AppUser User { get; set; } = new AppUser();
     }
 }

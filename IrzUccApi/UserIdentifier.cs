@@ -1,4 +1,4 @@
-﻿using IrzUccApi.Models;
+﻿using IrzUccApi.Models.Db;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 

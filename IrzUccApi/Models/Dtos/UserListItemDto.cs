@@ -1,16 +1,16 @@
-﻿namespace IrzUccApi.Models.Dtos.User
+﻿namespace IrzUccApi.Models.Dtos
 {
     public class UserListItemDto
     {
         public UserListItemDto(
-            string id, 
-            string firstName, 
+            string id,
+            string firstName,
             string surname,
             string? patronymic,
             string email,
             bool? isActiveAccount,
-            string? image, 
-            IEnumerable<string>? roles, 
+            string? image,
+            IEnumerable<string>? roles,
             string? positionName)
         {
             Id = id;

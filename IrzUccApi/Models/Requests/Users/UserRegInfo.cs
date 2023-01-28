@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Dtos.User;
+namespace IrzUccApi.Models.Requests.User;
 
 public class UserRegInfo
 {

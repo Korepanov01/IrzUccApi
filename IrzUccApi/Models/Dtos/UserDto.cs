@@ -1,21 +1,18 @@
-﻿using IrzUccApi.Models.Dtos.Position;
-using System.ComponentModel.DataAnnotations;
-
-namespace IrzUccApi.Models.Dtos.User
+﻿namespace IrzUccApi.Models.Dtos
 {
     public class UserDto
     {
         public UserDto(
-            string id, 
-            string firstName, 
-            string surname, 
-            string? patronymic, 
-            DateTime birthday, 
-            string? image, 
-            string? aboutMyself, 
-            string? myDoings, 
-            string? skills, 
-            DateTime? employmentDate, 
+            string id,
+            string firstName,
+            string surname,
+            string? patronymic,
+            DateTime birthday,
+            string? image,
+            string? aboutMyself,
+            string? myDoings,
+            string? skills,
+            DateTime? employmentDate,
             PositionDto? position,
             ICollection<PositionHistoricalRecordDto> positionsHistory)
         {
