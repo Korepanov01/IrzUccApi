@@ -28,7 +28,7 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetUsers([FromQuery] UserSearchParameters parameters)
     {
-        var isAdminOrSuperAdmin = User.IsInRole(Roles.Admin) || User.IsInRole(Roles.SuperAdmin);
+        var isAdminOrSuperAdmin = User.IsInRole(RolesNames.Admin) || User.IsInRole(RolesNames.SuperAdmin);
 
         var normalizedSearchString = parameters.SearchString?.ToUpper();
         parameters.IsActive = parameters.IsActive == null ? null : (!isAdminOrSuperAdmin ? true : parameters.IsActive);
@@ -38,6 +38,7 @@ public class UsersController : ControllerBase
             .Skip(parameters.PageSize * (parameters.PageIndex - 1))
             .Take(parameters.PageSize)
             .ToArray();
+
         var userListItems= new List<UserListItemDto>();
         foreach (var user in users) 
         {
@@ -49,7 +50,7 @@ public class UsersController : ControllerBase
                     user.Email,
                     user.IsActiveAccount,
                     user.Image,
-                    await _userManager.GetRolesAsync(user),
+                    user.UserRoles.Select(ur => ur.Role.Name),
                     user.Position?.Name));
         }
         return Ok(userListItems);
@@ -100,7 +101,7 @@ public class UsersController : ControllerBase
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
             return NotFound();
-        if (!User.IsInRole(Roles.SuperAdmin) && await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+        if (!User.IsInRole(RolesNames.SuperAdmin) && await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
             return Forbid();
 
         user.FirstName = userRegInfo.FirstName;
@@ -150,7 +151,7 @@ public class UsersController : ControllerBase
         if (user == null)
             return NotFound();
 
-        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+        if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
             return Forbid();
 
         user.IsActiveAccount = activation;
@@ -193,7 +194,7 @@ public class UsersController : ControllerBase
         if (user == null)
             return NotFound();
 
-        if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+        if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
             return Forbid();
 
         var identityResult = await _userManager.DeleteAsync(user);

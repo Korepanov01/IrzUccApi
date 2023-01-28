@@ -24,12 +24,12 @@ namespace IrzUccApi.Controllers
         {
             var roles = new List<string>()
             {
-                Roles.Support,
-                Roles.Publisher,
+                RolesNames.Support,
+                RolesNames.Publisher,
             };
 
-            if (User.IsInRole(Roles.SuperAdmin))
-                roles.Add(Roles.Admin);
+            if (User.IsInRole(RolesNames.SuperAdmin))
+                roles.Add(RolesNames.Admin);
 
             return Ok(roles);
         }
@@ -46,14 +46,14 @@ namespace IrzUccApi.Controllers
 
         private async Task<IActionResult> AddRemoveUserRole(AddRemoveRoleRequest request, bool isRemoving = false)
         {
-            if (request.Role == Roles.SuperAdmin || !User.IsInRole(Roles.SuperAdmin) && request.Role == Roles.Admin)
+            if (request.Role == RolesNames.SuperAdmin || !User.IsInRole(RolesNames.SuperAdmin) && request.Role == RolesNames.Admin)
                 return Forbid();
 
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
-            if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
                 return Forbid();
 
             try

@@ -22,6 +22,7 @@ namespace IrzUccApi.Models.Db
         public string? Skills { get; set; }
         public string? RefreshToken { get; set; }
 
+        public virtual ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();
         public virtual Position? Position { get; set; }
         public virtual ICollection<AppUser> Subscriptions { get; set; } = new HashSet<AppUser>();
         public virtual ICollection<AppUser> Subscribers { get; set; } = new HashSet<AppUser>();

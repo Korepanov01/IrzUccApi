@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi
 {
-    public class AppDbContext: IdentityDbContext<AppUser>
+    public class AppDbContext: IdentityDbContext<AppUser, AppRole, string, 
+        IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>, 
+        IdentityRoleClaim<string>, IdentityUserToken<string>>
     {
         private const string SuperAdminEmail = "user@example.com";
         private const string SuperAdminPassword = "string";
@@ -64,6 +66,19 @@ namespace IrzUccApi
                 .HasMany(u => u.Subscribers)
                 .WithMany(u => u.Subscriptions)
                 .UsingEntity(join => join.ToTable("Subscription"));
+            builder.Entity<AppUser>()
+                .HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId);
+
+            builder.Entity<AppUserRole>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRole)
+                .HasForeignKey(ur => ur.RoleId);
+            builder.Entity<AppUserRole>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
 
             builder.Entity<Position>()
                 .HasMany(p => p.Users)
@@ -86,27 +101,27 @@ namespace IrzUccApi
             var adminUserId = Guid.NewGuid().ToString();
             var superAdminRoleId = Guid.NewGuid().ToString();
 
-            builder.Entity<IdentityRole>().HasData(new[] {
-                new IdentityRole
+            builder.Entity<AppRole>().HasData(new[] {
+                new AppRole
                 {
                     Id = superAdminRoleId,
-                    Name = Enums.Roles.SuperAdmin,
-                    NormalizedName = Enums.Roles.SuperAdmin.ToUpper()
+                    Name = Enums.RolesNames.SuperAdmin,
+                    NormalizedName = Enums.RolesNames.SuperAdmin.ToUpper()
                 },
-                new IdentityRole
+                new AppRole
                 {
-                    Name = Enums.Roles.Admin,
-                    NormalizedName = Enums.Roles.Admin.ToUpper()
+                    Name = Enums.RolesNames.Admin,
+                    NormalizedName = Enums.RolesNames.Admin.ToUpper()
                 },
-                new IdentityRole
+                new AppRole
                 {
-                    Name = Enums.Roles.Support,
-                    NormalizedName = Enums.Roles.Support.ToUpper()
+                    Name = Enums.RolesNames.Support,
+                    NormalizedName = Enums.RolesNames.Support.ToUpper()
                 },
-                new IdentityRole
+                new AppRole
                 {
-                    Name = Enums.Roles.Publisher,
-                    NormalizedName = Enums.Roles.Publisher.ToUpper()
+                    Name = Enums.RolesNames.Publisher,
+                    NormalizedName = Enums.RolesNames.Publisher.ToUpper()
                 }
             });
 
@@ -123,7 +138,7 @@ namespace IrzUccApi
             superAdmin.PasswordHash = new PasswordHasher<AppUser>().HashPassword(superAdmin, SuperAdminPassword);
             builder.Entity<AppUser>().HasData(superAdmin);
 
-            builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
+            builder.Entity<AppUserRole>().HasData(new AppUserRole
             {
                 RoleId = superAdminRoleId,
                 UserId = adminUserId

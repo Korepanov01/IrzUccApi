@@ -96,7 +96,7 @@ namespace IrzUccApi.Controllers
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
-            if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
                 return Forbid();
 
             if (request.IsRemoving)

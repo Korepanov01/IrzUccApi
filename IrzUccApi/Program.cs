@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
-builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -55,7 +55,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminRights", policy =>
     {
-        policy.RequireRole(new[] { Roles.Admin, Roles.SuperAdmin });
+        policy.RequireRole(new[] { RolesNames.Admin, RolesNames.SuperAdmin });
     });
 });
 

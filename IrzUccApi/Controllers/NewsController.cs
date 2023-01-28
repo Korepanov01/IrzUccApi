@@ -121,7 +121,7 @@ namespace IrzUccApi.Controllers
             if (currentUser == null)
                 return Unauthorized();
 
-            if (request.IsPublic && !User.IsInRole(Roles.Publisher))
+            if (request.IsPublic && !User.IsInRole(RolesNames.Publisher))
                 return Forbid();
 
             await _dbContext.AddAsync(new NewsEntry
@@ -180,7 +180,7 @@ namespace IrzUccApi.Controllers
                 return NotFound();
 
             var currentUserId = User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            if (newsEntry.Author.Id != currentUserId && !newsEntry.IsPublic || !User.IsInRole(Roles.Publisher) && newsEntry.IsPublic)
+            if (newsEntry.Author.Id != currentUserId && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Publisher) && newsEntry.IsPublic)
                 return Forbid();
 
             _dbContext.Remove(newsEntry);
