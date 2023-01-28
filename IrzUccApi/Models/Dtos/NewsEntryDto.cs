@@ -1,17 +1,17 @@
-﻿namespace IrzUccApi.Models.Dtos.NewsEntry
+﻿namespace IrzUccApi.Models.Dtos
 {
     public class NewsEntryDto
     {
         public NewsEntryDto(
-            int id, 
-            string title, 
-            string text, 
-            string? image, 
-            DateTime dateTime, 
-            bool isLiked, 
-            int likesCount, 
-            string authorId, 
-            string authorName, 
+            int id,
+            string title,
+            string text,
+            string? image,
+            DateTime dateTime,
+            bool isLiked,
+            int likesCount,
+            string authorId,
+            string authorName,
             bool isPublic)
         {
             Id = id;

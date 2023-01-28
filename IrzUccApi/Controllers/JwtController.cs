@@ -1,6 +1,6 @@
 ﻿using IrzUccApi.Models;
-using IrzUccApi.Models.Dtos;
-using IrzUccApi.Models.Dtos.User;
+using IrzUccApi.Models.Db;
+using IrzUccApi.Models.Requests.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

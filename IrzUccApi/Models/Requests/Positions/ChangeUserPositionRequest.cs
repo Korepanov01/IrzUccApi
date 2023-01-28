@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Dtos.Position
+namespace IrzUccApi.Models.Requests.Position
 {
     public class ChangeUserPositionRequest
     {

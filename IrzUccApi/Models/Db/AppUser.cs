@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace IrzUccApi.Models
+namespace IrzUccApi.Models.Db
 {
     [Table("User")]
     public class AppUser : IdentityUser
@@ -21,7 +21,7 @@ namespace IrzUccApi.Models
         public string? MyDoings { get; set; }
         public string? Skills { get; set; }
         public string? RefreshToken { get; set; }
-        
+
         public virtual Position? Position { get; set; }
         public virtual ICollection<AppUser> Subscriptions { get; set; } = new HashSet<AppUser>();
         public virtual ICollection<AppUser> Subscribers { get; set; } = new HashSet<AppUser>();
@@ -33,8 +33,10 @@ namespace IrzUccApi.Models
         public virtual ICollection<PositionHistoricalRecord> PositionHistoricalRecords { get; set; } = new HashSet<PositionHistoricalRecord>();
 
         [NotMapped]
-        public string FullName { get => SurnameFirstName + (Patronymic != null ? " " + Patronymic : ""); }
+        public string FullNameEmail => FullName + " " + Email;
         [NotMapped]
-        public string SurnameFirstName { get => Surname + " " + FirstName; }
+        public string FullName => SurnameFirstName + (Patronymic != null ? " " + Patronymic : "");
+        [NotMapped]
+        public string SurnameFirstName => Surname + " " + FirstName;
     }
 }

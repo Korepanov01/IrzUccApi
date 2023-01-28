@@ -1,6 +1,7 @@
 ﻿using IrzUccApi.Enums;
-using IrzUccApi.Models;
-using IrzUccApi.Models.Dtos.NewsEntry;
+using IrzUccApi.Models.Db;
+using IrzUccApi.Models.Dtos;
+using IrzUccApi.Models.Requests.News;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

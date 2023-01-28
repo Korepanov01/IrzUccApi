@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Dtos.Position
+namespace IrzUccApi.Models.Dtos
 {
     public class PositionDto
     {

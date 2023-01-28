@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace IrzUccApi.Models
+namespace IrzUccApi.Models.Db
 {
     [Table("NewsEntry")]
     public class NewsEntry

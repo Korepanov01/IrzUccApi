@@ -1,6 +1,7 @@
 using IrzUccApi;
 using IrzUccApi.Enums;
-using IrzUccApi.Models;
+using IrzUccApi.Models.Db;
+using IrzUccApi.Models.PagingOptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

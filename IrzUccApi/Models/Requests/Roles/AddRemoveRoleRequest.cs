@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Dtos.Role
+namespace IrzUccApi.Models.Requests.Role
 {
     public class AddRemoveRoleRequest
     {
