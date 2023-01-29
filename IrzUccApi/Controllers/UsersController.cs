@@ -8,6 +8,8 @@ using System.Security.Claims;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.User;
 using IrzUccApi.Models.GetOptions;
+using IrzUccApi.Models.Requests.Users;
+using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Controllers;
 
@@ -32,28 +34,26 @@ public class UsersController : ControllerBase
 
         var normalizedSearchString = parameters.SearchString?.ToUpper();
         parameters.IsActive = parameters.IsActive == null ? null : (!isAdminOrSuperAdmin ? true : parameters.IsActive);
-        var users = _dbContext.Users
+
+        var users = await _dbContext.Users
             .Where(u => parameters.PositionId == null || parameters.PositionId == (u.Position != null ? u.Position.Id : 0))
             .Where(u => normalizedSearchString == null || u.FullNameEmail.Contains(normalizedSearchString))
+            .Where(u => parameters.Role == null || u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : "").Contains(parameters.Role))
             .Skip(parameters.PageSize * (parameters.PageIndex - 1))
             .Take(parameters.PageSize)
-            .ToArray();
+            .Select(u => new UserListItemDto(
+                    u.Id,
+                    u.FirstName,
+                    u.Surname,
+                    u.Patronymic,
+                    u.Email,
+                    u.IsActiveAccount,
+                    u.Image,
+                    u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
+                    u.Position != null ? u.Position.Name : null))
+            .ToArrayAsync();
 
-        var userListItems= new List<UserListItemDto>();
-        foreach (var user in users) 
-        {
-            userListItems.Add(new UserListItemDto(
-                    user.Id,
-                    user.FirstName,
-                    user.Surname,
-                    user.Patronymic,
-                    user.Email,
-                    user.IsActiveAccount,
-                    user.Image,
-                    user.UserRoles.Select(ur => ur.Role.Name),
-                    user.Position?.Name));
-        }
-        return Ok(userListItems);
+        return Ok(users);
     }
 
     [HttpGet("me")]
@@ -96,7 +96,7 @@ public class UsersController : ControllerBase
 
     [HttpPut("{id}/update_reg_info")]
     [Authorize(Policy = "AdminRights")]
-    public async Task<IActionResult> UpdateUserRegInfo(string id, [FromBody] UserRegInfo userRegInfo)
+    public async Task<IActionResult> UpdateUserRegInfo(string id, [FromBody] UpdateRegInfoRequest request)
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
@@ -104,12 +104,31 @@ public class UsersController : ControllerBase
         if (!User.IsInRole(RolesNames.SuperAdmin) && await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
             return Forbid();
 
-        user.FirstName = userRegInfo.FirstName;
-        user.Surname = userRegInfo.Surname;
-        user.Patronymic = userRegInfo.Patronymic;
-        user.Email = userRegInfo.Email;
-        user.Birthday = userRegInfo.Birthday;
+        user.FirstName = request.FirstName;
+        user.Surname = request.Surname;
+        user.Patronymic = request.Patronymic;
+        user.Email = request.Email;
+        user.Birthday = request.Birthday;
         var identityResult = await _userManager.UpdateAsync(user);
+        if (!identityResult.Succeeded)
+            return BadRequest(identityResult.Errors);
+
+        return Ok();
+    }
+
+    [HttpPut("{id}/change_password")]
+    [Authorize(Policy = "AdminRights")]
+    public async Task<IActionResult> ChangePassword(string id, [FromBody][Required][MinLength(6)] string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound();
+
+        if (!User.IsInRole(RolesNames.SuperAdmin) && await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
+            return Forbid();
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var identityResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
         if (!identityResult.Succeeded)
             return BadRequest(identityResult.Errors);
 
@@ -118,16 +137,16 @@ public class UsersController : ControllerBase
 
     [HttpPut("update_extra_info")]
     [Authorize]
-    public async Task<IActionResult> UpdateUserExtraInfo([FromBody] UserExtraInfo userExtraInfo)
+    public async Task<IActionResult> UpdateUserExtraInfo([FromBody] UpdateExtraInfoRequest request)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
             return Unauthorized();
 
-        user.Image = userExtraInfo.Image;
-        user.AboutMyself = userExtraInfo.AboutMyself;
-        user.MyDoings = userExtraInfo.MyDoings;
-        user.Skills = userExtraInfo.Skills;
+        user.Image = request.Image;
+        user.AboutMyself = request.AboutMyself;
+        user.MyDoings = request.MyDoings;
+        user.Skills = request.Skills;
         var identityResult = await _userManager.UpdateAsync(user);
         if (!identityResult.Succeeded)
             return BadRequest(identityResult.Errors);
@@ -164,7 +183,7 @@ public class UsersController : ControllerBase
 
     [HttpPost("register")]
     [Authorize(Policy = "AdminRights")]
-    public async Task<IActionResult> RegisterUser([FromBody] UserRegInfo request)
+    public async Task<IActionResult> RegisterUser([FromBody] RegUserRequest request)
     {
         if (await _userManager.FindByEmailAsync(request.Email) != null)
             return BadRequest(RequestErrorMessages.EmailAlreadyUsed);

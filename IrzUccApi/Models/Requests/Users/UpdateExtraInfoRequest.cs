@@ -2,7 +2,7 @@
 
 namespace IrzUccApi.Models.Requests.User
 {
-    public class UserExtraInfo
+    public class UpdateExtraInfoRequest
     {
         public string? Image { get; set; }
         [MaxLength(500)]
