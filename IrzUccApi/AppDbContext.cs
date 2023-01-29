@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi
 {
-    public class AppDbContext: IdentityDbContext<AppUser, AppRole, string, 
-        IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>, 
+    public class AppDbContext : IdentityDbContext<AppUser, AppRole, string,
+        IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>,
         IdentityRoleClaim<string>, IdentityUserToken<string>>
     {
         private const string SuperAdminEmail = "user@example.com";
@@ -98,13 +98,9 @@ namespace IrzUccApi
 
         private static void SeedData(ModelBuilder builder)
         {
-            var adminUserId = Guid.NewGuid().ToString();
-            var superAdminRoleId = Guid.NewGuid().ToString();
-
-            builder.Entity<AppRole>().HasData(new[] {
+            var appRoles = new[] {
                 new AppRole
                 {
-                    Id = superAdminRoleId,
                     Name = Enums.RolesNames.SuperAdmin,
                     NormalizedName = Enums.RolesNames.SuperAdmin.ToUpper()
                 },
@@ -123,11 +119,11 @@ namespace IrzUccApi
                     Name = Enums.RolesNames.Publisher,
                     NormalizedName = Enums.RolesNames.Publisher.ToUpper()
                 }
-            });
+            };
+            builder.Entity<AppRole>().HasData(appRoles);
 
             var superAdmin = new AppUser
             {
-                Id = adminUserId,
                 FirstName = SuperAdminName,
                 Surname = SuperAdminSurname,
                 UserName = SuperAdminEmail,
@@ -138,10 +134,18 @@ namespace IrzUccApi
             superAdmin.PasswordHash = new PasswordHasher<AppUser>().HashPassword(superAdmin, SuperAdminPassword);
             builder.Entity<AppUser>().HasData(superAdmin);
 
-            builder.Entity<AppUserRole>().HasData(new AppUserRole
+            builder.Entity<AppUserRole>().HasData(new[]
             {
-                RoleId = superAdminRoleId,
-                UserId = adminUserId
+                new AppUserRole
+                {
+                    RoleId = appRoles[0].Id,
+                    UserId = superAdmin.Id
+                },
+                new AppUserRole
+                {
+                    RoleId = appRoles[1].Id,
+                    UserId = superAdmin.Id
+                },
             });
         }
     }
