@@ -13,8 +13,7 @@
             string? myDoings,
             string? skills,
             DateTime? employmentDate,
-            PositionDto? position,
-            ICollection<PositionHistoricalRecordDto> positionsHistory)
+            string? positionName)
         {
             Id = id;
             FirstName = firstName;
@@ -26,8 +25,7 @@
             MyDoings = myDoings;
             Skills = skills;
             EmploymentDate = employmentDate;
-            Position = position;
-            PositionsHistory = positionsHistory;
+            PositionName = positionName;
         }
 
         public string Id { get; }
@@ -40,8 +38,6 @@
         public string? MyDoings { get; }
         public string? Skills { get; }
         public DateTime? EmploymentDate { get; }
-        public PositionDto? Position { get; }
-
-        public IEnumerable<PositionHistoricalRecordDto> PositionsHistory { get; }
+        public string? PositionName { get; }
     }
 }

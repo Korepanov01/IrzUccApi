@@ -11,15 +11,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.Services.Configure<ApiBehaviorOptions>(apiBehaviorOptions => {
-//     apiBehaviorOptions.SuppressModelStateInvalidFilter = true;
-// });
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
-builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>();
 
-builder.Services.AddAuthentication(options => {
+builder.Services
+    .AddIdentity<AppUser, AppRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options => 
+{
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
@@ -51,13 +52,7 @@ builder.Services.AddAuthentication(options => {
             }
         };
     });
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminRights", policy =>
-    {
-        policy.RequireRole(new[] { RolesNames.Admin, RolesNames.SuperAdmin });
-    });
-});
+builder.Services.AddAuthorization();
 
 builder.Services.AddTransient<JwtManager>();
 
