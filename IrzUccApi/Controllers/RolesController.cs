@@ -9,7 +9,7 @@ namespace IrzUccApi.Controllers
 {
     [Route("api/roles")]
     [ApiController]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     public class RolesController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -35,30 +35,32 @@ namespace IrzUccApi.Controllers
         }
 
         [HttpPost("add_to_user")]
-        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> AddUserRole([FromBody] AddRemoveRoleRequest request)
             => await AddRemoveUserRole(request);
 
         [HttpPost("remove_from_user")]
-        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> RemoveUserRole([FromBody] AddRemoveRoleRequest request)
             => await AddRemoveUserRole(request, true);
 
         private async Task<IActionResult> AddRemoveUserRole(AddRemoveRoleRequest request, bool isRemoving = false)
         {
-            if (request.Role == RolesNames.SuperAdmin || !User.IsInRole(RolesNames.SuperAdmin) && request.Role == RolesNames.Admin)
+            var isSuperAdmin = User.IsInRole(RolesNames.SuperAdmin);
+
+            if (request.Role == RolesNames.SuperAdmin || request.Role == RolesNames.Admin && !isSuperAdmin)
                 return Forbid();
 
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
 
-            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
+            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin) && (!isSuperAdmin || request.Role == RolesNames.Admin))
                 return Forbid();
 
             try
             {
-                var identityResult = isRemoving ? await _userManager.RemoveFromRoleAsync(user, request.Role) : await _userManager.AddToRoleAsync(user, request.Role);
+                var identityResult = isRemoving 
+                    ? await _userManager.RemoveFromRoleAsync(user, request.Role) 
+                    : await _userManager.AddToRoleAsync(user, request.Role);
                 if (!identityResult.Succeeded)
                     return BadRequest(identityResult.Errors);
             }
