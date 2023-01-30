@@ -57,13 +57,13 @@ namespace IrzUccApi.Controllers
             if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == name) != null)
                 return BadRequest(RequestErrorMessages.PositionAlreadyExistsMessage);
 
-            await _dbContext.Positions.AddAsync(new Position
-            {
-                Name = name
-            });
+            var position = new Position { Name = name };
+
+            await _dbContext.AddAsync(position);
+
             await _dbContext.SaveChangesAsync();
 
-            return Ok();
+            return Ok(new PositionDto(position.Id, position.Name));
         }
 
         [HttpPut("{id}")]

@@ -66,9 +66,9 @@ namespace IrzUccApi.Controllers
                         n.Author.FirstName,
                         n.Author.Surname,
                         n.Author.Patronymic,
-                        n.Author.Email,
                         n.Author.Image),
-                    n.IsPublic))
+                    n.IsPublic,
+                    n.Comments.Count))
                 .ToArrayAsync());
         }
 
@@ -82,7 +82,7 @@ namespace IrzUccApi.Controllers
             if (request.IsPublic && !User.IsInRole(RolesNames.Publisher))
                 return Forbid();
 
-            await _dbContext.AddAsync(new NewsEntry
+            var newsEntry = new NewsEntry
             {
                 Title = request.Title,
                 Text = request.Text,
@@ -90,10 +90,13 @@ namespace IrzUccApi.Controllers
                 DateTime = DateTime.UtcNow,
                 Author = currentUser,
                 IsPublic = request.IsPublic
-            });
+            };
+
+            await _dbContext.AddAsync(newsEntry);
+
             await _dbContext.SaveChangesAsync();
 
-            return Ok();
+            return Ok(newsEntry.Id);
         }
 
         [HttpGet("{id}")]
@@ -120,9 +123,9 @@ namespace IrzUccApi.Controllers
                         newsEntry.Author.FirstName,
                         newsEntry.Author.Surname,
                         newsEntry.Author.Patronymic,
-                        newsEntry.Author.Email,
                         newsEntry.Author.Image),
-                    newsEntry.IsPublic));
+                    newsEntry.IsPublic,
+                    newsEntry.Comments.Count));
         }
 
         [HttpDelete("{id}")]

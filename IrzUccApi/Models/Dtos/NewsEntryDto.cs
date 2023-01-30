@@ -11,7 +11,8 @@
             bool isLiked,
             int likesCount,
             UserHeaderDto author,
-            bool isPublic)
+            bool isPublic,
+            int commentCount)
         {
             Id = id;
             Title = title;
@@ -22,6 +23,7 @@
             LikesCount = likesCount;
             Author = author;
             IsPublic = isPublic;
+            CommentCount = commentCount;
         }
 
         public int Id { get; }
@@ -33,5 +35,6 @@
         public int LikesCount { get; }
         public UserHeaderDto Author { get; }
         public bool IsPublic { get; }
+        public int CommentCount { get; }
     }
 }

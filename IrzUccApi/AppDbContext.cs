@@ -44,7 +44,7 @@ namespace IrzUccApi
 
             builder.Entity<AppUser>()
                 .HasMany(u => u.Comments)
-                .WithOne(c => c.User)
+                .WithOne(c => c.Author)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<AppUser>()
                 .HasMany(u => u.Events)
