@@ -102,7 +102,9 @@ public class UsersController : ControllerBase
             user.Skills,
             user.UserPosition
                 .Where(up => up.IsActive)
-                .Select(up => new PositionDto(up.Position.Id, up.Position.Name))));
+                .Select(up => new PositionDto(up.Position.Id, up.Position.Name)),
+            user.Subscribers.Count,
+            user.Subscriptions.Count));
     }
 
     [HttpPut("me/change_password")]
