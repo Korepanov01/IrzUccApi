@@ -51,7 +51,7 @@ namespace IrzUccApi.Controllers
 
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
-                return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
+                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
             if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin) && (!isSuperAdmin || request.Role == RolesNames.Admin))
                 return Forbid();

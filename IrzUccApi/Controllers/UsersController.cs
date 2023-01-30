@@ -29,10 +29,11 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetUsers([FromQuery] UserSearchParameters parameters)
     {      
-        var users = _dbContext.Users.Where(u => true);
+        var users = _dbContext.Users.AsQueryable();
 
-        var isAdmin = User.IsInRole(RolesNames.Admin);
-        users = parameters.IsActive != null && isAdmin ? users.Where(u => u.IsActiveAccount == parameters.IsActive) : users = users.Where(u => u.IsActiveAccount);
+        users = (parameters.IsActive != null && User.IsInRole(RolesNames.Admin)
+            ? users.Where(u => u.IsActiveAccount == parameters.IsActive) 
+            : users.Where(u => u.IsActiveAccount));
 
         if (parameters.PositionId != null)
             users = users.Where(u => parameters.PositionId == (u.Position != null ? u.Position.Id : 0));

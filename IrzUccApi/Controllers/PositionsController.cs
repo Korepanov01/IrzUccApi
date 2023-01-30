@@ -2,6 +2,8 @@
 using IrzUccApi.Models;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
+using IrzUccApi.Models.GetOptions;
+using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Position;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +15,7 @@ namespace IrzUccApi.Controllers
 {
     [Route("api/positions")]
     [ApiController]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     public class PositionsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
@@ -27,17 +29,23 @@ namespace IrzUccApi.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetPositions(
-            [Range(0, 50)] int pageSize = 10,
-            [Range(1, int.MaxValue)] int page = 1,
-            string? searchString = null)
-            => Ok(await _dbContext.Positions
-                .Where(p => searchString == null || p.Name.ToUpper().Contains(searchString.ToUpper()))
+        public async Task<IActionResult> GetPositions([FromQuery] SearchStringParameters parameters)
+        {
+            var positions = _dbContext.Positions.AsQueryable();
+
+            if (parameters.SearchString != null)
+            {
+                var normalizedSearchString = parameters.SearchString.ToUpper();
+                positions = positions.Where(p => p.Name.ToUpper().Contains(normalizedSearchString));
+            }
+
+            return Ok(await positions                
                 .OrderBy(p => p.Name)
-                .Skip(pageSize * (page - 1))
-                .Take(pageSize)
+                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Take(parameters.PageSize)
                 .Select(p => new PositionDto(p.Id, p.Name))
                 .ToArrayAsync());
+        }
 
         [HttpPost]
         public async Task<IActionResult> AddPosition(
@@ -50,7 +58,7 @@ namespace IrzUccApi.Controllers
             {
                 Name = name
             });
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return Ok();
         }
@@ -68,7 +76,7 @@ namespace IrzUccApi.Controllers
                 return BadRequest(RequestErrorMessages.PositionAlreadyExistsMessage);
 
             position.Name = newName;
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return Ok();
         }
@@ -83,54 +91,59 @@ namespace IrzUccApi.Controllers
             if (position.Users.Count != 0)
                 return BadRequest(RequestErrorMessages.ThereAreUsersWithThisPositionMessage);
 
-            _dbContext.Remove(position);
-            _dbContext.SaveChanges();
+            _dbContext.Positions.Remove(position);
+            await _dbContext.SaveChangesAsync();
 
             return Ok();
         }
 
-        [HttpPost("change_user_position")]
-        public async Task<IActionResult> ChangeUserPosition([FromBody] ChangeUserPositionRequest request)
+        [HttpPost("{id}/to_user")]
+        public async Task<IActionResult> ChangeUserPosition(int id, [FromBody] string userId)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == request.UserId);
+            var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
+            if (position == null)
+                return NotFound(RequestErrorMessages.PositionDoesntExistMessage);
+
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
-                return NotFound(RequestErrorMessages.UserDoesntExistsMessage);
+                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
             if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
                 return Forbid();
 
-            if (request.IsRemoving)
-            {
-                user.EmploymentDate = null;
-                user.Position = null;
-                _dbContext.Update(user);
-                await _dbContext.SaveChangesAsync();
-                return Ok();
-            }
-
-            if (request.PositionId == null)
-                return NotFound(RequestErrorMessages.PositionDoesntExistsMessage);
-
-            var newPosition = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
-            if (newPosition == null)
-                return NotFound(RequestErrorMessages.PositionDoesntExistsMessage);
-
             var employmentDate = DateTime.UtcNow;
 
             user.EmploymentDate = employmentDate;
-            user.Position = newPosition;
+            user.Position = position;
             _dbContext.Update(user);
 
             var positionHistoricalRecord = new PositionHistoricalRecord
             {
                 DateTime = employmentDate,
-                PositionName = newPosition.Name,
+                PositionName = position.Name,
                 User = user
             };
             await _dbContext.AddAsync(positionHistoricalRecord);
 
             await _dbContext.SaveChangesAsync();
 
+            return Ok();
+        }
+
+        [HttpPost("remove_user_position")]
+        public async Task<IActionResult> RemoveUserPosition([FromBody] string userId)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return NotFound();
+
+            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
+                return Forbid();
+
+            user.EmploymentDate = null;
+            user.Position = null;
+            _dbContext.Update(user);
+            await _dbContext.SaveChangesAsync();
             return Ok();
         }
     }

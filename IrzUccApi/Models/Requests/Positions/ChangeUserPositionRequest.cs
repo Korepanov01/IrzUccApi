@@ -4,9 +4,9 @@ namespace IrzUccApi.Models.Requests.Position
 {
     public class ChangeUserPositionRequest
     {
-        public bool IsRemoving { get; set; } = false;
-        public int? PositionId { get; set; }
-        [Required(AllowEmptyStrings = false)]
+        [Required]
+        public int PositionId { get; set; }
+        [Required]
         public string UserId { get; set; } = string.Empty;
     }
 }
