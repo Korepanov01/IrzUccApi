@@ -12,8 +12,7 @@
             string? aboutMyself,
             string? myDoings,
             string? skills,
-            DateTime? employmentDate,
-            string? positionName)
+            IEnumerable<PositionDto> positions)
         {
             Id = id;
             FirstName = firstName;
@@ -23,9 +22,8 @@
             Image = image;
             AboutMyself = aboutMyself;
             MyDoings = myDoings;
-            Skills = skills;
-            EmploymentDate = employmentDate;
-            PositionName = positionName;
+            Skills = skills; ;
+            Positions = positions;
         }
 
         public string Id { get; }
@@ -37,7 +35,6 @@
         public string? AboutMyself { get; }
         public string? MyDoings { get; }
         public string? Skills { get; }
-        public DateTime? EmploymentDate { get; }
-        public string? PositionName { get; }
+        public IEnumerable<PositionDto> Positions { get; }
     }
 }
