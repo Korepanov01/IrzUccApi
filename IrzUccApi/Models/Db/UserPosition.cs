@@ -2,7 +2,7 @@
 
 namespace IrzUccApi.Models.Db
 {
-    [Table("userPosition")]
+    [Table("UserPosition")]
     public class UserPosition
     {
         public int Id { get; set; }
