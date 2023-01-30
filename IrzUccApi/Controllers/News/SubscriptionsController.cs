@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
-namespace IrzUccApi.Controllers
+namespace IrzUccApi.Controllers.News
 {
     [Route("api/subscriptions")]
     [ApiController]
@@ -58,7 +58,7 @@ namespace IrzUccApi.Controllers
 
             var resultUsers = isSubscriptions ? user.Subscriptions : user.Subscribers;
             return Ok(resultUsers
-                .OrderBy(u => (u.FirstName + u.Surname + u.Patronymic + u.Email))
+                .OrderBy(u => u.FirstName + u.Surname + u.Patronymic + u.Email)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
                 .Select(u => new UserListItemDto(

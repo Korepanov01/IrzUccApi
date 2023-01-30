@@ -10,7 +10,7 @@ using IrzUccApi.Models.Requests.User;
 using IrzUccApi.Models.GetOptions;
 using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Controllers;
+namespace IrzUccApi.Controllers.Users;
 
 [Route("api/users")]
 [ApiController]
@@ -28,12 +28,12 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetUsers([FromQuery] UserSearchParameters parameters)
-    {      
+    {
         var users = _dbContext.Users.AsQueryable();
 
-        users = (parameters.IsActive != null && User.IsInRole(RolesNames.Admin)
-            ? users.Where(u => u.IsActiveAccount == parameters.IsActive) 
-            : users.Where(u => u.IsActiveAccount));
+        users = parameters.IsActive != null && User.IsInRole(RolesNames.Admin)
+            ? users.Where(u => u.IsActiveAccount == parameters.IsActive)
+            : users.Where(u => u.IsActiveAccount);
 
         if (parameters.PositionId != null)
         {
@@ -55,7 +55,7 @@ public class UsersController : ControllerBase
             users = users.Where(u => u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : "").Contains(parameters.Role));
 
         return Ok(await users
-            .OrderBy(u => (u.FirstName + u.Surname + u.Patronymic + u.Email))
+            .OrderBy(u => u.FirstName + u.Surname + u.Patronymic + u.Email)
             .Skip(parameters.PageSize * (parameters.PageIndex - 1))
             .Take(parameters.PageSize)
             .Select(u => new UserListItemDto(
@@ -142,4 +142,4 @@ public class UsersController : ControllerBase
 
         return Ok();
     }
- }
+}

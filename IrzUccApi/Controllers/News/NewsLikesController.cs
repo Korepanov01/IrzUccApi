@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Controllers
+namespace IrzUccApi.Controllers.News
 {
     [Route("api/likes")]
     [ApiController]

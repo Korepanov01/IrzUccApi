@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Controllers
+namespace IrzUccApi.Controllers.Users
 {
     [Route("api/users_management")]
     [ApiController]

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Controllers
+namespace IrzUccApi.Controllers.News
 {
     [Route("api/news_comments")]
     [ApiController]
@@ -27,7 +27,7 @@ namespace IrzUccApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetNewsComments([Required] int newsEntryId, [FromQuery] PagingParameters parameters)
         {
-            var newsEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id== newsEntryId);
+            var newsEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == newsEntryId);
             if (newsEntry == null)
                 return NotFound();
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace IrzUccApi.Controllers
+namespace IrzUccApi.Controllers.Users
 {
     [Route("api/roles")]
     [ApiController]
@@ -58,8 +58,8 @@ namespace IrzUccApi.Controllers
 
             try
             {
-                var identityResult = isRemoving 
-                    ? await _userManager.RemoveFromRoleAsync(user, request.Role) 
+                var identityResult = isRemoving
+                    ? await _userManager.RemoveFromRoleAsync(user, request.Role)
                     : await _userManager.AddToRoleAsync(user, request.Role);
                 if (!identityResult.Succeeded)
                     return BadRequest(identityResult.Errors);

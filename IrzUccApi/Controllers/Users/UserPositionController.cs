@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 
-namespace IrzUccApi.Controllers
+namespace IrzUccApi.Controllers.Users
 {
     [Route("api/user_positions")]
     [ApiController]
@@ -31,7 +31,7 @@ namespace IrzUccApi.Controllers
         public async Task<IActionResult> GetMyUserPositions()
         {
             var myId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (myId == null) 
+            if (myId == null)
                 return Unauthorized();
             return await GetUserPositionsByUserId(myId);
         }

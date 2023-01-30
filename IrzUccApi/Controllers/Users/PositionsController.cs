@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Controllers
+namespace IrzUccApi.Controllers.Users
 {
     [Route("api/positions")]
     [ApiController]
@@ -42,7 +42,7 @@ namespace IrzUccApi.Controllers
                 positions = positions.Where(p => p.Name.ToUpper().Contains(normalizedSearchString));
             }
 
-            return Ok(await positions                
+            return Ok(await positions
                 .OrderBy(p => p.Name)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
@@ -131,7 +131,7 @@ namespace IrzUccApi.Controllers
             if (request.End < userPosition.Start)
                 return BadRequest(RequestErrorMessages.EndTimeIsLessThenStartTime);
 
-            userPosition.End= request.End;
+            userPosition.End = request.End;
             userPosition.IsActive = false;
             _dbContext.Update(userPosition);
             await _dbContext.SaveChangesAsync();
