@@ -12,7 +12,10 @@
             string? aboutMyself,
             string? myDoings,
             string? skills,
-            IEnumerable<PositionDto> positions)
+            IEnumerable<PositionDto> positions,
+            int subscribersCount,
+            int subscriptionsCount
+            )
         {
             Id = id;
             FirstName = firstName;
@@ -24,6 +27,8 @@
             MyDoings = myDoings;
             Skills = skills; ;
             Positions = positions;
+            SubscribersCount = subscribersCount;
+            SubscriptionsCount = subscriptionsCount;
         }
 
         public string Id { get; }
@@ -36,5 +41,7 @@
         public string? MyDoings { get; }
         public string? Skills { get; }
         public IEnumerable<PositionDto> Positions { get; }
+        public int SubscribersCount { get; }
+        public int SubscriptionsCount { get; }
     }
 }

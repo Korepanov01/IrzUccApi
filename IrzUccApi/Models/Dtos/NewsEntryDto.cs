@@ -10,8 +10,7 @@
             DateTime dateTime,
             bool isLiked,
             int likesCount,
-            string authorId,
-            string authorName,
+            UserHeaderDto author,
             bool isPublic)
         {
             Id = id;
@@ -21,8 +20,7 @@
             DateTime = dateTime;
             IsLiked = isLiked;
             LikesCount = likesCount;
-            AuthorId = authorId;
-            AuthorName = authorName;
+            Author = author;
             IsPublic = isPublic;
         }
 
@@ -33,8 +31,7 @@
         public DateTime DateTime { get; }
         public bool IsLiked { get; }
         public int LikesCount { get; }
-        public string AuthorId { get; }
-        public string AuthorName { get; }
+        public UserHeaderDto Author { get; }
         public bool IsPublic { get; }
     }
 }
