@@ -1,13 +1,18 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class PositionHistoricalRecordDto
+    public class UserPositionDto
     {
-        public PositionHistoricalRecordDto(DateTime dateTime, PositionDto position)
+        public UserPositionDto(int id, DateTime start, DateTime? end, bool isActive)
         {
-            DateTime = dateTime;
-            Position = position;
+            Id = id;
+            Start = start;
+            End = end;
+            IsActive = isActive;
         }
-        public DateTime DateTime { get; }
-        public PositionDto Position { get; }
+
+        public int Id { get; }
+        public DateTime Start { get; }
+        public DateTime? End { get; }
+        public bool IsActive { get; }
     }
 }

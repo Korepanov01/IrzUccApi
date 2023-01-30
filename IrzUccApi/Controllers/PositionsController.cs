@@ -9,7 +9,9 @@ using IrzUccApi.Models.Requests.Positions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Controllers
@@ -122,12 +124,16 @@ namespace IrzUccApi.Controllers
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
-            var posHistRec = user.UserPosition.FirstOrDefault(up => up.IsActive && up.Position?.Id == request.PositionId);
-            if (posHistRec == null)
+            var userPosition = user.UserPosition.FirstOrDefault(up => up.IsActive && up.Position?.Id == request.PositionId);
+            if (userPosition == null)
                 return BadRequest(RequestErrorMessages.UserIsNotInPosition);
 
-            posHistRec.IsActive = false;
-            _dbContext.Update(posHistRec);
+            if (request.End < userPosition.Start)
+                return BadRequest(RequestErrorMessages.EndTimeIsLessThenStartTime);
+
+            userPosition.End= request.End;
+            userPosition.IsActive = false;
+            _dbContext.Update(userPosition);
             await _dbContext.SaveChangesAsync();
 
             return Ok();

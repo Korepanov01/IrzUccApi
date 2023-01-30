@@ -12,5 +12,7 @@ namespace IrzUccApi.Enums
         static public readonly string PositionAlreadyExistsMessage = "Position already exists!";
         static public readonly string ThereAreUsersWithThisPositionMessage = "There are users with this position!";
         static public readonly string UserIsNotInPosition = "User is not in position!";
+
+        static public readonly string EndTimeIsLessThenStartTime = "End time is less then start time!";
     }
 }
