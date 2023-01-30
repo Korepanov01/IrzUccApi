@@ -80,11 +80,6 @@ namespace IrzUccApi
                 .WithMany(u => u.UserRoles)
                 .HasForeignKey(ur => ur.UserId);
 
-            builder.Entity<Position>()
-                .HasMany(p => p.Users)
-                .WithOne(u => u.Position)
-                .OnDelete(DeleteBehavior.SetNull);
-
             builder.Entity<Chat>()
                 .HasMany(c => c.Messages)
                 .WithOne(m => m.Chat)

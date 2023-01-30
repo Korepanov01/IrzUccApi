@@ -6,9 +6,11 @@ namespace IrzUccApi.Models.Db
     public class PositionHistoricalRecord
     {
         public int Id { get; set; }
-        public DateTime DateTime { get; set; } = DateTime.UtcNow;
-        public string PositionName { get; set; } = string.Empty;
+        public DateTime Start { get; set; }
+        public DateTime? End { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public virtual AppUser User { get; set; } = new AppUser();
+        public virtual Position Position { get; set; } = new Position();
     }
 }

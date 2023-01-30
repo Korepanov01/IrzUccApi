@@ -2,12 +2,12 @@
 {
     public class PositionHistoricalRecordDto
     {
-        public PositionHistoricalRecordDto(DateTime dateTime, string positionName)
+        public PositionHistoricalRecordDto(DateTime dateTime, PositionDto position)
         {
             DateTime = dateTime;
-            PositionName = positionName;
+            Position = position;
         }
         public DateTime DateTime { get; }
-        public string PositionName { get; }
+        public PositionDto Position { get; }
     }
 }

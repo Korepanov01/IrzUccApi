@@ -5,6 +5,7 @@ using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Position;
+using IrzUccApi.Models.Requests.Positions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -81,69 +82,54 @@ namespace IrzUccApi.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpPost("add_pos_to_user")]
+        public async Task<IActionResult> AddPositionToUser([FromBody] AddPositionToUserRequest request)
         {
-            var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
-            if (position == null)
-                return NotFound();
-            
-            if (position.Users.Count != 0)
-                return BadRequest(RequestErrorMessages.ThereAreUsersWithThisPositionMessage);
-
-            _dbContext.Positions.Remove(position);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok();
-        }
-
-        [HttpPost("{id}/to_user")]
-        public async Task<IActionResult> ChangeUserPosition(int id, [FromBody] string userId)
-        {
-            var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
+            var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
             if (position == null)
                 return NotFound(RequestErrorMessages.PositionDoesntExistMessage);
 
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == request.UserId);
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
+
+            if (user.PositionHistoricalRecords.FirstOrDefault(phr => phr.IsActive && phr.Position?.Id == request.PositionId) != null)
+                return BadRequest(RequestErrorMessages.UserAlreadyOnPosition);
 
             if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
                 return Forbid();
 
-            var employmentDate = DateTime.UtcNow;
-
-            user.EmploymentDate = employmentDate;
-            user.Position = position;
-            _dbContext.Update(user);
-
             var positionHistoricalRecord = new PositionHistoricalRecord
             {
-                DateTime = employmentDate,
-                PositionName = position.Name,
-                User = user
+                Start = request.Start,
+                Position = position,
+                User = user,
+                IsActive = true
             };
             await _dbContext.AddAsync(positionHistoricalRecord);
-
             await _dbContext.SaveChangesAsync();
-
             return Ok();
         }
 
         [HttpPost("remove_user_position")]
-        public async Task<IActionResult> RemoveUserPosition([FromBody] string userId)
+        public async Task<IActionResult> RemoveUserPosition([FromBody] RemoveUserPositionRequest request)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
+            if (position == null)
+                return NotFound(RequestErrorMessages.PositionDoesntExistMessage);
+
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == request.UserId);
             if (user == null)
-                return NotFound();
+                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
-            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-                return Forbid();
+            var posHistRec = user.PositionHistoricalRecords.FirstOrDefault(phr => phr.IsActive && phr.Position?.Id == request.PositionId);
+            if (posHistRec == null)
+                return BadRequest(RequestErrorMessages.UserIsNotInPosition);
 
-            user.EmploymentDate = null;
-            user.Position = null;
-            _dbContext.Update(user);
+            posHistRec.IsActive = false;
+            _dbContext.Update(posHistRec);
             await _dbContext.SaveChangesAsync();
+
             return Ok();
         }
     }
