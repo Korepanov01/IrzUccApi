@@ -22,37 +22,6 @@ namespace IrzUccApi.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet("liked_news")]
-        public async Task<IActionResult> GetLikedNews(
-            [FromQuery] PagingParameters parameters)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-                return Unauthorized();
-
-            return Ok(currentUser.LikedNewsEntries
-                .OrderBy(n => n.DateTime)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize)
-                .Select(n => new NewsEntryDto(
-                    n.Id,
-                    n.Title,
-                    n.Text,
-                    n.Image,
-                    n.DateTime,
-                    true,
-                    n.Likers.Count,
-                    new UserHeaderDto(
-                        n.Author.Id,
-                        n.Author.FirstName,
-                        n.Author.Surname,
-                        n.Author.Patronymic,
-                        n.Author.Email,
-                        n.Author.Image),
-                    n.IsPublic))
-                .ToArray());
-        }
-
         [HttpPost("like_news_entry")]
         public async Task<IActionResult> LikeNewsEntry([Required] int newsEntryId)
             => await LikeUnlikeNewsEntry(newsEntryId, true);
