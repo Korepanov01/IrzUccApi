@@ -93,20 +93,20 @@ namespace IrzUccApi.Controllers
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
-            if (user.PositionHistoricalRecords.FirstOrDefault(phr => phr.IsActive && phr.Position?.Id == request.PositionId) != null)
+            if (user.UserPosition.FirstOrDefault(up => up.IsActive && up.Position?.Id == request.PositionId) != null)
                 return BadRequest(RequestErrorMessages.UserAlreadyOnPosition);
 
             if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
                 return Forbid();
 
-            var positionHistoricalRecord = new PositionHistoricalRecord
+            var userPosition = new UserPosition
             {
                 Start = request.Start,
                 Position = position,
                 User = user,
                 IsActive = true
             };
-            await _dbContext.AddAsync(positionHistoricalRecord);
+            await _dbContext.AddAsync(userPosition);
             await _dbContext.SaveChangesAsync();
             return Ok();
         }
@@ -122,7 +122,7 @@ namespace IrzUccApi.Controllers
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
-            var posHistRec = user.PositionHistoricalRecords.FirstOrDefault(phr => phr.IsActive && phr.Position?.Id == request.PositionId);
+            var posHistRec = user.UserPosition.FirstOrDefault(up => up.IsActive && up.Position?.Id == request.PositionId);
             if (posHistRec == null)
                 return BadRequest(RequestErrorMessages.UserIsNotInPosition);
 

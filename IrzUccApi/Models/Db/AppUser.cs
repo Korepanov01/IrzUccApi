@@ -29,7 +29,7 @@ namespace IrzUccApi.Models.Db
         public virtual ICollection<Event> ListeningEvents { get; set; } = new HashSet<Event>();
         public virtual ICollection<NewsEntry> LikedNewsEntries { get; set; } = new HashSet<NewsEntry>();
         public virtual ICollection<NewsEntry> NewsEntries { get; set; } = new HashSet<NewsEntry>();
-        public virtual ICollection<PositionHistoricalRecord> PositionHistoricalRecords { get; set; } = new HashSet<PositionHistoricalRecord>();
+        public virtual ICollection<UserPosition> UserPosition { get; set; } = new HashSet<UserPosition>();
 
         [NotMapped]
         public string FullNameEmail => FullName + " " + Email;

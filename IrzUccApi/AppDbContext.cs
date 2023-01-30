@@ -20,7 +20,7 @@ namespace IrzUccApi
         public DbSet<Message> Messages { get; set; }
         public DbSet<NewsEntry> NewsEntries { get; set; }
         public DbSet<Position> Positions { get; set; }
-        public DbSet<PositionHistoricalRecord> PositionHistoricalRecords { get; set; }
+        public DbSet<UserPosition> userPositions { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -51,7 +51,7 @@ namespace IrzUccApi
                 .WithOne(e => e.Creator)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<AppUser>()
-                .HasMany(u => u.PositionHistoricalRecords)
+                .HasMany(u => u.UserPosition)
                 .WithOne(p => p.User)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<AppUser>()

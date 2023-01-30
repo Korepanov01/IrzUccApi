@@ -2,8 +2,8 @@
 
 namespace IrzUccApi.Models.Db
 {
-    [Table("PositionHistoricalRecord")]
-    public class PositionHistoricalRecord
+    [Table("userPosition")]
+    public class UserPosition
     {
         public int Id { get; set; }
         public DateTime Start { get; set; }

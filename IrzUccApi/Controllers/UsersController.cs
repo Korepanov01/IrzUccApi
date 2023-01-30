@@ -38,11 +38,11 @@ public class UsersController : ControllerBase
         if (parameters.PositionId != null)
         {
             if (parameters.PositionId == 0)
-                users = users.Where(u => u.PositionHistoricalRecords.Where(phr => phr.IsActive).Count() == 0);
+                users = users.Where(u => u.UserPosition.Where(up => up.IsActive).Count() == 0);
             else
-                users = users.Where(u => u.PositionHistoricalRecords
-                .Where(phr => phr.IsActive)
-                .Select(phr => phr.Position.Id).Contains((int)parameters.PositionId));
+                users = users.Where(u => u.UserPosition
+                .Where(up => up.IsActive)
+                .Select(up => up.Position.Id).Contains((int)parameters.PositionId));
         }
 
         if (parameters.SearchString != null)
@@ -67,7 +67,7 @@ public class UsersController : ControllerBase
                     u.IsActiveAccount,
                     u.Image,
                     u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
-                    u.PositionHistoricalRecords.Where(phr => phr.IsActive).Select(phr => new PositionDto(phr.Position.Id, phr.Position.Name))))
+                    u.UserPosition.Where(up => up.IsActive).Select(up => new PositionDto(up.Position.Id, up.Position.Name))))
             .ToArrayAsync());
     }
 
@@ -100,9 +100,9 @@ public class UsersController : ControllerBase
             user.AboutMyself,
             user.MyDoings,
             user.Skills,
-            user.PositionHistoricalRecords
-                .Where(phr => phr.IsActive)
-                .Select(phr => new PositionDto(phr.Position.Id, phr.Position.Name))));
+            user.UserPosition
+                .Where(up => up.IsActive)
+                .Select(up => new PositionDto(up.Position.Id, up.Position.Name))));
     }
 
     [HttpPut("me/change_password")]
