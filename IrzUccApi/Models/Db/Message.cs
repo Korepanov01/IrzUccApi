@@ -8,10 +8,9 @@ namespace IrzUccApi.Models.Db
         public int Id { get; set; }
         public string Text { get; set; } = string.Empty;
         public bool IsReaded { get; set; }
-        public byte[] Image { get; set; } = Array.Empty<byte>();
+        public string Image { get; set; } = string.Empty;
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
         public virtual AppUser Sender { get; set; } = new AppUser();
-        public virtual Chat Chat { get; set; } = new Chat();
     }
 }
