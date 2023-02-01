@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace IrzUccApi.Models.PagingOptions
+﻿namespace IrzUccApi.Models.PagingOptions
 {
     public class SearchStringParameters : PagingParameters
     {

@@ -1,16 +1,13 @@
 ﻿using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
-using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Messages;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace IrzUccApi.Controllers.Messages
 {
@@ -45,7 +42,7 @@ namespace IrzUccApi.Controllers.Messages
             var messages = chat.Messages.AsQueryable();
 
             if (parameters.SearchString != null)
-                messages = messages.Where(m => m.Text.Contains(parameters.SearchString));
+                messages = messages.Where(m => m.Text != null && m.Text.Contains(parameters.SearchString));
 
             messages = messages.
                 OrderBy(m => m.DateTime)

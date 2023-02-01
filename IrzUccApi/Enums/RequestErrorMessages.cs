@@ -1,6 +1,4 @@
-﻿using NuGet.Protocol.Plugins;
-
-namespace IrzUccApi.Enums
+﻿namespace IrzUccApi.Enums
 {
     static public class RequestErrorMessages
     {

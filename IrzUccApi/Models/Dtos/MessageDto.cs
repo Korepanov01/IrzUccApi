@@ -1,6 +1,4 @@
-﻿using IrzUccApi.Models.Db;
-
-namespace IrzUccApi.Models.Dtos
+﻿namespace IrzUccApi.Models.Dtos
 {
     public class MessageDto
     {
