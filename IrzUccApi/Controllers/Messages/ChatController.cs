@@ -30,7 +30,7 @@ namespace IrzUccApi.Controllers.Messages
                 return Unauthorized();
 
             return Ok(currentUser.Chats
-                .OrderBy(c => c.LastMessage != null ? c.LastMessage.DateTime : DateTime.MinValue)
+                .OrderByDescending(c => c.LastMessage != null ? c.LastMessage.DateTime : DateTime.MinValue)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
                 .Select(c =>

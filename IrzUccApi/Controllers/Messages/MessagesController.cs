@@ -41,17 +41,17 @@ namespace IrzUccApi.Controllers.Messages
 
             var messages = chat.Messages.AsQueryable();
 
-            if (parameters.SearchString != null)
-                messages = messages.Where(m => m.Text != null && m.Text.Contains(parameters.SearchString));
-
-            messages = messages.
-                OrderBy(m => m.DateTime)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize);
-
             await messages.ForEachAsync(m => m.IsReaded = true);
             _dbContext.UpdateRange(messages);
             await _dbContext.SaveChangesAsync();
+
+            if (parameters.SearchString != null)
+                messages = messages.Where(m => m.Text != null && m.Text.Contains(parameters.SearchString));
+
+            messages = messages
+                .OrderByDescending(m => m.DateTime)
+                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Take(parameters.PageSize);
 
             return Ok(await messages
                 .Select(m => new MessageDto(
