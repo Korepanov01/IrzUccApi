@@ -45,7 +45,6 @@ namespace IrzUccApi.Controllers.Messages
                     var lastMessageDto = c.LastMessage != null ? new MessageDto(
                             c.LastMessage.Id,
                             c.LastMessage.Text,
-                            c.LastMessage.IsReaded,
                             c.LastMessage.Image,
                             c.LastMessage.DateTime,
                             c.LastMessage.Sender.Id) : null;
