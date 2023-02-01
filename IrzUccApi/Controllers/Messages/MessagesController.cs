@@ -39,21 +39,16 @@ namespace IrzUccApi.Controllers.Messages
             if (!chat.Participants.Contains(currentUser))
                 return Forbid();
 
-            var messages = chat.Messages.AsQueryable();
-
-            await messages.ForEachAsync(m => m.IsReaded = true);
-            _dbContext.UpdateRange(messages);
+            var unreadedMessages = chat.Messages.Where(m => m.Sender.Id != currentUser.Id).ToList();
+            unreadedMessages.ForEach(m => m.IsReaded = true);
+            _dbContext.UpdateRange(unreadedMessages);
             await _dbContext.SaveChangesAsync();
 
-            if (parameters.SearchString != null)
-                messages = messages.Where(m => m.Text != null && m.Text.Contains(parameters.SearchString));
-
-            messages = messages
+            return Ok(chat.Messages
+                .Where(m => parameters.SearchString != null && m.Text != null && m.Text.Contains(parameters.SearchString))
                 .OrderByDescending(m => m.DateTime)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize);
-
-            return Ok(await messages
+                .Take(parameters.PageSize)
                 .Select(m => new MessageDto(
                     m.Id,
                     m.Text,
@@ -61,7 +56,7 @@ namespace IrzUccApi.Controllers.Messages
                     m.Image,
                     m.DateTime,
                     m.Sender.Id))
-                .ToArrayAsync());
+                .ToArray());
         }
 
         [HttpPost]
@@ -83,7 +78,9 @@ namespace IrzUccApi.Controllers.Messages
             {
                 chat = new Chat
                 {
-                    Participants = new[] { currentUser, recipient }
+                    Participants = currentUser.Id != recipient.Id 
+                        ? new[] { currentUser, recipient } 
+                        : new[] { currentUser }
                 };
                 await _dbContext.AddAsync(chat);
                 await _dbContext.SaveChangesAsync();

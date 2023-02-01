@@ -54,28 +54,8 @@ namespace IrzUccApi.Controllers.Messages
                         c.Id,
                         recipientDto,
                         lastMessageDto,
-                        c.Messages.Where(m => !m.IsReaded).Count());
+                        c.Messages.Where(m => m.Sender.Id != currentUser.Id && !m.IsReaded).Count());
                 }));
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteChat(int id)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-                return Unauthorized();
-
-            var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Id == id);
-            if (chat == null) 
-                return NotFound();
-
-            if (!chat.Participants.Contains(currentUser))
-                return Forbid();
-            
-            _dbContext.Chats.Remove(chat);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok();
         }
     }
 }
