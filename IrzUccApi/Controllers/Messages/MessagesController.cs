@@ -62,7 +62,6 @@ namespace IrzUccApi.Controllers.Messages
                 .Select(m => new MessageDto(
                     m.Id,
                     m.Text,
-                    m.IsReaded,
                     m.Image,
                     m.DateTime,
                     m.Sender.Id))
@@ -122,7 +121,6 @@ namespace IrzUccApi.Controllers.Messages
             return Ok(new MessageDto(
                 message.Id,
                 message.Text,
-                message.IsReaded,
                 message.Image,
                 message.DateTime,
                 message.Sender.Id));
