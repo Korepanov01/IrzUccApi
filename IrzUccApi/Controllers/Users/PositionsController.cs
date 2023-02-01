@@ -1,17 +1,13 @@
 ﻿using IrzUccApi.Enums;
-using IrzUccApi.Models;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
-using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Position;
 using IrzUccApi.Models.Requests.Positions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Controllers.Users

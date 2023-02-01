@@ -1,5 +1,4 @@
-﻿using IrzUccApi.Models.Db;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Models.Requests.News
 {

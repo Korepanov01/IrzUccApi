@@ -1,6 +1,4 @@
-﻿using NuGet.Protocol.Plugins;
-
-namespace IrzUccApi.Enums
+﻿namespace IrzUccApi.Enums
 {
     static public class RequestErrorMessages
     {
@@ -14,5 +12,8 @@ namespace IrzUccApi.Enums
         static public readonly string UserIsNotInPosition = "User is not in position!";
 
         static public readonly string EndTimeIsLessThenStartTime = "End time is less then start time!";
+
+        static public readonly string MessageCantBeEmpty = "Message can't be empty!";
+        static public readonly string ChatDoesntExist = "Chat doesn't exist!";
     }
 }

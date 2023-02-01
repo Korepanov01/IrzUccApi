@@ -81,9 +81,16 @@ namespace IrzUccApi
                 .HasForeignKey(ur => ur.UserId);
 
             builder.Entity<Chat>()
+                .HasMany(c => c.Participants)
+                .WithMany(u => u.Chats)
+                .UsingEntity(join => join.ToTable("ChatParticipants"));
+            builder.Entity<Chat>()
                 .HasMany(c => c.Messages)
                 .WithOne(m => m.Chat)
                 .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Chat>()
+                .HasOne(c => c.LastMessage)
+                .WithOne();
 
             builder.Entity<NewsEntry>()
                 .HasMany(n => n.Comments)

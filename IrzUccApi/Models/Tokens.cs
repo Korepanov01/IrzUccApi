@@ -1,6 +1,4 @@
-﻿using Microsoft.Build.Framework;
-
-namespace IrzUccApi.Models
+﻿namespace IrzUccApi.Models
 {
     public class Tokens
     {

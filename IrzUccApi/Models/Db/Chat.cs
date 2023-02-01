@@ -6,9 +6,10 @@ namespace IrzUccApi.Models.Db
     public class Chat
     {
         public int Id { get; set; }
-        public virtual AppUser FirstUser { get; set; } = new AppUser();
-        public virtual AppUser SecondUser { get; set; } = new AppUser();
+        public virtual ICollection<AppUser> Participants { get; set; } = new HashSet<AppUser>();
+        [ForeignKey("LastMessageId")]
         public virtual Message? LastMessage { get; set; }
+        [ForeignKey("ChatId")]
         public virtual ICollection<Message> Messages { get; set; } = new HashSet<Message>();
     }
 }

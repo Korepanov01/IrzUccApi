@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace IrzUccApi.Models.PagingOptions
+﻿namespace IrzUccApi.Models.PagingOptions
 {
     public class PagingParameters
     {

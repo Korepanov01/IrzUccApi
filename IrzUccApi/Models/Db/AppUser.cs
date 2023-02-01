@@ -21,6 +21,7 @@ namespace IrzUccApi.Models.Db
         public string? Skills { get; set; }
         public string? RefreshToken { get; set; }
 
+        public virtual ICollection<Chat> Chats { get; set; } = new HashSet<Chat>();
         public virtual ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();
         public virtual ICollection<AppUser> Subscriptions { get; set; } = new HashSet<AppUser>();
         public virtual ICollection<AppUser> Subscribers { get; set; } = new HashSet<AppUser>();
@@ -30,12 +31,5 @@ namespace IrzUccApi.Models.Db
         public virtual ICollection<NewsEntry> LikedNewsEntries { get; set; } = new HashSet<NewsEntry>();
         public virtual ICollection<NewsEntry> NewsEntries { get; set; } = new HashSet<NewsEntry>();
         public virtual ICollection<UserPosition> UserPosition { get; set; } = new HashSet<UserPosition>();
-
-        [NotMapped]
-        public string FullNameEmail => FullName + " " + Email;
-        [NotMapped]
-        public string FullName => SurnameFirstName + (Patronymic != null ? " " + Patronymic : "");
-        [NotMapped]
-        public string SurnameFirstName => Surname + " " + FirstName;
     }
 }
