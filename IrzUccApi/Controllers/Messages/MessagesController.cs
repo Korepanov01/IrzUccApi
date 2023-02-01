@@ -1,6 +1,7 @@
 ﻿using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
+using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Messages;
 using Microsoft.AspNetCore.Authorization;
@@ -26,9 +27,9 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMessages([Required] int chatId, [FromQuery] SearchStringParameters parameters)
+        public async Task<IActionResult> GetMessages([FromQuery] MessagesGetParameters parameters)
         {
-            var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Id == chatId);
+            var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Id == parameters.ChatId);
             if (chat == null)
                 return NotFound();
 
@@ -39,15 +40,24 @@ namespace IrzUccApi.Controllers.Messages
             if (!chat.Participants.Contains(currentUser))
                 return Forbid();
 
-            var unreadedMessages = chat.Messages.Where(m => m.Sender.Id != currentUser.Id).ToList();
-            unreadedMessages.ForEach(m => m.IsReaded = true);
-            _dbContext.UpdateRange(unreadedMessages);
-            await _dbContext.SaveChangesAsync();
+            var messages = chat.Messages.AsQueryable();
 
-            return Ok(chat.Messages
-                .Where(m => parameters.SearchString == null || m.Text != null && m.Text.Contains(parameters.SearchString))
-                .OrderByDescending(m => m.DateTime)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+            if (parameters.SearchString != null && parameters.LastMessageId == null)
+            {
+                var normalizedSearchString = parameters.SearchString.ToUpper();
+                messages = messages.Where(m => m.Text != null && m.Text.Contains(parameters.SearchString));
+            }
+
+            messages = parameters.LastMessageId == null
+                ? messages
+                    .OrderByDescending(m => m.DateTime)
+                    .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                : messages
+                    .OrderBy(m => m.DateTime)
+                    .SkipWhile(m => m.Id != parameters.LastMessageId)
+                    .Skip(1);
+
+            var result = messages
                 .Take(parameters.PageSize)
                 .Select(m => new MessageDto(
                     m.Id,
@@ -56,7 +66,14 @@ namespace IrzUccApi.Controllers.Messages
                     m.Image,
                     m.DateTime,
                     m.Sender.Id))
-                .ToArray());
+                .ToArray();
+
+            var unreadedMessages = chat.Messages.Where(m => m.Sender.Id != currentUser.Id && !m.IsReaded);
+            foreach (var  unreadedMessage in unreadedMessages)
+                unreadedMessage.IsReaded = true;
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(result);
         }
 
         [HttpPost]
