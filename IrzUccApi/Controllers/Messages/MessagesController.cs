@@ -70,16 +70,26 @@ namespace IrzUccApi.Controllers.Messages
         [HttpPost]
         public async Task<IActionResult> PostMessage([FromBody] PostMessageRequest request)
         {
-            var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Id == request.ChatId);
-            if (chat == null)
-                return BadRequest(RequestErrorMessages.ChatDoesntExist);
+            if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
+                return BadRequest(RequestErrorMessages.MessageCantBeEmpty);
 
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
-            if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
-                return BadRequest(RequestErrorMessages.MessageCantBeEmpty);
+            var recipient = await _userManager.FindByIdAsync(request.UserId);
+            if (recipient == null)
+                return BadRequest(RequestErrorMessages.UserDoesntExistMessage);
+
+            var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Participants.Contains(currentUser) && c.Participants.Contains(recipient));
+            if (chat == null)
+            {
+                chat = new Chat
+                {
+                    Participants = new[] { currentUser, recipient }
+                };
+                await _dbContext.AddAsync(chat);
+            }
 
             var message = new Message
             {
@@ -91,6 +101,7 @@ namespace IrzUccApi.Controllers.Messages
             };
 
             chat.Messages.Add(message);
+            chat.LastMessage = message;
             await _dbContext.SaveChangesAsync();
 
             return Ok(new MessageDto(
