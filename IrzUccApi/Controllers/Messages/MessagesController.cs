@@ -86,6 +86,7 @@ namespace IrzUccApi.Controllers.Messages
                     Participants = new[] { currentUser, recipient }
                 };
                 await _dbContext.AddAsync(chat);
+                await _dbContext.SaveChangesAsync();
             }
 
             var message = new Message
@@ -95,10 +96,13 @@ namespace IrzUccApi.Controllers.Messages
                 IsReaded = false,
                 DateTime = DateTime.UtcNow,
                 Sender = currentUser,
+                Chat = chat
             };
+            await _dbContext.AddAsync(message);
+            await _dbContext.SaveChangesAsync();
 
-            chat.Messages.Add(message);
             chat.LastMessage = message;
+            _dbContext.Update(chat);
             await _dbContext.SaveChangesAsync();
 
             return Ok(new MessageDto(

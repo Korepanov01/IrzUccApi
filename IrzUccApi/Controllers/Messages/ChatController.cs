@@ -35,7 +35,7 @@ namespace IrzUccApi.Controllers.Messages
                 .Take(parameters.PageSize)
                 .Select(c =>
                 {
-                    var recipient = c.Participants.First(u => u.Id != currentUser.Id);
+                    var recipient = c.Participants.FirstOrDefault(u => u.Id != currentUser.Id) ?? currentUser;
                     var recipientDto = new UserHeaderDto(
                             recipient.Id,
                             recipient.FirstName,
