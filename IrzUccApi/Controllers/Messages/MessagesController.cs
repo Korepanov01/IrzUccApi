@@ -45,7 +45,7 @@ namespace IrzUccApi.Controllers.Messages
             await _dbContext.SaveChangesAsync();
 
             return Ok(chat.Messages
-                .Where(m => parameters.SearchString != null && m.Text != null && m.Text.Contains(parameters.SearchString))
+                .Where(m => parameters.SearchString == null || m.Text != null && m.Text.Contains(parameters.SearchString))
                 .OrderByDescending(m => m.DateTime)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
