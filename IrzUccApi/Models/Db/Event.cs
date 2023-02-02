@@ -7,10 +7,10 @@ namespace IrzUccApi.Models.Db
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
-        public DateTime DateTime { get; set; }
-        public string Periodic { get; set; } = string.Empty;
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
         public string? Description { get; set; }
-        public string? CabinetName { get; set; }
+        public Cabinet? Cabinet { get; set; }
 
         public virtual AppUser Creator { get; set; } = new AppUser();
         public virtual ICollection<AppUser> Listeners { get; set; } = new HashSet<AppUser>();

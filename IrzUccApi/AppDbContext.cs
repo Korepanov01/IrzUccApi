@@ -16,6 +16,7 @@ namespace IrzUccApi
 
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Cabinet> Cabinets { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<NewsEntry> NewsEntries { get; set; }
@@ -96,6 +97,10 @@ namespace IrzUccApi
                 .HasMany(n => n.Comments)
                 .WithOne(c => c.NewsEntry)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Cabinet>()
+                .HasMany(c => c.Events)
+                .WithOne(e => e.Cabinet);
         }
 
         private static void SeedData(ModelBuilder builder)
@@ -120,6 +125,11 @@ namespace IrzUccApi
                 {
                     Name = Enums.RolesNames.Publisher,
                     NormalizedName = Enums.RolesNames.Publisher.ToUpper()
+                },
+                new AppRole
+                {
+                    Name = Enums.RolesNames.CabinetsManager,
+                    NormalizedName = Enums.RolesNames.CabinetsManager.ToUpper()
                 }
             };
             builder.Entity<AppRole>().HasData(appRoles);
@@ -146,6 +156,11 @@ namespace IrzUccApi
                 new AppUserRole
                 {
                     RoleId = appRoles[1].Id,
+                    UserId = superAdmin.Id
+                },                
+                new AppUserRole
+                {
+                    RoleId = appRoles[4].Id,
                     UserId = superAdmin.Id
                 },
             });

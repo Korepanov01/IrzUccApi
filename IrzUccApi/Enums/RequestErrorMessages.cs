@@ -15,5 +15,8 @@
 
         static public readonly string MessageCantBeEmpty = "Message can't be empty!";
         static public readonly string ChatDoesntExist = "Chat doesn't exist!";
+
+        static public readonly string CabinetAlreadyExists = "Cabinet already exists!";
+        static public readonly string CabinetIsBooked = "Cabinet is booked!";
     }
 }

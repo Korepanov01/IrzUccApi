@@ -6,5 +6,6 @@
         static public readonly string SuperAdmin = "SuperAdmin";
         static public readonly string Support = "Support";
         static public readonly string Publisher = "Publisher";
+        static public readonly string CabinetsManager = "CabinetsManager";
     }
 }
