@@ -2,7 +2,6 @@
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Events;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +43,7 @@ namespace IrzUccApi.Controllers.Events
                 if (!User.IsInRole(RolesNames.CabinetsManager))
                     return Forbid();
 
-                if (request.Start < request.End)
+                if (request.Start > request.End)
                     return BadRequest();
 
                 var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == request.CabinetId);
