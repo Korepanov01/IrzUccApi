@@ -123,11 +123,6 @@ namespace IrzUccApi
                 },
                 new AppRole
                 {
-                    Name = Enums.RolesNames.Publisher,
-                    NormalizedName = Enums.RolesNames.Publisher.ToUpper()
-                },
-                new AppRole
-                {
                     Name = Enums.RolesNames.CabinetsManager,
                     NormalizedName = Enums.RolesNames.CabinetsManager.ToUpper()
                 }
@@ -146,24 +141,12 @@ namespace IrzUccApi
             superAdmin.PasswordHash = new PasswordHasher<AppUser>().HashPassword(superAdmin, SuperAdminPassword);
             builder.Entity<AppUser>().HasData(superAdmin);
 
-            builder.Entity<AppUserRole>().HasData(new[]
+            var superAdminUserRoles = appRoles.Select(r => new AppUserRole
             {
-                new AppUserRole
-                {
-                    RoleId = appRoles[0].Id,
-                    UserId = superAdmin.Id
-                },
-                new AppUserRole
-                {
-                    RoleId = appRoles[1].Id,
-                    UserId = superAdmin.Id
-                },                
-                new AppUserRole
-                {
-                    RoleId = appRoles[4].Id,
-                    UserId = superAdmin.Id
-                },
+                RoleId = r.Id,
+                UserId = superAdmin.Id
             });
+            builder.Entity<AppUserRole>().HasData(superAdminUserRoles);
         }
     }
 }
