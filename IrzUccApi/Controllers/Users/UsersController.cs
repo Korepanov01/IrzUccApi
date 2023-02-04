@@ -1,14 +1,14 @@
 ﻿using IrzUccApi.Enums;
+using IrzUccApi.Models.Db;
+using IrzUccApi.Models.Dtos;
+using IrzUccApi.Models.GetOptions;
+using IrzUccApi.Models.Requests.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using IrzUccApi.Models.Dtos;
-using System.Security.Claims;
-using IrzUccApi.Models.Db;
-using IrzUccApi.Models.Requests.User;
-using IrzUccApi.Models.GetOptions;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.Users;
 

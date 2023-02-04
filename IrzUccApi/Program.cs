@@ -17,7 +17,7 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(options => 
+builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -90,8 +90,8 @@ builder.Services.AddSwaggerGen(setup =>
     setup.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            jwtSecurityScheme, 
-            Array.Empty<string>() 
+            jwtSecurityScheme,
+            Array.Empty<string>()
         }
     });
 

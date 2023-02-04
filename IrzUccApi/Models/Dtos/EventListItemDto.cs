@@ -1,14 +1,12 @@
-﻿using IrzUccApi.Models.Db;
-
-namespace IrzUccApi.Models.Dtos
+﻿namespace IrzUccApi.Models.Dtos
 {
     public class EventListItemDto
     {
         public EventListItemDto(
-            int id, 
-            string title, 
-            DateTime start, 
-            DateTime end, 
+            int id,
+            string title,
+            DateTime start,
+            DateTime end,
             string? cabinetName)
         {
             Id = id;

@@ -4,7 +4,6 @@ using IrzUccApi.Models.PagingOptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Messages
 {
@@ -23,7 +22,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetChats([FromQuery] PagingParameters parameters) 
+        public async Task<IActionResult> GetChats([FromQuery] PagingParameters parameters)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)

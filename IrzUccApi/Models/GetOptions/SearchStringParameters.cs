@@ -2,6 +2,6 @@
 {
     public class SearchStringParameters : PagingParameters
     {
-        public string? SearchString {  get; set; }
+        public string? SearchString { get; set; }
     }
 }

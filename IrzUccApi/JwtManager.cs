@@ -1,12 +1,12 @@
-﻿using System.Configuration;
+﻿using IrzUccApi.Models;
+using IrzUccApi.Models.Db;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
-using IrzUccApi.Models.Db;
-using IrzUccApi.Models;
 
 namespace IrzUccApi
 {

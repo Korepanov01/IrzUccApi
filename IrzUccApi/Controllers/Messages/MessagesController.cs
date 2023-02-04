@@ -2,13 +2,11 @@
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
-using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Controllers.Messages
 {
@@ -68,7 +66,7 @@ namespace IrzUccApi.Controllers.Messages
                 .ToArray();
 
             var unreadedMessages = chat.Messages.Where(m => m.Sender.Id != currentUser.Id && !m.IsReaded);
-            foreach (var  unreadedMessage in unreadedMessages)
+            foreach (var unreadedMessage in unreadedMessages)
                 unreadedMessage.IsReaded = true;
             await _dbContext.SaveChangesAsync();
 
@@ -94,8 +92,8 @@ namespace IrzUccApi.Controllers.Messages
             {
                 chat = new Chat
                 {
-                    Participants = currentUser.Id != recipient.Id 
-                        ? new[] { currentUser, recipient } 
+                    Participants = currentUser.Id != recipient.Id
+                        ? new[] { currentUser, recipient }
                         : new[] { currentUser }
                 };
                 await _dbContext.AddAsync(chat);

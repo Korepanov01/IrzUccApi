@@ -3,10 +3,10 @@
     public class MessageDto
     {
         public MessageDto(
-            int id, 
-            string? text, 
-            string? image, 
-            DateTime dateTime, 
+            int id,
+            string? text,
+            string? image,
+            DateTime dateTime,
             string senderId)
         {
             Id = id;

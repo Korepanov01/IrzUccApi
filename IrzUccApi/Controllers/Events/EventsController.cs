@@ -154,7 +154,7 @@ namespace IrzUccApi.Controllers.Events
                         if (user == null)
                             return BadRequest();
                     }
-                else 
+                else
                     return BadRequest();
 
             await _dbContext.AddAsync(newEvent);

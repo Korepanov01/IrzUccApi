@@ -1,6 +1,4 @@
-﻿using IrzUccApi.Models.PagingOptions;
-
-namespace IrzUccApi.Models.GetOptions
+﻿namespace IrzUccApi.Models.GetOptions
 {
     public class TimeRangeGetParameters
     {

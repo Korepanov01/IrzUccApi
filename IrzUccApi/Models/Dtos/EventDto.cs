@@ -1,19 +1,16 @@
-﻿using IrzUccApi.Models.Db;
-using System.ComponentModel.DataAnnotations;
-
-namespace IrzUccApi.Models.Dtos
+﻿namespace IrzUccApi.Models.Dtos
 {
     public class EventDto
     {
         public EventDto(
-            int id, 
-            string title, 
-            DateTime start, 
-            DateTime end, 
-            string? description, 
-            string? cabinetName, 
-            bool isPublic, 
-            UserHeaderDto creator, 
+            int id,
+            string title,
+            DateTime start,
+            DateTime end,
+            string? description,
+            string? cabinetName,
+            bool isPublic,
+            UserHeaderDto creator,
             IEnumerable<UserHeaderDto> listeners)
         {
             Id = id;

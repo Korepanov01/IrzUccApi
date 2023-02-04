@@ -1,6 +1,5 @@
 ﻿using IrzUccApi.Models.PagingOptions;
 using System.ComponentModel.DataAnnotations;
-using System.Drawing.Printing;
 
 namespace IrzUccApi.Models.GetOptions
 {

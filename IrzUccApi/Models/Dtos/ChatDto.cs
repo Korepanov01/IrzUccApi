@@ -3,9 +3,9 @@
     public class ChatDto
     {
         public ChatDto(
-            int id, 
-            UserHeaderDto recipient, 
-            MessageDto? lastMessage, 
+            int id,
+            UserHeaderDto recipient,
+            MessageDto? lastMessage,
             int unreadedCount)
         {
             Id = id;
