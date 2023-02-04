@@ -78,7 +78,7 @@ namespace IrzUccApi.Controllers.News
             if (currentUser == null)
                 return Unauthorized();
 
-            if (request.IsPublic && !User.IsInRole(RolesNames.Publisher))
+            if (request.IsPublic && !User.IsInRole(RolesNames.Support))
                 return Forbid();
 
             var newsEntry = new NewsEntry
@@ -137,7 +137,7 @@ namespace IrzUccApi.Controllers.News
             var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (currentUserId == null)
                 return Unauthorized();
-            if (newsEntry.Author.Id != currentUserId && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Publisher) && newsEntry.IsPublic)
+            if (newsEntry.Author.Id != currentUserId && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Support) && newsEntry.IsPublic)
                 return Forbid();
 
             _dbContext.Remove(newsEntry);

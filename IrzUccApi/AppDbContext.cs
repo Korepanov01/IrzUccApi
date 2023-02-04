@@ -16,6 +16,7 @@ namespace IrzUccApi
 
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Cabinet> Cabinets { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<NewsEntry> NewsEntries { get; set; }
@@ -96,6 +97,10 @@ namespace IrzUccApi
                 .HasMany(n => n.Comments)
                 .WithOne(c => c.NewsEntry)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Cabinet>()
+                .HasMany(c => c.Events)
+                .WithOne(e => e.Cabinet);
         }
 
         private static void SeedData(ModelBuilder builder)
@@ -118,8 +123,8 @@ namespace IrzUccApi
                 },
                 new AppRole
                 {
-                    Name = Enums.RolesNames.Publisher,
-                    NormalizedName = Enums.RolesNames.Publisher.ToUpper()
+                    Name = Enums.RolesNames.CabinetsManager,
+                    NormalizedName = Enums.RolesNames.CabinetsManager.ToUpper()
                 }
             };
             builder.Entity<AppRole>().HasData(appRoles);
@@ -136,19 +141,12 @@ namespace IrzUccApi
             superAdmin.PasswordHash = new PasswordHasher<AppUser>().HashPassword(superAdmin, SuperAdminPassword);
             builder.Entity<AppUser>().HasData(superAdmin);
 
-            builder.Entity<AppUserRole>().HasData(new[]
+            var superAdminUserRoles = appRoles.Select(r => new AppUserRole
             {
-                new AppUserRole
-                {
-                    RoleId = appRoles[0].Id,
-                    UserId = superAdmin.Id
-                },
-                new AppUserRole
-                {
-                    RoleId = appRoles[1].Id,
-                    UserId = superAdmin.Id
-                },
+                RoleId = r.Id,
+                UserId = superAdmin.Id
             });
+            builder.Entity<AppUserRole>().HasData(superAdminUserRoles);
         }
     }
 }

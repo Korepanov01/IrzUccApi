@@ -25,7 +25,7 @@ namespace IrzUccApi.Controllers.Users
             var roles = new List<string>()
             {
                 RolesNames.Support,
-                RolesNames.Publisher,
+                RolesNames.CabinetsManager,
             };
 
             if (User.IsInRole(RolesNames.SuperAdmin))
