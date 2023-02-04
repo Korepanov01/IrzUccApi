@@ -1,5 +1,8 @@
 ﻿using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
+using IrzUccApi.Models.Dtos;
+using IrzUccApi.Models.GetOptions;
+using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Events;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +23,84 @@ namespace IrzUccApi.Controllers.Events
         {
             _dbContext = dbContext;
             _userManager = userManager;
+        }
+
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyEvents([FromQuery] PagingParameters parameters)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return Unauthorized();
+
+            return Ok(currentUser.Events
+                .OrderBy(e => e.Start)
+                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Take(parameters.PageSize)
+                .Select(e => new EventListItemDto(
+                    e.Id,
+                    e.Title,
+                    e.Start,
+                    e.End,
+                    e.Cabinet?.Name)));
+        }
+
+        [HttpGet("listenning")]
+        public async Task<IActionResult> GetListenningEvents([FromQuery] TimeRangeGetParameters parameters)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return Unauthorized();
+
+            if (parameters.Start > parameters.End)
+                return BadRequest();
+
+            return Ok(currentUser.ListeningEvents
+                .OrderBy(e => e.Start)
+                .Where(e => parameters.Start < e.Start && parameters.End > e.Start
+                    || parameters.Start > e.Start && parameters.End < e.End)
+                .Select(e => new EventListItemDto(
+                    e.Id,
+                    e.Title,
+                    e.Start,
+                    e.End,
+                    e.Cabinet?.Name)));
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetEvent(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return Unauthorized();
+
+            var resEvent = await _dbContext.Events.FirstOrDefaultAsync(e => e.Id == id);
+            if (resEvent == null)
+                return NotFound();
+
+            if (!resEvent.IsPublic && !resEvent.Listeners.Contains(currentUser) && resEvent.Creator.Id != currentUser.Id)
+                return Forbid();
+
+            return Ok(new EventDto(
+                resEvent.Id,
+                resEvent.Title,
+                resEvent.Start,
+                resEvent.End,
+                resEvent.Description,
+                resEvent.Cabinet?.Name,
+                resEvent.IsPublic,
+                new UserHeaderDto(
+                    resEvent.Creator.Id,
+                    resEvent.Creator.FirstName,
+                    resEvent.Creator.Surname,
+                    resEvent.Creator.Patronymic,
+                    resEvent.Creator.Image),
+                resEvent.Listeners
+                    .Select(u => new UserHeaderDto(
+                        u.Id,
+                        u.FirstName,
+                        u.Surname,
+                        u.Patronymic,
+                        u.Image))));
         }
 
         [HttpPost]
