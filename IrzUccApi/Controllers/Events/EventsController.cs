@@ -51,7 +51,7 @@ namespace IrzUccApi.Controllers.Events
             if (currentUser == null)
                 return Unauthorized();
 
-            if (parameters.Start > parameters.End)
+            if (parameters.Start > parameters.End || (parameters.End - parameters.Start).Days > 40)
                 return BadRequest();
 
             return Ok(currentUser.ListeningEvents
