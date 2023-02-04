@@ -162,5 +162,25 @@ namespace IrzUccApi.Controllers.Events
 
             return Ok(newEvent.Id);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEvent(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return Unauthorized();
+
+            var resEvent = await _dbContext.Events.FirstOrDefaultAsync(e => e.Id == id);
+            if (resEvent == null)
+                return NotFound();
+
+            if (!(resEvent.IsPublic && User.IsInRole(RolesNames.Support) || resEvent.Creator.Id == currentUser.Id))
+                return Forbid();
+
+            _dbContext.Events.Remove(resEvent);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
