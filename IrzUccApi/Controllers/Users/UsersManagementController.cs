@@ -120,23 +120,5 @@ namespace IrzUccApi.Controllers.Users
 
             return Ok();
         }
-
-        [HttpPut("{id}/change_password")]
-        public async Task<IActionResult> ChangeUserPassword(string id, [FromBody][Required][MinLength(6)] string newPassword)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-                return NotFound();
-
-            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-                return Forbid();
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var identityResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
-            if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
-
-            return Ok();
-        }
     }
 }

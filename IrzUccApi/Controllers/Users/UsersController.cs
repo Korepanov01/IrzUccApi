@@ -3,6 +3,7 @@ using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.User;
+using IrzUccApi.Models.Requests.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -108,17 +109,16 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("me/change_password")]
-    public async Task<IActionResult> ChangeMyPassword([FromBody][Required][MinLength(6)] string newPassword)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
             return Unauthorized();
 
-        if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
+        if (User.IsInRole(RolesNames.SuperAdmin))
             return Forbid();
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var identityResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        var identityResult = await _userManager.ChangePasswordAsync(currentUser, request.CurrentPassword, request.NewPassword);
         if (!identityResult.Succeeded)
             return BadRequest(identityResult.Errors);
 
