@@ -32,8 +32,6 @@ namespace IrzUccApi.Controllers.News
         [AllowAnonymous]
         public async Task<IActionResult> GetNews([FromQuery] NewsSearchParameters parameters)
         {
-            await emailService.SendEmailAsync("korepanovpa01@gmail.com", "sub", "mes");
-
             var currentUser = await _userManager.GetUserAsync(User);
 
             var news = _dbContext.NewsEntries.AsQueryable();
