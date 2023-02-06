@@ -1,10 +1,13 @@
 using IrzUccApi;
+using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Configuration;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +56,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 builder.Services.AddTransient<JwtManager>();
+
+var emailConfiguration = new EmailConfiguration();
+builder.Configuration.Bind("EmailService", emailConfiguration);
+builder.Services.AddSingleton(emailConfiguration);
+builder.Services.AddTransient<EmailService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
