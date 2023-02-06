@@ -62,14 +62,18 @@ builder.Configuration.Bind("EmailService", emailConfiguration);
 builder.Services.AddSingleton(emailConfiguration);
 builder.Services.AddTransient<EmailService>();
 
+var passwordConfiguration = new PasswordConfiguration();
+builder.Configuration.Bind("Password", passwordConfiguration);
+builder.Services.AddSingleton(passwordConfiguration);
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 0;
+    options.Password.RequireDigit = passwordConfiguration.RequireDigit;
+    options.Password.RequireLowercase = passwordConfiguration.RequireLowercase;
+    options.Password.RequireNonAlphanumeric = passwordConfiguration.RequireNonAlphanumeric;
+    options.Password.RequireUppercase = passwordConfiguration.RequireUppercase;
+    options.Password.RequiredLength = passwordConfiguration.RequiredLength;
+    options.Password.RequiredUniqueChars = passwordConfiguration.RequiredUniqueChars;
+
     options.User.RequireUniqueEmail = true;
 });
 
