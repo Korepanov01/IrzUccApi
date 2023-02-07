@@ -16,8 +16,22 @@ namespace IrzUccApi.Services
 
         public async Task SendRegisterMessage(string email, string password)
         {
-            var subject = "Вы зарегестрированы в ЕЦК ИРЗ!";
+            var subject = "Вы зарегистрированы в ЕЦК ИРЗ!";
             var message = $"Ваш пароль: {password}.";
+            await SendEmailAsync(email, subject, message);
+        }
+
+        public async Task SendResetPasswordMessage(string email, string url)
+        {
+            var subject = "Восстановление пароля";
+            var message = $"Перейдите по ссылке, чтобы восстановить пароль.\n{url}";
+            await SendEmailAsync(email, subject, message);
+        }
+
+        public async Task SendNewPasswordMessage(string email, string password)
+        {
+            var subject = "Восстановление пароля";
+            var message = $"Ваш новый пароль: {password}";
             await SendEmailAsync(email, subject, message);
         }
 
