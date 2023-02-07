@@ -1,7 +1,9 @@
 ﻿using IrzUccApi.Enums;
+using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.User;
 using IrzUccApi.Models.Requests.Users;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +17,17 @@ namespace IrzUccApi.Controllers.Users
     public class UsersManagementController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly PasswordConfiguration _passwordConfiguration;
+        private readonly EmailService _emailService;
 
-        public UsersManagementController(UserManager<AppUser> userManager)
+        public UsersManagementController(
+            UserManager<AppUser> userManager,
+            EmailService emailService,
+            PasswordConfiguration passwordConfiguration)
         {
             _userManager = userManager;
+            _passwordConfiguration = passwordConfiguration;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -37,9 +46,13 @@ namespace IrzUccApi.Controllers.Users
                 Birthday = request.Birthday
             };
 
-            var identityResult = await _userManager.CreateAsync(user, request.Password);
+            var password = PasswordGenerator.GenerateRandomPassword(_passwordConfiguration);
+
+            var identityResult = await _userManager.CreateAsync(user, password);
             if (!identityResult.Succeeded)
                 return BadRequest(identityResult.Errors);
+
+            await _emailService.SendRegisterMessage(request.Email, password);
 
             return Ok(user.Id);
         }
@@ -56,8 +69,8 @@ namespace IrzUccApi.Controllers.Users
             user.FirstName = request.FirstName;
             user.Surname = request.Surname;
             user.Patronymic = request.Patronymic;
-            user.Email = request.Email;
             user.Birthday = request.Birthday;
+
             var identityResult = await _userManager.UpdateAsync(user);
             if (!identityResult.Succeeded)
                 return BadRequest(identityResult.Errors);
@@ -102,24 +115,6 @@ namespace IrzUccApi.Controllers.Users
 
             user.IsActiveAccount = activation;
             var identityResult = await _userManager.UpdateAsync(user);
-            if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
-
-            return Ok();
-        }
-
-        [HttpPut("{id}/change_password")]
-        public async Task<IActionResult> ChangeUserPassword(string id, [FromBody][Required][MinLength(6)] string newPassword)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-                return NotFound();
-
-            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-                return Forbid();
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var identityResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
             if (!identityResult.Succeeded)
                 return BadRequest(identityResult.Errors);
 

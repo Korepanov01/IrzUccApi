@@ -3,6 +3,7 @@ using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.News;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,13 @@ namespace IrzUccApi.Controllers.News
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly EmailService emailService;
 
-        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager, EmailService emailService)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            this.emailService = emailService;
         }
 
         [HttpGet]

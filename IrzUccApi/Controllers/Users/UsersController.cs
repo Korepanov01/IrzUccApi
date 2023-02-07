@@ -1,13 +1,15 @@
 ﻿using IrzUccApi.Enums;
+using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.User;
+using IrzUccApi.Models.Requests.Users;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.Users;
@@ -20,7 +22,9 @@ public class UsersController : ControllerBase
     private readonly AppDbContext _dbContext;
     private readonly UserManager<AppUser> _userManager;
 
-    public UsersController(AppDbContext dbContext, UserManager<AppUser> userManager)
+    public UsersController(
+        AppDbContext dbContext, 
+        UserManager<AppUser> userManager)
     {
         _dbContext = dbContext;
         _userManager = userManager;
@@ -105,24 +109,6 @@ public class UsersController : ControllerBase
                 .Select(up => new PositionDto(up.Position.Id, up.Position.Name)),
             user.Subscribers.Count,
             user.Subscriptions.Count));
-    }
-
-    [HttpPut("me/change_password")]
-    public async Task<IActionResult> ChangeMyPassword([FromBody][Required][MinLength(6)] string newPassword)
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-            return Unauthorized();
-
-        if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-            return Forbid();
-
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var identityResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
-        if (!identityResult.Succeeded)
-            return BadRequest(identityResult.Errors);
-
-        return Ok();
     }
 
     [HttpPut("me/update_info")]
