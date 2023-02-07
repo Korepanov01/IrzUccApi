@@ -21,19 +21,13 @@ public class UsersController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
     private readonly UserManager<AppUser> _userManager;
-    private readonly EmailService _emailService;
-    private readonly PasswordConfiguration _passwordConfiguration;
 
     public UsersController(
         AppDbContext dbContext, 
-        UserManager<AppUser> userManager,
-        EmailService emailService,
-        PasswordConfiguration passwordConfiguration)
+        UserManager<AppUser> userManager)
     {
         _dbContext = dbContext;
         _userManager = userManager;
-        _emailService = emailService;
-        _passwordConfiguration = passwordConfiguration; 
     }
 
     [HttpGet]
@@ -115,57 +109,6 @@ public class UsersController : ControllerBase
                 .Select(up => new PositionDto(up.Position.Id, up.Position.Name)),
             user.Subscribers.Count,
             user.Subscriptions.Count));
-    }
-
-    [HttpPut("me/change_password")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
-    {
-        var currentUser = await _userManager.GetUserAsync(User);
-        if (currentUser == null)
-            return Unauthorized();
-
-        var identityResult = await _userManager.ChangePasswordAsync(currentUser, request.CurrentPassword, request.NewPassword);
-        if (!identityResult.Succeeded)
-            return BadRequest(identityResult.Errors);
-
-        return Ok();
-    }
-
-    [HttpPut("send_reset_password_url")]
-    [AllowAnonymous]
-    public async Task<IActionResult> SendResetPasswordUrl([FromBody] SendResetPasswordTokenRequest request)
-    {
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null)
-            return NotFound();
-
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        if (token == null)
-            return StatusCode(StatusCodes.Status500InternalServerError);
-
-        var url = new Uri($"{Request.Scheme}://{Request.Host}/api/users/reset_password?Email={request.Email}&Token={token}").AbsoluteUri;
-        await _emailService.SendResetPasswordMessage(request.Email, url);
-
-        return Ok();
-    }
-
-    [HttpPut("reset_password")]
-    [AllowAnonymous]
-    public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request)
-    {
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null)
-            return NotFound();
-
-        var newPassword = PasswordGenerator.GenerateRandomPassword(_passwordConfiguration);
-
-        var result = await _userManager.ResetPasswordAsync(user, request.Token, newPassword);
-        if (!result.Succeeded)
-            return StatusCode(StatusCodes.Status500InternalServerError);
-
-        await _emailService.SendNewPasswordMessage(request.Email, newPassword);
-
-        return Ok();
     }
 
     [HttpPut("me/update_info")]

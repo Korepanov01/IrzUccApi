@@ -55,7 +55,7 @@ builder.Services.AddAuthentication(options =>
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddTransient<JwtManager>();
+builder.Services.AddTransient<JwtService>();
 
 var emailConfiguration = new EmailConfiguration();
 builder.Configuration.Bind("EmailService", emailConfiguration);

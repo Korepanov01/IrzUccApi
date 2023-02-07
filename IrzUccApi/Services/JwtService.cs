@@ -8,14 +8,14 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace IrzUccApi
+namespace IrzUccApi.Services
 {
-    public class JwtManager
+    public class JwtService
     {
         private readonly IConfiguration _iConfiguration;
         private readonly UserManager<AppUser> _userManager;
 
-        public JwtManager(IConfiguration iConfiguration, UserManager<AppUser> userManager)
+        public JwtService(IConfiguration iConfiguration, UserManager<AppUser> userManager)
         {
             _iConfiguration = iConfiguration;
             _userManager = userManager;
