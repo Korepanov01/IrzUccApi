@@ -1,11 +1,8 @@
 ﻿using IrzUccApi.Enums;
-using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.User;
-using IrzUccApi.Models.Requests.Users;
-using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +20,7 @@ public class UsersController : ControllerBase
     private readonly UserManager<AppUser> _userManager;
 
     public UsersController(
-        AppDbContext dbContext, 
+        AppDbContext dbContext,
         UserManager<AppUser> userManager)
     {
         _dbContext = dbContext;

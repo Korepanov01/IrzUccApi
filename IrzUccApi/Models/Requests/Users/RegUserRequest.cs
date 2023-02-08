@@ -1,5 +1,4 @@
-﻿using IrzUccApi.Models.Requests.Users;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Models.Requests.User;
 

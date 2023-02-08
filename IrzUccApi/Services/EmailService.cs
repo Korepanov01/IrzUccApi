@@ -1,7 +1,6 @@
-﻿using MimeKit;
+﻿using IrzUccApi.Models.Configurations;
 using MailKit.Net.Smtp;
-using System.Configuration;
-using IrzUccApi.Models.Configurations;
+using MimeKit;
 
 namespace IrzUccApi.Services
 {
@@ -11,7 +10,7 @@ namespace IrzUccApi.Services
 
         public EmailService(EmailConfiguration configuration)
         {
-            _configuration = configuration;        
+            _configuration = configuration;
         }
 
         public async Task SendRegisterMessage(string email, string password)

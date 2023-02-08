@@ -1,5 +1,4 @@
 ﻿using IrzUccApi.Models.Configurations;
-using Microsoft.AspNetCore.Identity;
 
 namespace IrzUccApi.Services
 {

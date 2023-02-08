@@ -20,7 +20,7 @@ namespace IrzUccApi.Controllers.Authentication
         private readonly PasswordConfiguration _passwordConfiguration;
 
         public AuthenticationController(
-            JwtService jwtManager, 
+            JwtService jwtManager,
             UserManager<AppUser> userManager,
             EmailService emailService,
             PasswordConfiguration passwordConfiguration)
