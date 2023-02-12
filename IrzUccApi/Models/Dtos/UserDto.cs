@@ -13,6 +13,7 @@
             string? myDoings,
             string? skills,
             IEnumerable<PositionDto> positions,
+            IEnumerable<string> roles,
             int subscribersCount,
             int subscriptionsCount
             )
@@ -27,6 +28,7 @@
             MyDoings = myDoings;
             Skills = skills; ;
             Positions = positions;
+            Roles = roles;
             SubscribersCount = subscribersCount;
             SubscriptionsCount = subscriptionsCount;
         }
@@ -41,6 +43,7 @@
         public string? MyDoings { get; }
         public string? Skills { get; }
         public IEnumerable<PositionDto> Positions { get; }
+        public IEnumerable<string> Roles { get; }
         public int SubscribersCount { get; }
         public int SubscriptionsCount { get; }
     }

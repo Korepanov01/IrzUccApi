@@ -3,9 +3,8 @@
 namespace IrzUccApi.Models.Db
 {
     [Table("NewsEntry")]
-    public class NewsEntry
+    public class NewsEntry : BaseDbModel
     {
-        public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
         public DateTime DateTime { get; set; } = DateTime.UtcNow;

@@ -104,6 +104,7 @@ public class UsersController : ControllerBase
             user.UserPosition
                 .Where(up => up.IsActive)
                 .Select(up => new PositionDto(up.Position.Id, up.Position.Name)),
+            user.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
             user.Subscribers.Count,
             user.Subscriptions.Count));
     }

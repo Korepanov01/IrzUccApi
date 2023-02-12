@@ -4,9 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IrzUccApi.Models.Db
 {
     [Table("Message")]
-    public class Message
+    public class Message : BaseDbModel
     {
-        public int Id { get; set; }
         [MaxLength(150)]
         public string? Text { get; set; } = string.Empty;
         public bool IsReaded { get; set; }
