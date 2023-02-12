@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using IrzUccApi.Models.Requests.Images;
+using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Models.Requests.User
 {
     public class UpdateExtraInfoRequest
     {
-        public string? Image { get; set; }
+        public ImageRequest? Image { get; set; }
         [MaxLength(500)]
         public string? AboutMyself { get; set; }
         [MaxLength(500)]

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using IrzUccApi.Models.Requests.Images;
+using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Models.Requests.Messages
 {
@@ -8,6 +9,6 @@ namespace IrzUccApi.Models.Requests.Messages
         public string UserId { get; set; } = string.Empty;
         [MaxLength(150)]
         public string? Text { get; set; }
-        public string? Image { get; set; }
+        public ImageRequest? Image { get; set; }
     }
 }

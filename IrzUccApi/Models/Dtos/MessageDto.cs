@@ -11,14 +11,14 @@
         {
             Id = id;
             Text = text;
-            Image = image;
+            ImageId = image;
             DateTime = dateTime;
             SenderId = senderId;
         }
 
         public int Id { get; }
         public string? Text { get; }
-        public string? Image { get; }
+        public string? ImageId { get; }
         public DateTime DateTime { get; }
         public string SenderId { get; }
     }

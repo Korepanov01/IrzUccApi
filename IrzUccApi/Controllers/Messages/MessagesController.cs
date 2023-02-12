@@ -60,7 +60,7 @@ namespace IrzUccApi.Controllers.Messages
                 .Select(m => new MessageDto(
                     m.Id,
                     m.Text,
-                    m.Image,
+                    m.Image != null ? m.Image.Id.ToString() : null,
                     m.DateTime,
                     m.Sender.Id))
                 .ToArray();
@@ -100,10 +100,23 @@ namespace IrzUccApi.Controllers.Messages
                 await _dbContext.SaveChangesAsync();
             }
 
+            Image? image = null;
+            if (request.Image != null)
+            {
+                image = new Image
+                {
+                    Id = new Guid(),
+                    Name = request.Image.Name,
+                    Extension = request.Image.Extension,
+                    Data = request.Image.Data
+                };
+                await _dbContext.Images.AddAsync(image);
+            }
+
             var message = new Message
             {
                 Text = request.Text,
-                Image = request.Image,
+                Image = image,
                 IsReaded = false,
                 DateTime = DateTime.UtcNow,
                 Sender = currentUser,
@@ -119,7 +132,7 @@ namespace IrzUccApi.Controllers.Messages
             return Ok(new MessageDto(
                 message.Id,
                 message.Text,
-                message.Image,
+                message.Image != null ? message.Image.Id.ToString() : null,
                 message.DateTime,
                 message.Sender.Id));
         }

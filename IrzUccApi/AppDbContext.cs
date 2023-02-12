@@ -14,6 +14,7 @@ namespace IrzUccApi
         private const string SuperAdminName = "Главный";
         private const string SuperAdminSurname = "Администратор";
 
+        public DbSet<Image> Images { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Cabinet> Cabinets { get; set; }
