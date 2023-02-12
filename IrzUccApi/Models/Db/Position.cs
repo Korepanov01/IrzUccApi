@@ -6,9 +6,8 @@ namespace IrzUccApi.Models.Db
 {
     [Table("Position")]
     [Index(nameof(Name), IsUnique = true)]
-    public class Position
+    public class Position : BaseDbModel
     {
-        public int Id { get; set; }
         [Required(AllowEmptyStrings = false)]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;

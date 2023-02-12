@@ -3,9 +3,8 @@
 namespace IrzUccApi.Models.Db
 {
     [Table("UserPosition")]
-    public class UserPosition
+    public class UserPosition : BaseDbModel
     {
-        public int Id { get; set; }
         public DateTime Start { get; set; }
         public DateTime? End { get; set; }
         public bool IsActive { get; set; } = true;

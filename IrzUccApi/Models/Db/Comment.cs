@@ -4,9 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IrzUccApi.Models.Db
 {
     [Table("Comment")]
-    public class Comment
+    public class Comment : BaseDbModel
     {
-        public int Id { get; set; }
         [MaxLength(250)]
         public string Text { get; set; } = string.Empty;
         public DateTime DateTime { get; set; } = DateTime.UtcNow;

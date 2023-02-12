@@ -4,9 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IrzUccApi.Models.Db
 {
     [Table("Event")]
-    public class Event
+    public class Event : BaseDbModel
     {
-        public int Id { get; set; }
         [MaxLength(100)]
         public string Title { get; set; } = string.Empty;
         public DateTime Start { get; set; }
