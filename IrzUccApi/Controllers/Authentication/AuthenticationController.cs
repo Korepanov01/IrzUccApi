@@ -1,12 +1,13 @@
 ﻿using IrzUccApi.Models;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
-using IrzUccApi.Models.Requests.User;
+using IrzUccApi.Models.Requests.Authentication;
 using IrzUccApi.Models.Requests.Users;
 using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace IrzUccApi.Controllers.Authentication
 {
@@ -33,12 +34,17 @@ namespace IrzUccApi.Controllers.Authentication
 
         [HttpPost]
         [Route("authenticate")]
-        public async Task<IActionResult> GetTokenAsync([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> GetToken([FromBody] LoginRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(loginRequest.Email);
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+                return NotFound(request.Email);
 
-            if (!await _userManager.CheckPasswordAsync(user, loginRequest.Password))
-                return BadRequest("Incorrect login or password!");
+            if (!await _userManager.CheckPasswordAsync(user, request.Password))
+                return BadRequest(request.Password);
+
+            if (!user.IsActiveAccount)
+                return BadRequest();
 
             var tokens = await _jwtManager.GenerateTokens(user.Email);
 
@@ -52,23 +58,31 @@ namespace IrzUccApi.Controllers.Authentication
 
         [HttpPost]
         [Route("refresh")]
-        public async Task<IActionResult> RefreshTokenAsync([FromBody] Tokens tokens)
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            var email = _jwtManager.GetEmailFromExpiredJwt(tokens.Jwt);
+            string userId;
+            try
+            {
+                userId = _jwtManager.GetIdFromExpiredJwt(request.Jwt);
+            }
+            catch (SecurityTokenException)
+            {
+                return BadRequest(request.Jwt);
+            }
 
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return Unauthorized("Non existing user!");
+                return BadRequest(request.Jwt);
 
-            if (user.RefreshToken != tokens.RefreshToken)
-                return Unauthorized("Invalid refresh token!");
+            if (user.RefreshToken != request.RefreshToken)
+                return BadRequest(request.RefreshToken);
 
             var newTokens = await _jwtManager.GenerateTokens(user.Email);
 
             user.RefreshToken = newTokens.RefreshToken;
             var identityResult = await _userManager.UpdateAsync(user);
             if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
+                return StatusCode(StatusCodes.Status500InternalServerError);
 
             return Ok(newTokens);
         }

@@ -1,5 +1,6 @@
-﻿using IrzUccApi.Models;
+﻿using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
+using IrzUccApi.Models.Dtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Configuration;
@@ -12,48 +13,45 @@ namespace IrzUccApi.Services
 {
     public class JwtService
     {
-        private readonly IConfiguration _iConfiguration;
+        private readonly int _jwtLifeTimeMinutes = 20;
+
+        private readonly JwtConfiguration _jwtConfiguration;
         private readonly UserManager<AppUser> _userManager;
 
-        public JwtService(IConfiguration iConfiguration, UserManager<AppUser> userManager)
+        public JwtService(
+            JwtConfiguration jwtConfiguration, 
+            UserManager<AppUser> userManager)
         {
-            _iConfiguration = iConfiguration;
+            _jwtConfiguration = jwtConfiguration;
             _userManager = userManager;
         }
 
-        public async Task<Tokens> GenerateTokens(string email)
+        public async Task<TokensDto> GenerateTokens(string email)
         {
-            var tokenKey = Encoding.UTF8.GetBytes(_iConfiguration["JWT:SecurityKey"]
-                       ?? throw new ConfigurationErrorsException("JWT:SecurityKey is empty!"));
+            var tokenKey = Encoding.UTF8.GetBytes(_jwtConfiguration.SecurityKey);
 
             var user = await _userManager.FindByEmailAsync(email)
-                       ?? throw new ArgumentException("There is no such user!", email);
-
-            if (!user.IsActiveAccount)
-                throw new ArgumentException("User is deactivated!", email);
+                       ?? throw new ArgumentException("There is no such user!", nameof(email));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity((await _userManager.GetRolesAsync(user))
                     .Select(r => new Claim(ClaimTypes.Role, r))
-                    .Append(new Claim(ClaimTypes.Email, email))
                     .Append(new Claim(ClaimTypes.NameIdentifier, user.Id))),
-                Expires = DateTime.Now.AddHours(1),
+                Expires = DateTime.Now.AddMinutes(_jwtLifeTimeMinutes),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return new Tokens
-            {
-                Jwt = tokenHandler.WriteToken(token),
-                RefreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64))
-            };
+            return new TokensDto(
+                tokenHandler.WriteToken(token),
+                Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)));
         }
 
-        public string GetEmailFromExpiredJwt(string jwt)
+        public string GetIdFromExpiredJwt(string jwt)
         {
-            var tokenKey = Encoding.UTF8.GetBytes(_iConfiguration["JWT:SecurityKey"]
-                ?? throw new ConfigurationErrorsException("JWT:SecurityKey is empty!"));
+            var tokenKey = Encoding.UTF8.GetBytes(_jwtConfiguration.SecurityKey);
 
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -65,13 +63,22 @@ namespace IrzUccApi.Services
                 ClockSkew = TimeSpan.Zero
             };
 
-            var principal = new JwtSecurityTokenHandler().ValidateToken(jwt, tokenValidationParameters, out var securityToken);
+            ClaimsPrincipal claimsPrincipal;
+            SecurityToken securityToken;
+            try
+            {
+                claimsPrincipal = new JwtSecurityTokenHandler().ValidateToken(jwt, tokenValidationParameters, out securityToken);
+            }
+            catch(Exception)
+            {
+                throw new SecurityTokenException();
+            }
             if (securityToken is not JwtSecurityToken jwtSecurityToken
                 || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                throw new SecurityTokenException("Invalid token");
+                throw new SecurityTokenException();
 
-            return (principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ??
-                    throw new SecurityTokenException("Invalid token")).Value;
+            return (claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier) ??
+                    throw new SecurityTokenException()).Value;
         }
     }
 }

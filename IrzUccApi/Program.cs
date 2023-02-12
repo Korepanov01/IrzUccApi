@@ -19,6 +19,10 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+var jwtConfiguration = new JwtConfiguration();
+builder.Configuration.Bind("Jwt", jwtConfiguration);
+builder.Services.AddSingleton(jwtConfiguration);
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -29,13 +33,13 @@ builder.Services.AddAuthentication(options =>
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecurityKey"] ?? throw new ArgumentNullException("JWT:SecurityKey is empty!"))),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.SecurityKey)),
 
             ValidateIssuer = false,
-            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidIssuer = jwtConfiguration.Issuer,
 
             ValidateAudience = false,
-            ValidAudience = builder.Configuration["JWT:Audience"],
+            ValidAudience = jwtConfiguration.Audience,
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
