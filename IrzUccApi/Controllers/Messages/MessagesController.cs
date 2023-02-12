@@ -105,7 +105,7 @@ namespace IrzUccApi.Controllers.Messages
             {
                 image = new Image
                 {
-                    Id = new Guid(),
+                    Id = Guid.NewGuid().ToString(),
                     Name = request.Image.Name,
                     Extension = request.Image.Extension,
                     Data = request.Image.Data

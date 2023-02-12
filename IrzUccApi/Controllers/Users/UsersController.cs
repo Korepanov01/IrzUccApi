@@ -66,7 +66,7 @@ public class UsersController : ControllerBase
                     u.Patronymic,
                     u.Email,
                     u.IsActiveAccount,
-                    u.Image != null ? u.Image.Id.ToString() : null,
+                    u.Image != null ? u.Image.Id : null,
                     u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
                     u.UserPosition.Where(up => up.IsActive).Select(up => new PositionDto(up.Position.Id, up.Position.Name))))
             .ToArrayAsync());
@@ -97,7 +97,7 @@ public class UsersController : ControllerBase
             user.Surname,
             user.Patronymic,
             user.Birthday,
-            user.Image != null ? user.Image.Id.ToString() : null,
+            user.Image?.Id,
             user.AboutMyself,
             user.MyDoings,
             user.Skills,
@@ -120,7 +120,7 @@ public class UsersController : ControllerBase
         {
             image = new Image
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid().ToString(),
                 Name = request.Image.Name,
                 Extension = request.Image.Extension,
                 Data = request.Image.Data
