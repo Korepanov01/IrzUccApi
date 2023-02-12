@@ -8,7 +8,7 @@
             string surname,
             string? patronymic,
             DateTime birthday,
-            string? image,
+            string? imageId,
             string? aboutMyself,
             string? myDoings,
             string? skills,
@@ -23,7 +23,7 @@
             Surname = surname;
             Patronymic = patronymic;
             Birthday = birthday;
-            Image = image;
+            ImageId = imageId;
             AboutMyself = aboutMyself;
             MyDoings = myDoings;
             Skills = skills; ;
@@ -38,7 +38,7 @@
         public string Surname { get; }
         public string? Patronymic { get; }
         public DateTime Birthday { get; }
-        public string? Image { get; }
+        public string? ImageId { get; }
         public string? AboutMyself { get; }
         public string? MyDoings { get; }
         public string? Skills { get; }

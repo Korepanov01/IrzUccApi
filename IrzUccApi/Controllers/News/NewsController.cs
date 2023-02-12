@@ -59,7 +59,7 @@ namespace IrzUccApi.Controllers.News
                     n.Id,
                     n.Title,
                     n.Text.Substring(0, Math.Min(100, n.Text.Length)),
-                    n.Image,
+                    n.Image != null ? n.Image.Id.ToString() : null,
                     n.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(n),
                     n.Likers.Count,
@@ -68,7 +68,7 @@ namespace IrzUccApi.Controllers.News
                         n.Author.FirstName,
                         n.Author.Surname,
                         n.Author.Patronymic,
-                        n.Author.Image),
+                        n.Author.Image != null ? n.Author.Image.Id.ToString() : null),
                     n.IsPublic,
                     n.Comments.Count))
                 .ToArrayAsync());
@@ -84,16 +84,28 @@ namespace IrzUccApi.Controllers.News
             if (request.IsPublic && !User.IsInRole(RolesNames.Support))
                 return Forbid();
 
+            Image? image = null;
+            if (request.Image != null)
+            {
+                image = new Image
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = request.Image.Name,
+                    Extension = request.Image.Extension,
+                    Data = request.Image.Data
+                };
+                await _dbContext.Images.AddAsync(image);
+            }
+
             var newsEntry = new NewsEntry
             {
                 Title = request.Title,
                 Text = request.Text,
-                Image = request.Image,
+                Image = image,
                 DateTime = DateTime.UtcNow,
                 Author = currentUser,
                 IsPublic = request.IsPublic
             };
-
             await _dbContext.AddAsync(newsEntry);
 
             await _dbContext.SaveChangesAsync();
@@ -116,7 +128,7 @@ namespace IrzUccApi.Controllers.News
                     newsEntry.Id,
                     newsEntry.Title,
                     newsEntry.Text,
-                    newsEntry.Image,
+                    newsEntry.Image != null ? newsEntry.Image.Id.ToString() : null,
                     newsEntry.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(newsEntry),
                     newsEntry.Likers.Count,
@@ -125,7 +137,7 @@ namespace IrzUccApi.Controllers.News
                         newsEntry.Author.FirstName,
                         newsEntry.Author.Surname,
                         newsEntry.Author.Patronymic,
-                        newsEntry.Author.Image),
+                        newsEntry.Author.Image != null ? newsEntry.Author.Image.Id.ToString() : null),
                     newsEntry.IsPublic,
                     newsEntry.Comments.Count));
         }

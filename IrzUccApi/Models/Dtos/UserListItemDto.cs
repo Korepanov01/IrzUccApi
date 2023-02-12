@@ -9,8 +9,8 @@
             string? patronymic,
             string email,
             bool? isActiveAccount,
-            string? image,
-            IEnumerable<string> roles,
+            string? imageId,
+            IEnumerable<string>? roles,
             IEnumerable<PositionDto> positions)
         {
             Id = id;
@@ -18,7 +18,7 @@
             Surname = surname;
             IsActiveAccount = isActiveAccount;
             Patronymic = patronymic;
-            Image = image;
+            ImageId = imageId;
             Roles = roles;
             Email = email;
             Positions = positions;
@@ -30,8 +30,8 @@
         public string Email { get; }
         public bool? IsActiveAccount { get; }
         public string? Patronymic { get; }
-        public string? Image { get; }
-        public IEnumerable<string> Roles { get; }
+        public string? ImageId { get; }
+        public IEnumerable<string>? Roles { get; }
         public IEnumerable<PositionDto> Positions { get; }
     }
 }

@@ -66,7 +66,7 @@ public class UsersController : ControllerBase
                     u.Patronymic,
                     u.Email,
                     u.IsActiveAccount,
-                    u.Image,
+                    u.Image != null ? u.Image.Id : null,
                     u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
                     u.UserPosition.Where(up => up.IsActive).Select(up => new PositionDto(up.Position.Id, up.Position.Name))))
             .ToArrayAsync());
@@ -97,7 +97,7 @@ public class UsersController : ControllerBase
             user.Surname,
             user.Patronymic,
             user.Birthday,
-            user.Image,
+            user.Image?.Id,
             user.AboutMyself,
             user.MyDoings,
             user.Skills,
@@ -116,13 +116,32 @@ public class UsersController : ControllerBase
         if (user == null)
             return Unauthorized();
 
-        user.Image = request.Image;
+        Image? image = null;
+        if (request.Image != null)
+        {
+            image = new Image
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = request.Image.Name,
+                Extension = request.Image.Extension,
+                Data = request.Image.Data
+            };
+            await _dbContext.Images.AddAsync(image);
+        }
+
+        if (user.Image != null)
+            _dbContext.Remove(user.Image);
+
+        user.Image = image;
         user.AboutMyself = request.AboutMyself;
         user.MyDoings = request.MyDoings;
         user.Skills = request.Skills;
+
+        _dbContext.Update(user);
+        await _dbContext.SaveChangesAsync();
         var identityResult = await _userManager.UpdateAsync(user);
-        if (!identityResult.Succeeded)
-            return BadRequest(identityResult.Errors);
+        //if (!identityResult.Succeeded)
+        //    return BadRequest(identityResult.Errors);
 
         return Ok();
     }

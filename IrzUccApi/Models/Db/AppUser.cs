@@ -15,11 +15,12 @@ namespace IrzUccApi.Models.Db
         [MaxLength(50)]
         public string? Patronymic { get; set; }
         public DateTime Birthday { get; set; }
-        public string? Image { get; set; }
         public string? AboutMyself { get; set; }
         public string? MyDoings { get; set; }
         public string? Skills { get; set; }
         public string? RefreshToken { get; set; }
+
+        public virtual Image? Image { get; set; }
 
         public virtual ICollection<Chat> Chats { get; set; } = new HashSet<Chat>();
         public virtual ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();

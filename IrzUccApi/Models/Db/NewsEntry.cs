@@ -9,7 +9,8 @@ namespace IrzUccApi.Models.Db
         public string Text { get; set; } = string.Empty;
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
         public bool IsPublic { get; set; } = false;
-        public string? Image { get; set; }
+
+        public virtual Image? Image { get; set; }
 
         public virtual AppUser Author { get; set; } = new AppUser();
         public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
