@@ -21,6 +21,7 @@ namespace IrzUccApi.Db
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
+            Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
@@ -29,7 +30,10 @@ namespace IrzUccApi.Db
             base.OnModelCreating(builder);
 
             DbConfigurer.Configure(builder);
-            DbSeeder.SeedData(builder);
+
+            var dbSeeder = new DbSeeder(builder);
+            dbSeeder.SeedRequiredData();
+            dbSeeder.SeedTestData();
         }       
     }
 }
