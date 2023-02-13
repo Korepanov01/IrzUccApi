@@ -93,14 +93,14 @@ namespace IrzUccApi.Controllers.Events
                     resEvent.Creator.FirstName,
                     resEvent.Creator.Surname,
                     resEvent.Creator.Patronymic,
-                    resEvent?.Creator?.Image?.Id.ToString()),
+                    resEvent?.Creator?.Image?.Id),
                 resEvent.Listeners
                     .Select(u => new UserHeaderDto(
                         u.Id,
                         u.FirstName,
                         u.Surname,
                         u.Patronymic,
-                        u?.Image?.Id.ToString()))));
+                        u?.Image?.Id))));
         }
 
         [HttpPost]

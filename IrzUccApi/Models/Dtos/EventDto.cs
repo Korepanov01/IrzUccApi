@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class EventDto
+    public class EventDto : EventListItemDto
     {
         public EventDto(
             Guid id,
@@ -11,25 +11,20 @@
             string? cabinetName,
             bool isPublic,
             UserHeaderDto creator,
-            IEnumerable<UserHeaderDto> listeners)
+            IEnumerable<UserHeaderDto> listeners) : base(
+                id,
+                title,
+                start,
+                end,
+                cabinetName)
         {
-            Id = id;
-            Title = title;
-            Start = start;
-            End = end;
             Description = description;
-            CabinetName = cabinetName;
             IsPublic = isPublic;
             Creator = creator;
             Listeners = listeners;
         }
 
-        public Guid Id { get; }
-        public string Title { get; }
-        public DateTime Start { get; }
-        public DateTime End { get; }
         public string? Description { get; }
-        public string? CabinetName { get; }
         public bool IsPublic { get; }
 
         public UserHeaderDto Creator { get; }

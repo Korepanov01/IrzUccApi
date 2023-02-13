@@ -68,7 +68,7 @@ namespace IrzUccApi.Controllers.News
                         n.Author.FirstName,
                         n.Author.Surname,
                         n.Author.Patronymic,
-                        n.Author.Image != null ? n.Author.Image.Id.ToString() : null),
+                        n.Author.Image != null ? n.Author.Image.Id : null),
                     n.IsPublic,
                     n.Comments.Count))
                 .ToArrayAsync());
@@ -137,7 +137,7 @@ namespace IrzUccApi.Controllers.News
                         newsEntry.Author.FirstName,
                         newsEntry.Author.Surname,
                         newsEntry.Author.Patronymic,
-                        newsEntry.Author.Image != null ? newsEntry.Author.Image.Id.ToString() : null),
+                        newsEntry.Author.Image != null ? newsEntry.Author.Image.Id : null),
                     newsEntry.IsPublic,
                     newsEntry.Comments.Count));
         }

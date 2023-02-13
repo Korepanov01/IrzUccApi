@@ -106,7 +106,9 @@ public class UsersController : ControllerBase
                 .Select(up => new PositionDto(up.Position.Id, up.Position.Name)),
             user.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
             user.Subscribers.Count,
-            user.Subscriptions.Count));
+            user.Subscriptions.Count,
+            user.Email,
+            user.IsActiveAccount));
     }
 
     [HttpPut("me/update_info")]

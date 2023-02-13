@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class UserDto
+    public class UserDto : UserListItemDto
     {
         public UserDto(
             string id,
@@ -15,35 +15,30 @@
             IEnumerable<PositionDto> positions,
             IEnumerable<string> roles,
             int subscribersCount,
-            int subscriptionsCount
-            )
+            int subscriptionsCount,
+            string email,
+            bool? isActiveAccount) : base(
+                id, 
+                firstName, 
+                surname, 
+                patronymic, 
+                email, 
+                isActiveAccount, 
+                imageId, roles, 
+                positions)
         {
-            Id = id;
-            FirstName = firstName;
-            Surname = surname;
-            Patronymic = patronymic;
             Birthday = birthday;
-            ImageId = imageId;
             AboutMyself = aboutMyself;
             MyDoings = myDoings;
-            Skills = skills; ;
-            Positions = positions;
-            Roles = roles;
+            Skills = skills;
             SubscribersCount = subscribersCount;
             SubscriptionsCount = subscriptionsCount;
         }
 
-        public string Id { get; }
-        public string FirstName { get; }
-        public string Surname { get; }
-        public string? Patronymic { get; }
         public DateTime Birthday { get; }
-        public Guid? ImageId { get; }
         public string? AboutMyself { get; }
         public string? MyDoings { get; }
         public string? Skills { get; }
-        public IEnumerable<PositionDto> Positions { get; }
-        public IEnumerable<string> Roles { get; }
         public int SubscribersCount { get; }
         public int SubscriptionsCount { get; }
     }
