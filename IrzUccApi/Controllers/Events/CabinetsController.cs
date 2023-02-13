@@ -58,7 +58,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpGet("{id}/events")]
-        public async Task<IActionResult> GetCabinetEvents(int id, [FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetCabinetEvents(Guid id, [FromQuery] PagingParameters parameters)
         {
             var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
             if (cabinet == null)
@@ -95,7 +95,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCabinet(int id, [FromBody] PostPutCabinetRequest request)
+        public async Task<IActionResult> UpdateCabinet(Guid id, [FromBody] PostPutCabinetRequest request)
         {
             var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
             if (cabinet == null)
@@ -113,7 +113,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCabinet(int id)
+        public async Task<IActionResult> DeleteCabinet(Guid id)
         {
             var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
             if (cabinet == null)

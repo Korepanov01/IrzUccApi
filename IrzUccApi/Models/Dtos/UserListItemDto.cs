@@ -9,7 +9,7 @@
             string? patronymic,
             string email,
             bool? isActiveAccount,
-            string? imageId,
+            Guid? imageId,
             IEnumerable<string>? roles,
             IEnumerable<PositionDto> positions)
         {
@@ -30,7 +30,7 @@
         public string Email { get; }
         public bool? IsActiveAccount { get; }
         public string? Patronymic { get; }
-        public string? ImageId { get; }
+        public Guid? ImageId { get; }
         public IEnumerable<string>? Roles { get; }
         public IEnumerable<PositionDto> Positions { get; }
     }

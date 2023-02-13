@@ -3,7 +3,7 @@
     public class NewsEntryDto
     {
         public NewsEntryDto(
-            int id,
+            Guid id,
             string title,
             string text,
             string? image,
@@ -26,7 +26,7 @@
             CommentCount = commentCount;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Title { get; }
         public string Text { get; }
         public string? Image { get; }

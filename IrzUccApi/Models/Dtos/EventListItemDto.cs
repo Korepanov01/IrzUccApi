@@ -3,7 +3,7 @@
     public class EventListItemDto
     {
         public EventListItemDto(
-            int id,
+            Guid id,
             string title,
             DateTime start,
             DateTime end,
@@ -16,7 +16,7 @@
             CabinetName = cabinetName;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Title { get; }
         public DateTime Start { get; }
         public DateTime End { get; }

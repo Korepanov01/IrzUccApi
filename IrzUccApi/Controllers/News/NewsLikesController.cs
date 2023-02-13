@@ -21,14 +21,14 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpPost("like_news_entry")]
-        public async Task<IActionResult> LikeNewsEntry([Required] int newsEntryId)
+        public async Task<IActionResult> LikeNewsEntry([Required] Guid newsEntryId)
             => await LikeUnlikeNewsEntry(newsEntryId, true);
 
         [HttpPost("unlike_news_entry")]
-        public async Task<IActionResult> UnlikeNewsEntry([Required] int newsEntryId)
+        public async Task<IActionResult> UnlikeNewsEntry([Required] Guid newsEntryId)
             => await LikeUnlikeNewsEntry(newsEntryId, false);
 
-        private async Task<IActionResult> LikeUnlikeNewsEntry(int newsEntryId, bool isLike)
+        private async Task<IActionResult> LikeUnlikeNewsEntry(Guid newsEntryId, bool isLike)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == newsEntryId);
             if (newsEntry == null)

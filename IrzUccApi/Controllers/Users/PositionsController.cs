@@ -64,7 +64,7 @@ namespace IrzUccApi.Controllers.Users
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePosition(
-            int id,
+            Guid id,
             [FromBody][Required(AllowEmptyStrings = false)][MaxLength(100)] string newName)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);

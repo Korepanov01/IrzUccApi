@@ -3,7 +3,7 @@
     public class ChatDto
     {
         public ChatDto(
-            int id,
+            Guid id,
             UserHeaderDto recipient,
             MessageDto? lastMessage,
             int unreadedCount)
@@ -14,7 +14,7 @@
             UnreadedCount = unreadedCount;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public UserHeaderDto Recipient { get; }
         public MessageDto? LastMessage { get; }
         public int UnreadedCount { get; }

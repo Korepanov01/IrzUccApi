@@ -12,7 +12,7 @@ namespace IrzUccApi.Models.Requests.Events
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public bool IsPublic { get; set; } = false;
-        public int? CabinetId { get; set; }
+        public Guid? CabinetId { get; set; }
         public IEnumerable<string>? ListenersIds { get; set; }
     }
 }
