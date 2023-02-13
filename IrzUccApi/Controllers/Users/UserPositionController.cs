@@ -40,7 +40,7 @@ namespace IrzUccApi.Controllers.Users
 
             return Ok(user.UserPosition
                 .OrderBy(up => up.Start)
-                .Select(up => new UserPositionDto(up.Id, up.Start, up.End, up.IsActive))
+                .Select(up => new UserPositionDto(up.Id, up.Start, up.End))
                 .ToArray());
         }
 

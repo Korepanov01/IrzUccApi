@@ -71,7 +71,7 @@ namespace IrzUccApi.Controllers.News
                         u.IsActiveAccount,
                         u.Image?.Id,
                         u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
-                        u.UserPosition.Where(up => up.IsActive).Select(up => new PositionDto(up.Position.Id, up.Position.Name)))));
+                        u.UserPosition.Where(up => up.End == null).Select(up => new PositionDto(up.Position.Id, up.Position.Name)))));
         }
 
         [HttpPost("subcribe")]

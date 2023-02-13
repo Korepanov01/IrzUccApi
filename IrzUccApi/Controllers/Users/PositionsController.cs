@@ -92,7 +92,7 @@ namespace IrzUccApi.Controllers.Users
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
-            if (user.UserPosition.FirstOrDefault(up => up.IsActive && up.Position?.Id == request.PositionId) != null)
+            if (user.UserPosition.FirstOrDefault(up => up.End == null && up.Position?.Id == request.PositionId) != null)
                 return BadRequest(RequestErrorMessages.UserAlreadyOnPosition);
 
             if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
@@ -102,8 +102,7 @@ namespace IrzUccApi.Controllers.Users
             {
                 Start = request.Start,
                 Position = position,
-                User = user,
-                IsActive = true
+                User = user
             };
             await _dbContext.AddAsync(userPosition);
             await _dbContext.SaveChangesAsync();
@@ -121,7 +120,7 @@ namespace IrzUccApi.Controllers.Users
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
-            var userPosition = user.UserPosition.FirstOrDefault(up => up.IsActive && up.Position?.Id == request.PositionId);
+            var userPosition = user.UserPosition.FirstOrDefault(up => up.End == null && up.Position?.Id == request.PositionId);
             if (userPosition == null)
                 return BadRequest(RequestErrorMessages.UserIsNotInPosition);
 
@@ -129,7 +128,6 @@ namespace IrzUccApi.Controllers.Users
                 return BadRequest(RequestErrorMessages.EndTimeIsLessThenStartTime);
 
             userPosition.End = request.End;
-            userPosition.IsActive = false;
             _dbContext.Update(userPosition);
             await _dbContext.SaveChangesAsync();
 

@@ -43,7 +43,7 @@ public class UsersController : ControllerBase
             //    users = users.Where(u => u.UserPosition.Where(up => up.IsActive).Count() == 0);
             //else
             users = users.Where(u => u.UserPosition
-            .Where(up => up.IsActive)
+            .Where(up => up.End == null)
             .Select(up => up.Position.Id).Contains((Guid)parameters.PositionId));
         }
 
@@ -69,7 +69,7 @@ public class UsersController : ControllerBase
                     u.IsActiveAccount,
                     u.Image != null ? u.Image.Id : null,
                     u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
-                    u.UserPosition.Where(up => up.IsActive).Select(up => new PositionDto(up.Position.Id, up.Position.Name))))
+                    u.UserPosition.Where(up => up.End == null).Select(up => new PositionDto(up.Position.Id, up.Position.Name))))
             .ToArrayAsync());
     }
 
@@ -103,7 +103,7 @@ public class UsersController : ControllerBase
             user.MyDoings,
             user.Skills,
             user.UserPosition
-                .Where(up => up.IsActive)
+                .Where(up => up.End == null)
                 .Select(up => new PositionDto(up.Position.Id, up.Position.Name)),
             user.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
             user.Subscribers.Count,
