@@ -67,7 +67,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetEvent(int id)
+        public async Task<IActionResult> GetEvent(Guid id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -164,7 +164,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(int id)
+        public async Task<IActionResult> DeleteEvent(Guid id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)

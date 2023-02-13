@@ -2,13 +2,13 @@
 {
     public class CabinetDto
     {
-        public CabinetDto(int id, string name)
+        public CabinetDto(Guid id, string name)
         {
             Id = id;
             Name = name;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Name { get; }
     }
 }

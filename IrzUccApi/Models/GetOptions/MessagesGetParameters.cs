@@ -6,7 +6,7 @@ namespace IrzUccApi.Models.GetOptions
     public class MessagesGetParameters : SearchStringParameters
     {
         [Required]
-        public int ChatId { get; set; }
-        public int? LastMessageId { get; set; }
+        public Guid ChatId { get; set; }
+        public Guid? LastMessageId { get; set; }
     }
 }

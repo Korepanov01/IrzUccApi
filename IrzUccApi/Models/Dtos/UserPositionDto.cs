@@ -2,7 +2,7 @@
 {
     public class UserPositionDto
     {
-        public UserPositionDto(int id, DateTime start, DateTime? end, bool isActive)
+        public UserPositionDto(Guid id, DateTime start, DateTime? end, bool isActive)
         {
             Id = id;
             Start = start;
@@ -10,7 +10,7 @@
             IsActive = isActive;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public DateTime Start { get; }
         public DateTime? End { get; }
         public bool IsActive { get; }

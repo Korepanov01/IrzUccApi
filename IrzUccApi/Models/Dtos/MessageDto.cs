@@ -3,7 +3,7 @@
     public class MessageDto
     {
         public MessageDto(
-            int id,
+            Guid id,
             string? text,
             string? image,
             DateTime dateTime,
@@ -16,7 +16,7 @@
             SenderId = senderId;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string? Text { get; }
         public string? ImageId { get; }
         public DateTime DateTime { get; }

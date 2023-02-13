@@ -22,9 +22,9 @@ namespace IrzUccApi.Controllers.Images
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        public async Task<IActionResult> Get(Guid id)
         {
-            var image = await _dbContext.Images.FirstOrDefaultAsync(i => i.Id== id);
+            var image = await _dbContext.Images.FirstOrDefaultAsync(i => i.Id == id);
             if (image == null)
                 return NotFound();
 

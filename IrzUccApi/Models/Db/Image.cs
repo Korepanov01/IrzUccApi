@@ -2,9 +2,8 @@
 
 namespace IrzUccApi.Models.Db
 {
-    public class Image
+    public class Image : BaseDbModel
     {
-        public string Id { get; set; } = string.Empty;
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
         [MaxLength(10)]

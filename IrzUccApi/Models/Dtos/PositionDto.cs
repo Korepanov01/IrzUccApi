@@ -2,13 +2,13 @@
 {
     public class PositionDto
     {
-        public PositionDto(int id, string name)
+        public PositionDto(Guid id, string name)
         {
             Id = id;
             Name = name;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Name { get; }
     }
 }

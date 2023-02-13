@@ -38,12 +38,12 @@ public class UsersController : ControllerBase
 
         if (parameters.PositionId != null)
         {
-            if (parameters.PositionId == 0)
-                users = users.Where(u => u.UserPosition.Where(up => up.IsActive).Count() == 0);
-            else
+            //if (parameters.PositionId == 0)
+            //    users = users.Where(u => u.UserPosition.Where(up => up.IsActive).Count() == 0);
+            //else
                 users = users.Where(u => u.UserPosition
                 .Where(up => up.IsActive)
-                .Select(up => up.Position.Id).Contains((int)parameters.PositionId));
+                .Select(up => up.Position.Id).Contains((Guid)parameters.PositionId));
         }
 
         if (parameters.SearchString != null)
@@ -121,7 +121,7 @@ public class UsersController : ControllerBase
         {
             image = new Image
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 Name = request.Image.Name,
                 Extension = request.Image.Extension,
                 Data = request.Image.Data

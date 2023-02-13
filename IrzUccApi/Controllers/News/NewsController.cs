@@ -89,7 +89,7 @@ namespace IrzUccApi.Controllers.News
             {
                 image = new Image
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Guid.NewGuid(),
                     Name = request.Image.Name,
                     Extension = request.Image.Extension,
                     Data = request.Image.Data
@@ -114,7 +114,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetNewsEntry(int id)
+        public async Task<IActionResult> GetNewsEntry(Guid id)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
             if (newsEntry == null)
@@ -143,7 +143,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteNewsEntry(int id)
+        public async Task<IActionResult> DeleteNewsEntry(Guid id)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
             if (newsEntry == null)

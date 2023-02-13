@@ -105,7 +105,7 @@ namespace IrzUccApi.Controllers.Messages
             {
                 image = new Image
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Guid.NewGuid(),
                     Name = request.Image.Name,
                     Extension = request.Image.Extension,
                     Data = request.Image.Data
@@ -138,7 +138,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMessage(int id)
+        public async Task<IActionResult> DeleteMessage(Guid id)
         {
             var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.Id == id);
             if (message == null)

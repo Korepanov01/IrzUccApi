@@ -8,7 +8,7 @@
             string surname,
             string? patronymic,
             DateTime birthday,
-            string? imageId,
+            Guid? imageId,
             string? aboutMyself,
             string? myDoings,
             string? skills,
@@ -38,7 +38,7 @@
         public string Surname { get; }
         public string? Patronymic { get; }
         public DateTime Birthday { get; }
-        public string? ImageId { get; }
+        public Guid? ImageId { get; }
         public string? AboutMyself { get; }
         public string? MyDoings { get; }
         public string? Skills { get; }

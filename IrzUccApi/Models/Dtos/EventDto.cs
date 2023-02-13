@@ -3,7 +3,7 @@
     public class EventDto
     {
         public EventDto(
-            int id,
+            Guid id,
             string title,
             DateTime start,
             DateTime end,
@@ -24,7 +24,7 @@
             Listeners = listeners;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Title { get; }
         public DateTime Start { get; }
         public DateTime End { get; }

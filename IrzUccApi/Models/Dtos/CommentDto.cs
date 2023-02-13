@@ -2,7 +2,7 @@
 {
     public class CommentDto
     {
-        public CommentDto(int id, string text, DateTime dateTime, UserHeaderDto user)
+        public CommentDto(Guid id, string text, DateTime dateTime, UserHeaderDto user)
         {
             Id = id;
             Text = text;
@@ -10,7 +10,7 @@
             User = user;
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Text { get; }
         public DateTime DateTime { get; }
         public UserHeaderDto User { get; }

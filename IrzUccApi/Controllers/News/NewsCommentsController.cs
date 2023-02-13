@@ -25,7 +25,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetNewsComments([Required] int newsEntryId, [FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetNewsComments([Required] Guid newsEntryId, [FromQuery] PagingParameters parameters)
         {
             var newsEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == newsEntryId);
             if (newsEntry == null)
@@ -83,7 +83,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(int id)
+        public async Task<IActionResult> DeleteComment(Guid id)
         {
             var comment = await _dbContext.Comments.FirstOrDefaultAsync(n => n.Id == id);
             if (comment == null)

@@ -5,7 +5,7 @@ namespace IrzUccApi.Models.Dtos
     public class ImageDto
     {
         public ImageDto(
-            string id, 
+            Guid id, 
             string name, 
             string extension, 
             string data)
@@ -16,7 +16,7 @@ namespace IrzUccApi.Models.Dtos
             Data = data;
         }
 
-        public string Id { get; }
+        public Guid Id { get; }
         public string Name { get; }
         public string Extension { get; }
         public string Data { get; }
