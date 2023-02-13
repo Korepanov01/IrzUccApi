@@ -3,11 +3,13 @@ using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
+using IrzUccApi.Models.Requests.Images;
 using IrzUccApi.Models.Requests.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.Users;
@@ -112,30 +114,63 @@ public class UsersController : ControllerBase
             user.IsActiveAccount));
     }
 
-    [HttpPut("me/update_info")]
-    public async Task<IActionResult> UpdateUserExtraInfo([FromBody] UpdateExtraInfoRequest request)
+    [HttpPut("me/update_photo")]
+    public async Task<IActionResult> UpdatePhoto([FromBody] ImageRequest request)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
             return Unauthorized();
 
-        Image? image = null;
-        if (request.Image != null)
+        var image = new Image
         {
-            image = new Image
-            {
-                Id = Guid.NewGuid(),
-                Name = request.Image.Name,
-                Extension = request.Image.Extension,
-                Data = request.Image.Data
-            };
-            await _dbContext.Images.AddAsync(image);
-        }
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Extension = request.Extension,
+            Data = request.Data
+        };
+        await _dbContext.Images.AddAsync(image);
+
+        if (user.Image != null)
+            _dbContext.Remove(user.Image);
+        user.Image = image;
+
+        _dbContext.Update(user);
+        await _dbContext.SaveChangesAsync();
+        var identityResult = await _userManager.UpdateAsync(user);
+        if (!identityResult.Succeeded)
+            return BadRequest(identityResult.Errors);
+
+        return Ok();
+    }
+
+    [HttpPut("me/delete_photo")]
+    public async Task<IActionResult> DeletePhoto()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+            return Unauthorized();
 
         if (user.Image != null)
             _dbContext.Remove(user.Image);
 
-        user.Image = image;
+        await _dbContext.SaveChangesAsync();
+        var identityResult = await _userManager.UpdateAsync(user);
+        if (!identityResult.Succeeded)
+            return BadRequest(identityResult.Errors);
+
+        return Ok();
+    }
+
+    [HttpPut("me/update_info")]
+    public async Task<IActionResult> UpdateExtraInfo([FromBody] UpdateExtraInfoRequest request)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+            return Unauthorized();
+
+        if (user.Image != null)
+            _dbContext.Remove(user.Image);
+
         user.AboutMyself = request.AboutMyself;
         user.MyDoings = request.MyDoings;
         user.Skills = request.Skills;
@@ -143,8 +178,8 @@ public class UsersController : ControllerBase
         _dbContext.Update(user);
         await _dbContext.SaveChangesAsync();
         var identityResult = await _userManager.UpdateAsync(user);
-        //if (!identityResult.Succeeded)
-        //    return BadRequest(identityResult.Errors);
+        if (!identityResult.Succeeded)
+            return BadRequest(identityResult.Errors);
 
         return Ok();
     }
