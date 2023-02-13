@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Models.Db;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

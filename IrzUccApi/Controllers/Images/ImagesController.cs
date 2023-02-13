@@ -1,7 +1,7 @@
-﻿using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,9 +29,9 @@ namespace IrzUccApi.Controllers.Images
                 return NotFound();
 
             return Ok(new ImageDto(
-                image.Id, 
-                image.Name, 
-                image.Extension, 
+                image.Id,
+                image.Name,
+                image.Extension,
                 image.Data));
         }
     }

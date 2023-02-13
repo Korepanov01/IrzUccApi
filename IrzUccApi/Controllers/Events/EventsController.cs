@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Enums;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;

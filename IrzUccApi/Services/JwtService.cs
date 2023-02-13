@@ -3,7 +3,6 @@ using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -19,7 +18,7 @@ namespace IrzUccApi.Services
         private readonly UserManager<AppUser> _userManager;
 
         public JwtService(
-            JwtConfiguration jwtConfiguration, 
+            JwtConfiguration jwtConfiguration,
             UserManager<AppUser> userManager)
         {
             _jwtConfiguration = jwtConfiguration;
@@ -69,7 +68,7 @@ namespace IrzUccApi.Services
             {
                 claimsPrincipal = new JwtSecurityTokenHandler().ValidateToken(jwt, tokenValidationParameters, out securityToken);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw new SecurityTokenException();
             }

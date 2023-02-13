@@ -1,5 +1,4 @@
-﻿using IrzUccApi.Models;
-using IrzUccApi.Models.Configurations;
+﻿using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Authentication;
 using IrzUccApi.Models.Requests.Users;

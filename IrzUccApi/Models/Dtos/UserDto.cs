@@ -18,13 +18,13 @@
             int subscriptionsCount,
             string email,
             bool? isActiveAccount) : base(
-                id, 
-                firstName, 
-                surname, 
-                patronymic, 
-                email, 
-                isActiveAccount, 
-                imageId, roles, 
+                id,
+                firstName,
+                surname,
+                patronymic,
+                email,
+                isActiveAccount,
+                imageId, roles,
                 positions)
         {
             Birthday = birthday;

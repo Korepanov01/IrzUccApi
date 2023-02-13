@@ -1,13 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace IrzUccApi.Models.Dtos
+﻿namespace IrzUccApi.Models.Dtos
 {
     public class ImageDto
     {
         public ImageDto(
-            Guid id, 
-            string name, 
-            string extension, 
+            Guid id,
+            string name,
+            string extension,
             string data)
         {
             Id = id;

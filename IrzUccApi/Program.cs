@@ -1,4 +1,4 @@
-using IrzUccApi;
+using IrzUccApi.Db;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Services;

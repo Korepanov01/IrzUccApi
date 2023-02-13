@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Models.Dtos;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

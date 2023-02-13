@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Enums;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
@@ -41,9 +42,9 @@ public class UsersController : ControllerBase
             //if (parameters.PositionId == 0)
             //    users = users.Where(u => u.UserPosition.Where(up => up.IsActive).Count() == 0);
             //else
-                users = users.Where(u => u.UserPosition
-                .Where(up => up.IsActive)
-                .Select(up => up.Position.Id).Contains((Guid)parameters.PositionId));
+            users = users.Where(u => u.UserPosition
+            .Where(up => up.IsActive)
+            .Select(up => up.Position.Id).Contains((Guid)parameters.PositionId));
         }
 
         if (parameters.SearchString != null)

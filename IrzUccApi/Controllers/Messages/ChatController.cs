@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
 using Microsoft.AspNetCore.Authorization;

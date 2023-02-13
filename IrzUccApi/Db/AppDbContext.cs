@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace IrzUccApi
+namespace IrzUccApi.Db
 {
     public class AppDbContext : IdentityDbContext<AppUser, AppRole, string,
         IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>,
@@ -22,7 +22,7 @@ namespace IrzUccApi
         public DbSet<Message> Messages { get; set; }
         public DbSet<NewsEntry> NewsEntries { get; set; }
         public DbSet<Position> Positions { get; set; }
-        public DbSet<UserPosition> userPositions { get; set; }
+        public DbSet<UserPosition> UserPositions { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -33,77 +33,9 @@ namespace IrzUccApi
         {
             base.OnModelCreating(builder);
 
-            ConfigureModel(builder);
+            DbConfigurer.Configure(builder);
             SeedData(builder);
         }
-
-        private static void ConfigureModel(ModelBuilder builder)
-        {
-            builder.Entity<Event>()
-               .HasMany(e => e.Listeners)
-               .WithMany(u => u.ListeningEvents)
-               .UsingEntity(join => join.ToTable("EventListening"));
-
-            builder.Entity<AppUser>()
-                .HasMany(u => u.Comments)
-                .WithOne(c => c.Author)
-                .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<AppUser>()
-                .HasMany(u => u.Events)
-                .WithOne(e => e.Creator)
-                .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<AppUser>()
-                .HasMany(u => u.UserPosition)
-                .WithOne(p => p.User)
-                .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<AppUser>()
-                .HasMany(u => u.LikedNewsEntries)
-                .WithMany(n => n.Likers)
-                .UsingEntity(join => join.ToTable("Like"));
-            builder.Entity<AppUser>()
-                .HasMany(u => u.NewsEntries)
-                .WithOne(n => n.Author)
-                .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<AppUser>()
-                .HasMany(u => u.Subscribers)
-                .WithMany(u => u.Subscriptions)
-                .UsingEntity(join => join.ToTable("Subscription"));
-            builder.Entity<AppUser>()
-                .HasMany(u => u.UserRoles)
-                .WithOne(ur => ur.User)
-                .HasForeignKey(ur => ur.UserId);
-
-            builder.Entity<AppUserRole>()
-                .HasOne(ur => ur.Role)
-                .WithMany(r => r.UserRole)
-                .HasForeignKey(ur => ur.RoleId);
-            builder.Entity<AppUserRole>()
-                .HasOne(ur => ur.User)
-                .WithMany(u => u.UserRoles)
-                .HasForeignKey(ur => ur.UserId);
-
-            builder.Entity<Chat>()
-                .HasMany(c => c.Participants)
-                .WithMany(u => u.Chats)
-                .UsingEntity(join => join.ToTable("ChatParticipants"));
-            builder.Entity<Chat>()
-                .HasMany(c => c.Messages)
-                .WithOne(m => m.Chat)
-                .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<Chat>()
-                .HasOne(c => c.LastMessage)
-                .WithOne();
-
-            builder.Entity<NewsEntry>()
-                .HasMany(n => n.Comments)
-                .WithOne(c => c.NewsEntry)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<Cabinet>()
-                .HasMany(c => c.Events)
-                .WithOne(e => e.Cabinet);
-        }
-
         private static void SeedData(ModelBuilder builder)
         {
             var appRoles = new[] {
