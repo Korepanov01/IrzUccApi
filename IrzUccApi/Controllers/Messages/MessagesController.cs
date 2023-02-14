@@ -61,7 +61,7 @@ namespace IrzUccApi.Controllers.Messages
                 .Select(m => new MessageDto(
                     m.Id,
                     m.Text,
-                    m.Image != null ? m.Image.Id.ToString() : null,
+                    m.Image != null ? m.Image.Id : null,
                     m.DateTime,
                     m.Sender.Id))
                 .ToArray();
@@ -137,7 +137,7 @@ namespace IrzUccApi.Controllers.Messages
             return Ok(new MessageDto(
                 message.Id,
                 message.Text,
-                message.Image?.Id.ToString(),
+                message.Image?.Id,
                 message.DateTime,
                 message.Sender.Id));
         }
