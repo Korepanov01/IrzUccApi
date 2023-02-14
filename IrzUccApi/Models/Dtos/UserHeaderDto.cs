@@ -3,7 +3,7 @@
     public class UserHeaderDto
     {
         public UserHeaderDto(
-            string id,
+            Guid id,
             string firstName,
             string surname,
             string? patronymic,
@@ -16,7 +16,7 @@
             ImageId = imageId;
         }
 
-        public string Id { get; }
+        public Guid Id { get; }
         public string FirstName { get; }
         public string Surname { get; }
         public string? Patronymic { get; }

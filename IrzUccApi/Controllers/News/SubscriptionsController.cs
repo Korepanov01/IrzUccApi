@@ -26,7 +26,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpGet("user_subscribers")]
-        public async Task<IActionResult> GetUserSubscribers([Required] string userId, [FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetUserSubscribers([Required] Guid userId, [FromQuery] PagingParameters parameters)
             => await GetSubscriptionsOrSubscribers(userId, parameters, false);
 
         [HttpGet("my_subscribers")]
@@ -35,11 +35,11 @@ namespace IrzUccApi.Controllers.News
             var myId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (myId == null)
                 return Unauthorized();
-            return await GetSubscriptionsOrSubscribers(myId, parameters, false);
+            return await GetSubscriptionsOrSubscribers(new Guid(myId), parameters, false);
         }
 
         [HttpGet("user_subscriptions")]
-        public async Task<IActionResult> GetUserSubscriptions([Required] string userId, [FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetUserSubscriptions([Required] Guid userId, [FromQuery] PagingParameters parameters)
             => await GetSubscriptionsOrSubscribers(userId, parameters, true);
 
         [HttpGet("my_subscriptions")]
@@ -48,10 +48,10 @@ namespace IrzUccApi.Controllers.News
             var myId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (myId == null)
                 return Unauthorized();
-            return await GetSubscriptionsOrSubscribers(myId, parameters, true);
+            return await GetSubscriptionsOrSubscribers(new Guid(myId), parameters, true);
         }
 
-        private async Task<IActionResult> GetSubscriptionsOrSubscribers(string userId, PagingParameters parameters, bool isSubscriptions)
+        private async Task<IActionResult> GetSubscriptionsOrSubscribers(Guid userId, PagingParameters parameters, bool isSubscriptions)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
@@ -75,14 +75,14 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpPost("subcribe")]
-        public async Task<IActionResult> Subscribe([Required] string userId)
+        public async Task<IActionResult> Subscribe([Required] Guid userId)
             => await SubscribeOrUnsubscribe(userId, true);
 
         [HttpPost("unsubscribe")]
-        public async Task<IActionResult> Unsubscribe([Required] string userId)
+        public async Task<IActionResult> Unsubscribe([Required] Guid userId)
             => await SubscribeOrUnsubscribe(userId, false);
 
-        private async Task<IActionResult> SubscribeOrUnsubscribe(string userId, bool isSubscribe)
+        private async Task<IActionResult> SubscribeOrUnsubscribe(Guid userId, bool isSubscribe)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)

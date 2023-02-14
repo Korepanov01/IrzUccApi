@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Db
 {
-    public class AppDbContext : IdentityDbContext<AppUser, AppRole, string,
-        IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>,
-        IdentityRoleClaim<string>, IdentityUserToken<string>>
+    public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid,
+        IdentityUserClaim<Guid>, AppUserRole, IdentityUserLogin<Guid>,
+        IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
     {
         public DbSet<Image> Images { get; set; }
         public DbSet<Chat> Chats { get; set; }

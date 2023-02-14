@@ -3,7 +3,7 @@
     public class UserDto : UserListItemDto
     {
         public UserDto(
-            string id,
+            Guid id,
             string firstName,
             string surname,
             string? patronymic,

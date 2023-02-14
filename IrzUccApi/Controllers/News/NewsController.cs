@@ -153,7 +153,7 @@ namespace IrzUccApi.Controllers.News
             var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (currentUserId == null)
                 return Unauthorized();
-            if (newsEntry.Author.Id != currentUserId && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Support) && newsEntry.IsPublic)
+            if (newsEntry.Author.Id != new Guid(currentUserId) && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Support) && newsEntry.IsPublic)
                 return Forbid();
 
             _dbContext.Remove(newsEntry);

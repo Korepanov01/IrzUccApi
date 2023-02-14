@@ -7,7 +7,7 @@
             string? text,
             string? image,
             DateTime dateTime,
-            string senderId)
+            Guid senderId)
         {
             Id = id;
             Text = text;
@@ -20,6 +20,6 @@
         public string? Text { get; }
         public string? ImageId { get; }
         public DateTime DateTime { get; }
-        public string SenderId { get; }
+        public Guid SenderId { get; }
     }
 }

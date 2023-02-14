@@ -28,6 +28,7 @@ namespace IrzUccApi.Db
             {
                 _appRoles.Add(role, new AppRole
                 {
+                    Id = Guid.NewGuid(),
                     Name = role,
                     NormalizedName = role.ToUpper()
                 });
@@ -36,13 +37,14 @@ namespace IrzUccApi.Db
 
             var superAdmin = new AppUser
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 FirstName = _superAdminName,
                 Surname = _superAdminSurname,
                 UserName = _superAdminEmail,
                 NormalizedUserName = _superAdminEmail.ToUpper(),
                 Email = _superAdminEmail,
                 NormalizedEmail = _superAdminEmail.ToUpper(),
+                SecurityStamp = Guid.NewGuid().ToString(),
             };
             superAdmin.PasswordHash = new PasswordHasher<AppUser>().HashPassword(superAdmin, _superAdminPassword);
             _modelBuilder.Entity<AppUser>().HasData(superAdmin);
@@ -87,7 +89,7 @@ namespace IrzUccApi.Db
             for(int i = 0; i < usersEmails.Length; i++)
                 users.Add(usersEmails[i], new AppUser
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Guid.NewGuid(),
                     Email = usersEmails[i],
                     NormalizedEmail = usersEmails[i].ToUpper(),
                     UserName = usersEmails[i].ToUpper(),
@@ -98,7 +100,8 @@ namespace IrzUccApi.Db
                     Birthday = usersBirthdays[i],
                     AboutMyself = usersAboutMyselfs[i],
                     MyDoings = usersMyDoings[i],
-                    Skills = usersSkills[i]
+                    Skills = usersSkills[i],
+                    SecurityStamp = Guid.NewGuid().ToString(),
                 });
             foreach(var user in users)
             {

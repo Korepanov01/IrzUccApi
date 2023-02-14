@@ -36,7 +36,7 @@ namespace IrzUccApi.Services
             {
                 Subject = new ClaimsIdentity((await _userManager.GetRolesAsync(user))
                     .Select(r => new Claim(ClaimTypes.Role, r))
-                    .Append(new Claim(ClaimTypes.NameIdentifier, user.Id))),
+                    .Append(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()))),
                 Expires = DateTime.Now.AddMinutes(_jwtLifeTimeMinutes),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };

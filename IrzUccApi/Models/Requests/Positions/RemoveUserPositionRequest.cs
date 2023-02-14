@@ -7,7 +7,7 @@ namespace IrzUccApi.Models.Requests.Positions
         [Required]
         public Guid PositionId { get; set; }
         [Required]
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
         public DateTime End { get; set; } = DateTime.UtcNow;
     }
 }

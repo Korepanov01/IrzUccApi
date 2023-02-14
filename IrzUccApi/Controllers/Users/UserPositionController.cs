@@ -20,19 +20,19 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserPositions(string userId)
+        public async Task<IActionResult> GetUserPositions(Guid userId)
             => await GetUserPositionsByUserId(userId);
 
         [HttpGet("my")]
         public async Task<IActionResult> GetMyUserPositions()
         {
-            var myId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (myId == null)
+            var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (currentUserId == null)
                 return Unauthorized();
-            return await GetUserPositionsByUserId(myId);
+            return await GetUserPositionsByUserId(new Guid(currentUserId));
         }
 
-        private async Task<IActionResult> GetUserPositionsByUserId(string id)
+        private async Task<IActionResult> GetUserPositionsByUserId(Guid id)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
