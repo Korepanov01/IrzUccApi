@@ -28,6 +28,31 @@ namespace IrzUccApi.Controllers.Images
             if (image == null)
                 return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            switch(image.Source)
+            {
+                case Enums.ImageSources.User:
+                    if (currentUser == null)
+                        return Unauthorized();
+                    break;
+                case Enums.ImageSources.NewsEntry:
+                    var newEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == image.SourceId);
+                    if (newEntry == null) 
+                        return NotFound();
+                    if (currentUser == null && !newEntry.IsPublic)
+                        return Unauthorized();
+                    break;
+                case Enums.ImageSources.Message:
+                    if (currentUser == null)
+                        return Unauthorized();
+                    var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.Id == image.SourceId);
+                    if (message == null)
+                        return NotFound();
+                    if (!message.Chat.Participants.Contains(currentUser))
+                        return Forbid();
+                    break;
+            }
+
             return Ok(new ImageDto(
                 image.Id,
                 image.Name,

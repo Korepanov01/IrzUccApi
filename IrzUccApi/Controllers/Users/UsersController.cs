@@ -126,7 +126,9 @@ public class UsersController : ControllerBase
             Id = Guid.NewGuid(),
             Name = request.Name,
             Extension = request.Extension,
-            Data = request.Data
+            Data = request.Data,
+            Source = ImageSources.User,
+            SourceId = user.Id,
         };
         await _dbContext.Images.AddAsync(image);
 

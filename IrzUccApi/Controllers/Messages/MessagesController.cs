@@ -101,21 +101,25 @@ namespace IrzUccApi.Controllers.Messages
                 await _dbContext.SaveChangesAsync();
             }
 
+            var newMessageId = Guid.NewGuid();
+
             Image? image = null;
             if (request.Image != null)
             {
                 image = new Image
                 {
-                    Id = Guid.NewGuid(),
                     Name = request.Image.Name,
                     Extension = request.Image.Extension,
-                    Data = request.Image.Data
+                    Data = request.Image.Data,
+                    Source = ImageSources.Message,
+                    SourceId = newMessageId
                 };
                 await _dbContext.Images.AddAsync(image);
             }
 
             var message = new Message
             {
+                Id = newMessageId,
                 Text = request.Text,
                 Image = image,
                 IsReaded = false,
@@ -133,7 +137,7 @@ namespace IrzUccApi.Controllers.Messages
             return Ok(new MessageDto(
                 message.Id,
                 message.Text,
-                message.Image != null ? message.Image.Id.ToString() : null,
+                message.Image?.Id.ToString(),
                 message.DateTime,
                 message.Sender.Id));
         }

@@ -85,6 +85,8 @@ namespace IrzUccApi.Controllers.News
             if (request.IsPublic && !User.IsInRole(RolesNames.Support))
                 return Forbid();
 
+            var newNewsEntryId = Guid.NewGuid();
+
             Image? image = null;
             if (request.Image != null)
             {
@@ -93,13 +95,16 @@ namespace IrzUccApi.Controllers.News
                     Id = Guid.NewGuid(),
                     Name = request.Image.Name,
                     Extension = request.Image.Extension,
-                    Data = request.Image.Data
+                    Data = request.Image.Data,
+                    Source = ImageSources.NewsEntry,
+                    SourceId = newNewsEntryId
                 };
                 await _dbContext.Images.AddAsync(image);
             }
 
             var newsEntry = new NewsEntry
             {
+                Id = newNewsEntryId,
                 Title = request.Title,
                 Text = request.Text,
                 Image = image,

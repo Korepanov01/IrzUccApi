@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using IrzUccApi.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Models.Db
 {
@@ -9,5 +10,8 @@ namespace IrzUccApi.Models.Db
         [MaxLength(10)]
         public string Extension { get; set; } = string.Empty;
         public string Data { get; set; } = string.Empty;
+
+        public ImageSources Source { get; set; }
+        public Guid SourceId { get; set; }
     }
 }

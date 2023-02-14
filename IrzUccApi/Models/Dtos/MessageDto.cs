@@ -5,20 +5,20 @@
         public MessageDto(
             Guid id,
             string? text,
-            string? image,
+            Guid? imageId,
             DateTime dateTime,
             Guid senderId)
         {
             Id = id;
             Text = text;
-            ImageId = image;
+            ImageId = imageId;
             DateTime = dateTime;
             SenderId = senderId;
         }
 
         public Guid Id { get; }
         public string? Text { get; }
-        public string? ImageId { get; }
+        public Guid? ImageId { get; }
         public DateTime DateTime { get; }
         public Guid SenderId { get; }
     }

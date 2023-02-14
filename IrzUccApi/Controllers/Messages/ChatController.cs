@@ -41,11 +41,11 @@ namespace IrzUccApi.Controllers.Messages
                             recipient.FirstName,
                             recipient.Surname,
                             recipient.Patronymic,
-                            recipient.Image != null ? recipient.Image.Id : null);
+                            recipient.Image?.Id);
                     var lastMessageDto = c.LastMessage != null ? new MessageDto(
                             c.LastMessage.Id,
                             c.LastMessage.Text,
-                            c.LastMessage.Image != null ? c.LastMessage.Image.Id.ToString() : null,
+                            c.LastMessage.Image?.Id,
                             c.LastMessage.DateTime,
                             c.LastMessage.Sender.Id) : null;
 
