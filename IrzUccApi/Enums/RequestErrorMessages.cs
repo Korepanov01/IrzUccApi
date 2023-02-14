@@ -3,7 +3,7 @@
     static public class RequestErrorMessages
     {
         static public readonly string UserDoesntExistMessage = "User does not exist!";
-        static public readonly string EmailAlreadyUsed = "Email already used!";
+        static public readonly string EmailAlreadyRegistered = "Email already used!";
 
         static public readonly string UserAlreadyOnPosition = "User already on position!";
         static public readonly string PositionDoesntExistMessage = "Position does not exist!";

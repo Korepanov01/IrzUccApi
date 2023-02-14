@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Enums;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Enums;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.User;
@@ -7,6 +8,7 @@ using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Users
 {
@@ -18,22 +20,25 @@ namespace IrzUccApi.Controllers.Users
         private readonly UserManager<AppUser> _userManager;
         private readonly PasswordConfiguration _passwordConfiguration;
         private readonly EmailService _emailService;
+        private readonly AppDbContext _dbContext;
 
         public UsersManagementController(
             UserManager<AppUser> userManager,
             EmailService emailService,
-            PasswordConfiguration passwordConfiguration)
+            PasswordConfiguration passwordConfiguration,
+            AppDbContext dbContext)
         {
             _userManager = userManager;
             _passwordConfiguration = passwordConfiguration;
             _emailService = emailService;
+            _dbContext = dbContext;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] RegUserRequest request)
         {
             if (await _userManager.FindByEmailAsync(request.Email) != null)
-                return BadRequest(RequestErrorMessages.EmailAlreadyUsed);
+                return BadRequest(RequestErrorMessages.EmailAlreadyRegistered);
 
             var user = new AppUser
             {
@@ -57,12 +62,12 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPut("{id}/update_reg_info")]
-        public async Task<IActionResult> UpdateUserRegInfo(string id, [FromBody] UpdateRegInfoRequest request)
+        public async Task<IActionResult> UpdateUserRegInfo(Guid id, [FromBody] UpdateRegInfoRequest request)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
                 return NotFound();
-            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
+            if (!User.IsInRole(RolesNames.SuperAdmin) && await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
                 return Forbid();
 
             user.FirstName = request.FirstName;
@@ -79,9 +84,9 @@ namespace IrzUccApi.Controllers.Users
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
                 return NotFound();
 
@@ -96,16 +101,16 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPut("{id}/activate")]
-        public async Task<IActionResult> Acivate(string id)
+        public async Task<IActionResult> Acivate(Guid id)
             => await ChangeActivation(id, true);
 
         [HttpPut("{id}/deactivate")]
-        public async Task<IActionResult> Deactivate(string id)
+        public async Task<IActionResult> Deactivate(Guid id)
             => await ChangeActivation(id, false);
 
-        private async Task<IActionResult> ChangeActivation(string userId, bool activation)
+        private async Task<IActionResult> ChangeActivation(Guid userId, bool activation)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
                 return NotFound();
 
