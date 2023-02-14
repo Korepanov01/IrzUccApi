@@ -21,7 +21,9 @@ namespace IrzUccApi.Controllers.Users
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
 
-        public PositionsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public PositionsController(
+            AppDbContext dbContext, 
+            UserManager<AppUser> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
@@ -43,39 +45,42 @@ namespace IrzUccApi.Controllers.Users
                 .OrderBy(p => p.Name)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
-                .Select(p => new PositionDto(p.Id, p.Name))
+                .Select(p => new PositionDto(
+                    p.Id, 
+                    p.Name))
                 .ToArrayAsync());
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddPosition(
-            [FromBody][Required(AllowEmptyStrings = false)][MaxLength(100)] string name)
+        public async Task<IActionResult> AddPosition([FromBody] AddUpdatePositionRequest request)
         {
-            if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == name) != null)
+            if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == request.Name) != null)
                 return BadRequest(RequestErrorMessages.PositionAlreadyExistsMessage);
 
-            var position = new Position { Name = name };
+            var position = new Position 
+            { 
+                Name = request.Name 
+            };
 
             await _dbContext.AddAsync(position);
-
             await _dbContext.SaveChangesAsync();
 
-            return Ok(new PositionDto(position.Id, position.Name));
+            return Ok(new PositionDto(
+                position.Id, 
+                position.Name));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePosition(
-            Guid id,
-            [FromBody][Required(AllowEmptyStrings = false)][MaxLength(100)] string newName)
+        public async Task<IActionResult> UpdatePosition(Guid id, [FromBody] AddUpdatePositionRequest request)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
             if (position == null)
                 return NotFound();
 
-            if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == newName) != null)
+            if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == request.Name) != null)
                 return BadRequest(RequestErrorMessages.PositionAlreadyExistsMessage);
 
-            position.Name = newName;
+            position.Name = request.Name;
             await _dbContext.SaveChangesAsync();
 
             return Ok();
@@ -92,11 +97,8 @@ namespace IrzUccApi.Controllers.Users
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
-            if (user.UserPosition.FirstOrDefault(up => up.End == null && up.Position?.Id == request.PositionId) != null)
+            if (user.UserPosition.Where(up => up.End == null && up.Position.Id == request.PositionId).Any())
                 return BadRequest(RequestErrorMessages.UserAlreadyOnPosition);
-
-            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-                return Forbid();
 
             var userPosition = new UserPosition
             {
@@ -106,6 +108,7 @@ namespace IrzUccApi.Controllers.Users
             };
             await _dbContext.AddAsync(userPosition);
             await _dbContext.SaveChangesAsync();
+
             return Ok();
         }
 

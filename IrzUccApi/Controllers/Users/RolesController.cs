@@ -49,7 +49,7 @@ namespace IrzUccApi.Controllers.Users
             if (request.Role == RolesNames.SuperAdmin || request.Role == RolesNames.Admin && !isSuperAdmin)
                 return Forbid();
 
-            var user = await _userManager.FindByIdAsync(request.UserId);
+            var user = await _userManager.FindByIdAsync(request.UserId.ToString());
             if (user == null)
                 return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
