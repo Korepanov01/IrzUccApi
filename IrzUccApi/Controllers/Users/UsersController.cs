@@ -41,25 +41,31 @@ public class UsersController : ControllerBase
 
         if (parameters.PositionId != null)
         {
-            //if (parameters.PositionId == 0)
-            //    users = users.Where(u => u.UserPosition.Where(up => up.IsActive).Count() == 0);
-            //else
-            users = users.Where(u => u.UserPosition
-            .Where(up => up.End == null)
-            .Select(up => up.Position.Id).Contains((Guid)parameters.PositionId));
+            if (parameters.PositionId == Guid.Empty)
+                users = users.Where(u => !u.UserPosition.Where(up => up.End == null).Any());
+            else
+                users = users.Where(u => u.UserPosition
+                    .Where(up => up.End == null)
+                    .Select(up => up.Position.Id)
+                    .Contains((Guid)parameters.PositionId));
         }
 
         if (parameters.SearchString != null)
         {
             var normalizedSearchString = parameters.SearchString.ToUpper();
-            users = users.Where(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper().Contains(normalizedSearchString));
+            users = users
+                .Where(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper()
+                    .Contains(normalizedSearchString));
         }
 
         if (parameters.Role != null)
-            users = users.Where(u => u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : "").Contains(parameters.Role));
+            users = users
+                .Where(u => u.UserRoles
+                    .Select(ur => ur.Role != null ? ur.Role.Name : "")
+                    .Contains(parameters.Role));
 
         return Ok(await users
-            .OrderBy(u => u.FirstName + u.Surname + u.Patronymic + u.Email)
+            .OrderBy(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper())
             .Skip(parameters.PageSize * (parameters.PageIndex - 1))
             .Take(parameters.PageSize)
             .Select(u => new UserListItemDto(
@@ -71,22 +77,26 @@ public class UsersController : ControllerBase
                     u.IsActiveAccount,
                     u.Image != null ? u.Image.Id : null,
                     u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
-                    u.UserPosition.Where(up => up.End == null).Select(up => new PositionDto(up.Position.Id, up.Position.Name))))
+                    u.UserPosition
+                        .Where(up => up.End == null)
+                        .Select(up => new PositionDto(
+                            up.Position.Id, 
+                            up.Position.Name))))
             .ToArrayAsync());
     }
 
     [HttpGet("me")]
-    public async Task<IActionResult> GetMyUser()
+    public async Task<IActionResult> GetCurrentUser()
     {
-        var myId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        if (myId == null)
+        var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId == null)
             return Unauthorized();
-        return await GetUser(myId);
+        return await GetUser(currentUserId);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserById(string id)
-       => await GetUser(id);
+    public async Task<IActionResult> GetUserById(Guid id)
+       => await GetUser(id.ToString());
 
     private async Task<IActionResult> GetUser(string userId)
     {
@@ -106,7 +116,9 @@ public class UsersController : ControllerBase
             user.Skills,
             user.UserPosition
                 .Where(up => up.End == null)
-                .Select(up => new PositionDto(up.Position.Id, up.Position.Name)),
+                .Select(up => new PositionDto(
+                    up.Position.Id, 
+                    up.Position.Name)),
             user.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
             user.Subscribers.Count,
             user.Subscriptions.Count,
@@ -117,8 +129,8 @@ public class UsersController : ControllerBase
     [HttpPut("me/update_photo")]
     public async Task<IActionResult> UpdatePhoto([FromBody] ImageRequest request)
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
             return Unauthorized();
 
         var image = new Image
@@ -128,37 +140,31 @@ public class UsersController : ControllerBase
             Extension = request.Extension,
             Data = request.Data,
             Source = ImageSources.User,
-            SourceId = user.Id,
+            SourceId = currentUser.Id,
         };
         await _dbContext.Images.AddAsync(image);
 
-        if (user.Image != null)
-            _dbContext.Remove(user.Image);
-        user.Image = image;
+        if (currentUser.Image != null)
+            _dbContext.Remove(currentUser.Image);
+        currentUser.Image = image;
 
-        _dbContext.Update(user);
+        _dbContext.Update(currentUser);
         await _dbContext.SaveChangesAsync();
-        var identityResult = await _userManager.UpdateAsync(user);
-        if (!identityResult.Succeeded)
-            return BadRequest(identityResult.Errors);
 
-        return Ok();
+        return Ok(image.Id);
     }
 
     [HttpPut("me/delete_photo")]
     public async Task<IActionResult> DeletePhoto()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
             return Unauthorized();
 
-        if (user.Image != null)
-            _dbContext.Remove(user.Image);
+        if (currentUser.Image != null)
+            _dbContext.Remove(currentUser.Image);
 
         await _dbContext.SaveChangesAsync();
-        var identityResult = await _userManager.UpdateAsync(user);
-        if (!identityResult.Succeeded)
-            return BadRequest(identityResult.Errors);
 
         return Ok();
     }
@@ -166,20 +172,15 @@ public class UsersController : ControllerBase
     [HttpPut("me/update_info")]
     public async Task<IActionResult> UpdateExtraInfo([FromBody] UpdateExtraInfoRequest request)
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
             return Unauthorized();
 
-        if (user.Image != null)
-            _dbContext.Remove(user.Image);
+        currentUser.AboutMyself = request.AboutMyself;
+        currentUser.MyDoings = request.MyDoings;
+        currentUser.Skills = request.Skills;
 
-        user.AboutMyself = request.AboutMyself;
-        user.MyDoings = request.MyDoings;
-        user.Skills = request.Skills;
-
-        _dbContext.Update(user);
-        await _dbContext.SaveChangesAsync();
-        var identityResult = await _userManager.UpdateAsync(user);
+        var identityResult = await _userManager.UpdateAsync(currentUser);
         if (!identityResult.Succeeded)
             return BadRequest(identityResult.Errors);
 
