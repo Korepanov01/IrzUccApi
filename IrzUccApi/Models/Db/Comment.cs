@@ -6,7 +6,7 @@ namespace IrzUccApi.Models.Db
     [Table("Comment")]
     public class Comment : BaseDbModel
     {
-        [MaxLength(250)]
+        [MaxLength(1000)]
         public string Text { get; set; } = string.Empty;
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
