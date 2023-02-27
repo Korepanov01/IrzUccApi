@@ -1,4 +1,5 @@
 using IrzUccApi.Db;
+using IrzUccApi.Hubs;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Services;
@@ -118,10 +119,12 @@ builder.Services.AddCors(options =>
         builder =>
         {
             builder.AllowAnyOrigin()
-                                .AllowAnyHeader()
-                                .AllowAnyMethod();
+            .AllowAnyHeader()
+            .AllowAnyMethod();
         });
 });
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -138,5 +141,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<ChatHub>("/hubs/chat");
+});
 
 app.Run();
