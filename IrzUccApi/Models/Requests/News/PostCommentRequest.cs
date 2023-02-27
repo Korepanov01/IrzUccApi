@@ -7,7 +7,7 @@ namespace IrzUccApi.Models.Requests.News
         [Required]
         public Guid NewsEntryId { get; set; }
         [Required(AllowEmptyStrings = false)]
-        [MaxLength(250)]
+        [MaxLength(1000)]
         public string Text { get; set; } = string.Empty;
     }
 }

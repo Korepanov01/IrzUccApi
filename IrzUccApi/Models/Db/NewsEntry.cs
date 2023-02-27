@@ -1,11 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IrzUccApi.Models.Db
 {
     [Table("NewsEntry")]
     public class NewsEntry : BaseDbModel
     {
+        [MaxLength(200)]
         public string Title { get; set; } = string.Empty;
+        [MaxLength(5000)]
         public string Text { get; set; } = string.Empty;
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
         public bool IsPublic { get; set; } = false;
