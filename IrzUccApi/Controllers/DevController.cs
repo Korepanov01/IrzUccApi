@@ -30,6 +30,8 @@ namespace IrzUccApi.Controllers
             var appRoles = await _dbContext.Roles.ToDictionaryAsync(r => r.Name);
 
             await SeedUserRolesAsync(users, appRoles);
+
+            await SeedUserPositionsAsync(users, positions);
         }
 
         private async Task<Dictionary<string, Position>> SeedPositionsAsync()
@@ -122,6 +124,47 @@ namespace IrzUccApi.Controllers
                 }
             };
             await _dbContext.AddRangeAsync(userRoles);
+            await _dbContext.SaveChangesAsync();
+        }
+
+
+        private async Task SeedUserPositionsAsync(Dictionary<string, AppUser> users, Dictionary<string, Position> positions)
+        {
+            var userPositions = new[]
+            {
+                new UserPosition
+                {
+                    User = users["ivan@irz.ru"],
+                    Position = positions["Сторож"],
+                    Start = new DateTime(1992, 3, 5).ToUniversalTime(),
+                    End = new DateTime(2001, 3, 5).ToUniversalTime(),
+                },
+                new UserPosition
+                {
+                    User = users["ivan@irz.ru"],
+                    Position = positions["Рабочий"],
+                    Start = new DateTime(2001, 3, 5).ToUniversalTime(),
+                },
+                new UserPosition
+                {
+                    User = users["sergey@irz.ru"],
+                    Position = positions["Сотрудник поддержки"],
+                    Start = new DateTime(2001, 3, 5).ToUniversalTime(),
+                },
+                new UserPosition
+                {
+                    User = users["ostalf@irz.ru"],
+                    Position = positions["Администратор ЕЦК"],
+                    Start = new DateTime(2001, 3, 5).ToUniversalTime(),
+                },
+                new UserPosition
+                {
+                    User = users["ostalf@irz.ru"],
+                    Position = positions["Сотрудник канцелярии"],
+                    Start = new DateTime(2003, 3, 5).ToUniversalTime(),
+                },
+            };
+            await _dbContext.AddRangeAsync(userPositions);
             await _dbContext.SaveChangesAsync();
         }
     }
