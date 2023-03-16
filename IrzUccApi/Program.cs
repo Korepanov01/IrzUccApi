@@ -83,8 +83,10 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(setup =>
+builder.Services.AddSwaggerGen(options =>
 {
+    options.AddSignalRSwaggerGen();
+
     var jwtSecurityScheme = new OpenApiSecurityScheme
     {
         BearerFormat = "JWT",
@@ -101,9 +103,9 @@ builder.Services.AddSwaggerGen(setup =>
         }
     };
 
-    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+    options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
 
-    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             jwtSecurityScheme,
@@ -135,14 +137,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
+app.UseCors(builder =>
+{
+    builder.WithOrigins()
+        .AllowAnyHeader()
+        .WithMethods("GET", "POST")
+        .AllowCredentials();
+});
 
 app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 
 app.UseRouting();
+app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapHub<ChatHub>("/hubs/chat");

@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using SignalRSwaggerGen.Attributes;
 using System.Security.Claims;
 
 namespace IrzUccApi.Hubs
 {
+    [SignalRHub]
     [Authorize]
     public class ChatHub : Hub
     {
