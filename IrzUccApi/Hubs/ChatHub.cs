@@ -5,10 +5,8 @@ using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.Requests.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Plugins;
 using System.Security.Claims;
 
 namespace IrzUccApi.Hubs
@@ -46,15 +44,15 @@ namespace IrzUccApi.Hubs
         public async Task SendMessage(PostMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
-                throw new Exception();
+                return;
 
             var currentUser = await _userManager.GetUserAsync(Context.User);
             if (currentUser == null)
-                throw new Exception();
+                return;
 
             var recipient = await _userManager.FindByIdAsync(request.UserId);
             if (recipient == null)
-                throw new Exception();
+                return;
 
             var chat = await _dbContext.Chats
                 .FirstOrDefaultAsync(c => 
