@@ -43,6 +43,18 @@ namespace IrzUccApi.Controllers
             await SeedCommentsAsync(users, news);
         }
 
+        [HttpPost("seed_news")]
+        public async Task SeedNews()
+        {
+            var users = await _dbContext.Users.ToDictionaryAsync(u => u.Email);
+
+            var news = await SeedNewsAsync(users);
+
+            await SeedLikesAsync(users, news);
+
+            await SeedCommentsAsync(users, news);
+        }
+
         private async Task<Dictionary<string, Position>> SeedPositionsAsync()
         {
             var positionsNames = new[]
