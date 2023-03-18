@@ -53,7 +53,7 @@ namespace IrzUccApi.Controllers.News
             }
 
             return Ok(await news
-                .OrderBy(n => n.DateTime)
+                .OrderByDescending(n => n.DateTime)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
                 .Select(n => new NewsEntryDto(
