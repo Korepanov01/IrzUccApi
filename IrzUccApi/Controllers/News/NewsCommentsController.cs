@@ -1,4 +1,5 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
@@ -33,7 +34,7 @@ namespace IrzUccApi.Controllers.News
                 return NotFound();
 
             return Ok(newsEntry.Comments
-                .OrderBy(c => c.DateTime)
+                .OrderByDescending(c => c.DateTime)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
                 .Select(c => new CommentDto(

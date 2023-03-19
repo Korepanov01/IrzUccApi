@@ -134,7 +134,7 @@ namespace IrzUccApi.Controllers.News
                     newsEntry.Id,
                     newsEntry.Title,
                     newsEntry.Text,
-                    newsEntry.Image != null ? newsEntry.Image.Id : null,
+                    newsEntry.Image?.Id,
                     newsEntry.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(newsEntry),
                     newsEntry.Likers.Count,
@@ -143,7 +143,7 @@ namespace IrzUccApi.Controllers.News
                         newsEntry.Author.FirstName,
                         newsEntry.Author.Surname,
                         newsEntry.Author.Patronymic,
-                        newsEntry.Author.Image != null ? newsEntry.Author.Image.Id : null),
+                        newsEntry.Author.Image?.Id),
                     newsEntry.IsPublic,
                     newsEntry.Comments.Count));
         }
