@@ -104,6 +104,8 @@ public class UsersController : ControllerBase
         if (user == null)
             return NotFound();
 
+        var currentUser = await _userManager.GetUserAsync(User);
+
         return Ok(new UserDto(
             user.Id,
             user.FirstName,
@@ -123,7 +125,8 @@ public class UsersController : ControllerBase
             user.Subscribers.Count,
             user.Subscriptions.Count,
             user.Email,
-            user.IsActiveAccount));
+            user.IsActiveAccount,
+            user.Subscribers.Contains(currentUser)));
     }
 
     [HttpPut("me/update_photo")]
