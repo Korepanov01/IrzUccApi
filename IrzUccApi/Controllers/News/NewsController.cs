@@ -43,7 +43,7 @@ namespace IrzUccApi.Controllers.News
             if (currentUser == null || parameters.PublicOnly)
                 news = news.Where(n => n.IsPublic);
             if (currentUser != null && parameters.AuthorId == null)
-                news = news.Where(n => n.IsPublic || currentUser.Subscriptions.Contains(n.Author));
+                news = news.Where(n => n.IsPublic || currentUser.Subscriptions.Contains(n.Author) || n.Author.Id == currentUser.Id);
             if (currentUser != null && parameters.LikedOnly)
                 news = news.Where(n => n.Likers.Contains(currentUser));
 
