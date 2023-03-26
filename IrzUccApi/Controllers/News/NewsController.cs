@@ -21,13 +21,11 @@ namespace IrzUccApi.Controllers.News
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
-        private readonly EmailService emailService;
 
-        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager, EmailService emailService)
+        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
-            this.emailService = emailService;
         }
 
         [HttpGet]
@@ -60,7 +58,7 @@ namespace IrzUccApi.Controllers.News
                 .Select(n => new NewsEntryDto(
                     n.Id,
                     n.Title,
-                    n.Text.Substring(0, Math.Min(100, n.Text.Length)),
+                    n.Text.Substring(0, Math.Min(200, n.Text.Length)),
                     n.Image != null ? n.Image.Id : null,
                     n.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(n),
@@ -73,7 +71,7 @@ namespace IrzUccApi.Controllers.News
                         n.Author.Image != null ? n.Author.Image.Id : null),
                     n.IsPublic,
                     n.Comments.Count,
-                    n.Text.Length > 100))
+                    n.Text.Length > 200))
                 .ToArrayAsync());
         }
 
