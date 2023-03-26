@@ -7,13 +7,15 @@
             string? text,
             Guid? imageId,
             DateTime dateTime,
-            Guid senderId)
+            Guid senderId,
+            bool canBeDeleted)
         {
             Id = id;
             Text = text;
             ImageId = imageId;
             DateTime = dateTime;
             SenderId = senderId;
+            CanBeDeleted = canBeDeleted;
         }
 
         public Guid Id { get; }
@@ -21,5 +23,6 @@
         public Guid? ImageId { get; }
         public DateTime DateTime { get; }
         public Guid SenderId { get; }
+        public bool CanBeDeleted { get; }
     }
 }
