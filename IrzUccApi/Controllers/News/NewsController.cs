@@ -121,6 +121,20 @@ namespace IrzUccApi.Controllers.News
             return Ok(newsEntry.Id);
         }
 
+        [HttpGet("{id}/full_text")]
+        public async Task<IActionResult> GetNewsEntryText(Guid id)
+        {
+            var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
+            if (newsEntry == null)
+                return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!newsEntry.IsPublic && currentUser == null)
+                return Forbid();
+
+            return Ok(newsEntry.Text);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNewsEntry(Guid id)
         {
@@ -148,7 +162,7 @@ namespace IrzUccApi.Controllers.News
                         newsEntry.Author.Image?.Id),
                     newsEntry.IsPublic,
                     newsEntry.Comments.Count,
-                    newsEntry.Text.Length > 100));
+                    false));
         }
 
         [HttpDelete("{id}")]
