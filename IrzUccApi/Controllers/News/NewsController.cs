@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.News
@@ -71,7 +72,8 @@ namespace IrzUccApi.Controllers.News
                         n.Author.Patronymic,
                         n.Author.Image != null ? n.Author.Image.Id : null),
                     n.IsPublic,
-                    n.Comments.Count))
+                    n.Comments.Count,
+                    n.Text.Length > 100))
                 .ToArrayAsync());
         }
 
@@ -145,7 +147,8 @@ namespace IrzUccApi.Controllers.News
                         newsEntry.Author.Patronymic,
                         newsEntry.Author.Image?.Id),
                     newsEntry.IsPublic,
-                    newsEntry.Comments.Count));
+                    newsEntry.Comments.Count,
+                    newsEntry.Text.Length > 100));
         }
 
         [HttpDelete("{id}")]

@@ -12,7 +12,8 @@
             int likesCount,
             UserHeaderDto author,
             bool isPublic,
-            int commentCount)
+            int commentCount,
+            bool isClipped)
         {
             Id = id;
             Title = title;
@@ -24,6 +25,7 @@
             Author = author;
             IsPublic = isPublic;
             CommentCount = commentCount;
+            IsClipped = isClipped;
         }
 
         public Guid Id { get; }
@@ -36,5 +38,6 @@
         public UserHeaderDto Author { get; }
         public bool IsPublic { get; }
         public int CommentCount { get; }
+        public bool IsClipped { get; }
     }
 }
