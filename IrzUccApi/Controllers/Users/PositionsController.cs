@@ -15,7 +15,7 @@ namespace IrzUccApi.Controllers.Users
 {
     [Route("api/positions")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RolesNames.Admin)]
     public class PositionsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;

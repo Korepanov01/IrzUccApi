@@ -2,9 +2,9 @@
 {
     static public class RolesNames
     {
-        static public readonly string Admin = "Admin";
-        static public readonly string SuperAdmin = "SuperAdmin";
-        static public readonly string Support = "Support";
-        static public readonly string CabinetsManager = "CabinetsManager";
+        public const string Admin = "Admin";
+        public const string SuperAdmin = "SuperAdmin";
+        public const string Support = "Support";
+        public const string CabinetsManager = "CabinetsManager";
     }
 }

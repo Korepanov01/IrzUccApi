@@ -14,7 +14,7 @@ namespace IrzUccApi.Controllers.Events
 {
     [Route("api/cabinets")]
     [ApiController]
-    [Authorize(Roles = "CabinetsManager")]
+    [Authorize(Roles = RolesNames.CabinetsManager)]
     public class CabinetsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;

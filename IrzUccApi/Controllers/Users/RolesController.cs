@@ -9,7 +9,7 @@ namespace IrzUccApi.Controllers.Users
 {
     [Route("api/roles")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RolesNames.Admin)]
     public class RolesController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;

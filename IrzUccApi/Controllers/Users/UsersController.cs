@@ -105,6 +105,8 @@ public class UsersController : ControllerBase
             return NotFound();
 
         var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+            return Unauthorized();
 
         return Ok(new UserDto(
             user.Id,
