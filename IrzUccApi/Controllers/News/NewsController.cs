@@ -120,6 +120,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpGet("{id}/full_text")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetNewsEntryText(Guid id)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
