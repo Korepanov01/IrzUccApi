@@ -1,4 +1,5 @@
 using IrzUccApi.Db;
+using IrzUccApi.Hubs;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Services;
@@ -82,8 +83,10 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(setup =>
+builder.Services.AddSwaggerGen(options =>
 {
+    options.AddSignalRSwaggerGen();
+
     var jwtSecurityScheme = new OpenApiSecurityScheme
     {
         BearerFormat = "JWT",
@@ -100,9 +103,9 @@ builder.Services.AddSwaggerGen(setup =>
         }
     };
 
-    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+    options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
 
-    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             jwtSecurityScheme,
@@ -118,10 +121,12 @@ builder.Services.AddCors(options =>
         builder =>
         {
             builder.AllowAnyOrigin()
-                                .AllowAnyHeader()
-                                .AllowAnyMethod();
+            .AllowAnyHeader()
+            .AllowAnyMethod();
         });
 });
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -132,11 +137,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
+app.UseCors(builder =>
+{
+    builder.AllowAnyHeader()
+    .AllowAnyMethod()
+    .SetIsOriginAllowed((host) => true)
+    .AllowCredentials();
+});
 
 app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseRouting();
+app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<ChatHub>("/hubs/chat");
+});
 
 app.Run();

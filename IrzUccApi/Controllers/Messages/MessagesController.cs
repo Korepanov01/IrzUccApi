@@ -63,8 +63,7 @@ namespace IrzUccApi.Controllers.Messages
                     m.Text,
                     m.Image != null ? m.Image.Id : null,
                     m.DateTime,
-                    m.Sender.Id,
-                    m.Sender.Id == currentUser.Id || User.IsInRole(RolesNames.Admin)))
+                    m.Sender.Id))
                 .ToArray();
 
             var unreadedMessages = chat.Messages.Where(m => m.Sender.Id != currentUser.Id && !m.IsReaded);
@@ -140,8 +139,7 @@ namespace IrzUccApi.Controllers.Messages
                 message.Text,
                 message.Image?.Id,
                 message.DateTime,
-                message.Sender.Id,
-                message.Sender.Id == currentUser.Id || User.IsInRole(RolesNames.Admin)));
+                message.Sender.Id));
         }
 
         [HttpDelete("{id}")]

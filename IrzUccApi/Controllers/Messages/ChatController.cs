@@ -48,8 +48,7 @@ namespace IrzUccApi.Controllers.Messages
                             c.LastMessage.Text,
                             c.LastMessage.Image?.Id,
                             c.LastMessage.DateTime,
-                            c.LastMessage.Sender.Id,
-                            c.LastMessage.Sender.Id == currentUser.Id || User.IsInRole(RolesNames.Admin)) : null;
+                            c.LastMessage.Sender.Id) : null;
 
                     return new ChatDto(
                         c.Id,
