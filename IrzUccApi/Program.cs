@@ -139,10 +139,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(builder =>
 {
-    builder.WithOrigins()
-        .AllowAnyHeader()
-        .WithMethods("GET", "POST")
-        .AllowCredentials();
+    builder.AllowAnyHeader()
+    .AllowAnyMethod()
+    .SetIsOriginAllowed((host) => true)
+    .AllowCredentials();
 });
 
 app.UseAuthentication();

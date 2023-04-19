@@ -26,7 +26,7 @@ namespace IrzUccApi.Hubs
             _dbContext = dbContext;
             _userManager = userManager;
         }
-         
+        
         private string? GetUserId()
         {
             if (Context?.User?.Identity == null || !Context.User.Identity.IsAuthenticated)
@@ -70,18 +70,27 @@ namespace IrzUccApi.Hubs
         public async Task SendMessage(PostMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.BadRequest, RequestErrorMessages.MessageCantBeEmpty);
                 return;
+            }
 
             var currentUser = await _userManager.GetUserAsync(Context.User);
             if (currentUser == null)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.Unauthorized);
                 return;
+            }
 
             var recipient = await _userManager.FindByIdAsync(request.UserId);
             if (recipient == null)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.BadRequest, RequestErrorMessages.UserDoesntExistMessage);
                 return;
+            }
 
             var chat = await _dbContext.Chats
-                .FirstOrDefaultAsync(c => 
+                .FirstOrDefaultAsync(c =>
                     c.Participants.Contains(currentUser) && c.Participants.Contains(recipient));
             if (chat == null)
             {
@@ -136,11 +145,48 @@ namespace IrzUccApi.Hubs
                     message.Sender.Id);
 
             await Clients
-                .Group(Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value!)
-                .SendAsync("ReceiveMessage", messageDto);
+                .Group(currentUser.Id.ToString())
+                .SendAsync(ChatHubMethodsNames.MessageReceived, messageDto);
             await Clients
                 .Group(request.UserId)
-                .SendAsync("ReceiveMessage", messageDto);
+                .SendAsync(ChatHubMethodsNames.MessageReceived, messageDto);
+        }
+
+        public async Task DeleteMessage(DeleteMessageRequest request)
+        {
+            var currentUser = await _userManager.GetUserAsync(Context.User);
+            if (currentUser == null)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.Unauthorized);
+                return;
+            }
+
+            var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.Id == request.MessageId);
+            if (message == null)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.NotFound);
+                return;
+            }
+
+            if (message.Sender.Id != currentUser.Id)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.Forbidden);
+                return;
+            }
+
+            var recipient = message.Chat.Participants.FirstOrDefault(u => u.Id != currentUser.Id);
+
+            _dbContext.Remove(message);
+            await _dbContext.SaveChangesAsync();
+            
+            await Clients
+                .Group(currentUser.Id.ToString())
+                .SendAsync(ChatHubMethodsNames.MessageDeleted, request.MessageId);
+
+            if (recipient != null)
+                await Clients
+                    .Group(recipient.Id.ToString())
+                    .SendAsync(ChatHubMethodsNames.MessageReceived, request.MessageId);
         }
     }
 }
