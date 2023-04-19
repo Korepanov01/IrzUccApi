@@ -14,7 +14,7 @@
         public int PageSize
         {
             get => _pageSize;
-            set => _pageSize = value < 10 ? 10 : (value > 50 ? 50 : value);
+            set => _pageSize = value < 0 ? 0 : (value > 50 ? 50 : value);
         }
     }
 }

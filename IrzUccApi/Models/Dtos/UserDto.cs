@@ -17,7 +17,8 @@
             int subscribersCount,
             int subscriptionsCount,
             string email,
-            bool? isActiveAccount) : base(
+            bool? isActiveAccount,
+            bool isSubscription) : base(
                 id,
                 firstName,
                 surname,
@@ -33,6 +34,7 @@
             Skills = skills;
             SubscribersCount = subscribersCount;
             SubscriptionsCount = subscriptionsCount;
+            IsSubscription = isSubscription;
         }
 
         public DateTime Birthday { get; }
@@ -41,5 +43,6 @@
         public string? Skills { get; }
         public int SubscribersCount { get; }
         public int SubscriptionsCount { get; }
+        public bool IsSubscription { get; }
     }
 }

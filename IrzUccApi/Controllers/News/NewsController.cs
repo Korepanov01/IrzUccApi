@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.News
@@ -20,13 +21,11 @@ namespace IrzUccApi.Controllers.News
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
-        private readonly EmailService emailService;
 
-        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager, EmailService emailService)
+        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
-            this.emailService = emailService;
         }
 
         [HttpGet]
@@ -42,7 +41,7 @@ namespace IrzUccApi.Controllers.News
             if (currentUser == null || parameters.PublicOnly)
                 news = news.Where(n => n.IsPublic);
             if (currentUser != null && parameters.AuthorId == null)
-                news = news.Where(n => n.IsPublic || currentUser.Subscriptions.Contains(n.Author));
+                news = news.Where(n => n.IsPublic || currentUser.Subscriptions.Contains(n.Author) || n.Author.Id == currentUser.Id);
             if (currentUser != null && parameters.LikedOnly)
                 news = news.Where(n => n.Likers.Contains(currentUser));
 
@@ -53,13 +52,13 @@ namespace IrzUccApi.Controllers.News
             }
 
             return Ok(await news
-                .OrderBy(n => n.DateTime)
+                .OrderByDescending(n => n.DateTime)
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
                 .Select(n => new NewsEntryDto(
                     n.Id,
                     n.Title,
-                    n.Text.Substring(0, Math.Min(100, n.Text.Length)),
+                    n.Text.Substring(0, Math.Min(200, n.Text.Length)),
                     n.Image != null ? n.Image.Id : null,
                     n.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(n),
@@ -71,7 +70,8 @@ namespace IrzUccApi.Controllers.News
                         n.Author.Patronymic,
                         n.Author.Image != null ? n.Author.Image.Id : null),
                     n.IsPublic,
-                    n.Comments.Count))
+                    n.Comments.Count,
+                    n.Text.Length > 200))
                 .ToArrayAsync());
         }
 
@@ -119,6 +119,21 @@ namespace IrzUccApi.Controllers.News
             return Ok(newsEntry.Id);
         }
 
+        [HttpGet("{id}/full_text")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetNewsEntryText(Guid id)
+        {
+            var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
+            if (newsEntry == null)
+                return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!newsEntry.IsPublic && currentUser == null)
+                return Forbid();
+
+            return Ok(newsEntry.Text);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNewsEntry(Guid id)
         {
@@ -134,7 +149,7 @@ namespace IrzUccApi.Controllers.News
                     newsEntry.Id,
                     newsEntry.Title,
                     newsEntry.Text,
-                    newsEntry.Image != null ? newsEntry.Image.Id : null,
+                    newsEntry.Image?.Id,
                     newsEntry.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(newsEntry),
                     newsEntry.Likers.Count,
@@ -143,9 +158,10 @@ namespace IrzUccApi.Controllers.News
                         newsEntry.Author.FirstName,
                         newsEntry.Author.Surname,
                         newsEntry.Author.Patronymic,
-                        newsEntry.Author.Image != null ? newsEntry.Author.Image.Id : null),
+                        newsEntry.Author.Image?.Id),
                     newsEntry.IsPublic,
-                    newsEntry.Comments.Count));
+                    newsEntry.Comments.Count,
+                    false));
         }
 
         [HttpDelete("{id}")]

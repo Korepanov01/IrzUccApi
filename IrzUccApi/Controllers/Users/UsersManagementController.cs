@@ -14,7 +14,7 @@ namespace IrzUccApi.Controllers.Users
 {
     [Route("api/users_management")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RolesNames.Admin)]
     public class UsersManagementController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -83,7 +83,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = RolesNames.SuperAdmin)]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);

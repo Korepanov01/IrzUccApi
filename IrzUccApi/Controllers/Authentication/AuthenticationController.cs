@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Models.Configurations;
+﻿using IrzUccApi.Enums;
+using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Authentication;
 using IrzUccApi.Models.Requests.Users;
@@ -37,13 +38,13 @@ namespace IrzUccApi.Controllers.Authentication
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
-                return NotFound(request.Email);
+                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
 
             if (!await _userManager.CheckPasswordAsync(user, request.Password))
-                return BadRequest(request.Password);
+                return BadRequest(RequestErrorMessages.WrongPassword);
 
             if (!user.IsActiveAccount)
-                return BadRequest();
+                return BadRequest(RequestErrorMessages.AccountDeactivated);
 
             var tokens = await _jwtManager.GenerateTokens(user.Email);
 
@@ -66,15 +67,15 @@ namespace IrzUccApi.Controllers.Authentication
             }
             catch (SecurityTokenException)
             {
-                return BadRequest(request.Jwt);
+                return BadRequest(RequestErrorMessages.WrongJwt);
             }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return BadRequest(request.Jwt);
+                return BadRequest(RequestErrorMessages.WrongJwt);
 
             if (user.RefreshToken != request.RefreshToken)
-                return BadRequest(request.RefreshToken);
+                return BadRequest(RequestErrorMessages.WrongRefreshToken);
 
             var newTokens = await _jwtManager.GenerateTokens(user.Email);
 

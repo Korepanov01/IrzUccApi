@@ -88,22 +88,22 @@ namespace IrzUccApi.Controllers.News
             if (user == null)
                 return NotFound();
 
-            var myUser = await _userManager.GetUserAsync(User);
-            if (myUser == null)
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
                 return Unauthorized();
 
-            if (user.Id == myUser.Id)
+            if (user.Id == currentUser.Id)
                 return BadRequest();
 
             if (isSubscribe)
             {
-                if (!user.Subscribers.Contains(myUser))
-                    user.Subscribers.Add(myUser);
+                if (!user.Subscribers.Contains(currentUser))
+                    user.Subscribers.Add(currentUser);
             }
             else
             {
-                if (user.Subscribers.Contains(myUser))
-                    user.Subscribers.Remove(myUser);
+                if (user.Subscribers.Contains(currentUser))
+                    user.Subscribers.Remove(currentUser);
             }
 
             await _dbContext.SaveChangesAsync();
