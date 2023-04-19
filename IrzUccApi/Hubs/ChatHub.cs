@@ -26,21 +26,45 @@ namespace IrzUccApi.Hubs
             _dbContext = dbContext;
             _userManager = userManager;
         }
-
-        public override Task OnConnectedAsync()
+         
+        private string? GetUserId()
         {
-            Groups.AddToGroupAsync(
-                Context.ConnectionId, 
-                Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-            return base.OnConnectedAsync();
+            if (Context?.User?.Identity == null || !Context.User.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+
+            var userId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userId;
         }
 
-        public override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnConnectedAsync()
         {
-            Groups.RemoveFromGroupAsync(
-                Context.ConnectionId,
-                Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-            return base.OnDisconnectedAsync(exception);
+            var userId = GetUserId();
+            if (userId == null)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.Unauthorized);
+                return;
+            }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = GetUserId();
+            if (userId == null)
+            {
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.Unauthorized);
+                return;
+            }
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
+
+            await base.OnDisconnectedAsync(exception);
         }
 
         public async Task SendMessage(PostMessageRequest request)
@@ -87,7 +111,7 @@ namespace IrzUccApi.Hubs
                 await _dbContext.Images.AddAsync(image);
             }
 
-            var message = new Models.Db.Message
+            var message = new Message
             {
                 Id = newMessageId,
                 Text = request.Text,
