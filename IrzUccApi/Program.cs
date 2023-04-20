@@ -2,6 +2,7 @@ using IrzUccApi.Db;
 using IrzUccApi.Hubs;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
+using IrzUccApi.Overriding;
 using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -18,7 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services
     .AddIdentity<AppUser, AppRole>()
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<AppIdentityErrorDescriber>();
 
 var jwtConfiguration = new JwtConfiguration();
 builder.Configuration.Bind("Jwt", jwtConfiguration);
