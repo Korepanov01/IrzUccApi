@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.User;
@@ -38,7 +39,7 @@ namespace IrzUccApi.Controllers.Users
         public async Task<IActionResult> RegisterUser([FromBody] RegUserRequest request)
         {
             if (await _userManager.FindByEmailAsync(request.Email) != null)
-                return BadRequest(RequestErrorMessages.EmailAlreadyRegistered);
+                return BadRequest(new[] { RequestErrorDescriber.EmailAlreadyRegistered });
 
             var user = new AppUser
             {
@@ -54,7 +55,7 @@ namespace IrzUccApi.Controllers.Users
 
             var identityResult = await _userManager.CreateAsync(user, password);
             if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
+                return BadRequest(identityResult.Errors.Select(e => new RequestError(e.Code, e.Description)));
 
             await _emailService.SendRegisterMessage(request.Email, password);
 

@@ -1,4 +1,5 @@
 ﻿using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Authentication;
@@ -38,20 +39,20 @@ namespace IrzUccApi.Controllers.Authentication
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
-                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
+                return NotFound(new[] { RequestErrorDescriber.UserDoesntExist });
 
             if (!await _userManager.CheckPasswordAsync(user, request.Password))
-                return BadRequest(RequestErrorMessages.WrongPassword);
+                return BadRequest(new[] { RequestErrorDescriber.WrongPassword });
 
             if (!user.IsActiveAccount)
-                return BadRequest(RequestErrorMessages.AccountDeactivated);
+                return BadRequest(new[] { RequestErrorDescriber.AccountDeactivated });
 
             var tokens = await _jwtManager.GenerateTokens(user.Email);
 
             user.RefreshToken = tokens.RefreshToken;
             var identityResult = await _userManager.UpdateAsync(user);
             if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
+                return BadRequest(identityResult.Errors.Select(e => new RequestError(e.Code, e.Description)));
 
             return Ok(tokens);
         }
@@ -67,15 +68,15 @@ namespace IrzUccApi.Controllers.Authentication
             }
             catch (SecurityTokenException)
             {
-                return BadRequest(RequestErrorMessages.WrongJwt);
+                return BadRequest(new[] { RequestErrorDescriber.WrongJwt });
             }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return BadRequest(RequestErrorMessages.WrongJwt);
+                return BadRequest(new[] { RequestErrorDescriber.WrongJwt });
 
             if (user.RefreshToken != request.RefreshToken)
-                return BadRequest(RequestErrorMessages.WrongRefreshToken);
+                return BadRequest(new[] { RequestErrorDescriber.WrongRefreshToken });
 
             var newTokens = await _jwtManager.GenerateTokens(user.Email);
 
@@ -97,7 +98,7 @@ namespace IrzUccApi.Controllers.Authentication
 
             var identityResult = await _userManager.ChangePasswordAsync(currentUser, request.CurrentPassword, request.NewPassword);
             if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
+                return BadRequest(identityResult.Errors.Select(e => new RequestError(e.Code, e.Description)));
 
             return Ok();
         }

@@ -1,4 +1,5 @@
 ﻿using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Role;
 using Microsoft.AspNetCore.Authorization;
@@ -51,7 +52,7 @@ namespace IrzUccApi.Controllers.Users
 
             var user = await _userManager.FindByIdAsync(request.UserId.ToString());
             if (user == null)
-                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
+                return NotFound(new[] { RequestErrorDescriber.UserDoesntExist });
 
             if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin) && (!isSuperAdmin || request.Role == RolesNames.Admin))
                 return Forbid();
