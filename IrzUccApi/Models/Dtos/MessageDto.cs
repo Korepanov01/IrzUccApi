@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class MessageDto
+    public record MessageDto
     {
         public MessageDto(
             Guid id,

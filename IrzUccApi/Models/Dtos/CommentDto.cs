@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class CommentDto
+    public record CommentDto
     {
         public CommentDto(Guid id, string text, DateTime dateTime, UserHeaderDto user)
         {

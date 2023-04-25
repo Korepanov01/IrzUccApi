@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class PositionDto
+    public record PositionDto
     {
         public PositionDto(Guid id, string name)
         {
