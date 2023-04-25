@@ -1,27 +1,27 @@
 ﻿namespace IrzUccApi.Enums
 {
-    static public class RequestErrorMessages
+    public static class RequestErrorMessages
     {
-        static public readonly string AccountDeactivated = "Account is deactivated!";
-        static public readonly string UserDoesntExistMessage = "User does not exist!";
-        static public readonly string EmailAlreadyRegistered = "Email already used!";
-        static public readonly string WrongPassword = "Wrong password!";
+        public static readonly string AccountDeactivated = "Аккаунт деактивирован!";
+        public static readonly string UserDoesntExistMessage = "Пользователя не существует!";
+        public static readonly string EmailAlreadyRegistered = "Электронная почта уже используется!";
+        public static readonly string WrongPassword = "Неправильный пароль!";
 
-        static public readonly string WrongRefreshToken = "Wrong refresh token!";
-        static public readonly string WrongJwt = "Wrong JWT!";
+        public static readonly string WrongRefreshToken = "Неправильный рефреш-токен!";
+        public static readonly string WrongJwt = "Неправильный JWT!";
 
-        static public readonly string UserAlreadyOnPosition = "User already on position!";
-        static public readonly string PositionDoesntExistMessage = "Position does not exist!";
-        static public readonly string PositionAlreadyExistsMessage = "Position already exists!";
-        static public readonly string ThereAreUsersWithThisPositionMessage = "There are users with this position!";
-        static public readonly string UserIsNotInPosition = "User is not in position!";
+        public static readonly string UserAlreadyOnPosition = "Пользователь имеет должность!";
+        public static readonly string PositionDoesntExistMessage = "Должности не существует!";
+        public static readonly string PositionAlreadyExistsMessage = "Должность уже существует!";
+        public static readonly string ThereAreUsersWithThisPositionMessage = "Есть пользователи с этой должностью!";
+        public static readonly string UserIsNotInPosition = "Пользователь не занимает данную должность!";
 
-        static public readonly string EndTimeIsLessThenStartTime = "End time is less then start time!";
+        public static readonly string EndTimeIsLessThenStartTime = "Время окончания не может быть меньше времени начала!";
 
-        static public readonly string MessageCantBeEmpty = "Message can't be empty!";
-        static public readonly string ChatDoesntExist = "Chat doesn't exist!";
+        public static readonly string MessageCantBeEmpty = "Сообщение не может быть пустым!";
+        public static readonly string ChatDoesntExist = "Чат не существует!";
 
-        static public readonly string CabinetAlreadyExists = "Cabinet already exists!";
-        static public readonly string CabinetIsBooked = "Cabinet is booked!";
+        public static readonly string CabinetAlreadyExists = "Кабинет уже существует!";
+        public static readonly string CabinetIsBooked = "Кабинет забронирован!";
     }
 }
