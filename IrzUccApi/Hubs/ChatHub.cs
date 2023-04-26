@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace IrzUccApi.Hubs
 {
-    [SignalRHub]
+    [SignalRHub("/hubs/chat")]
     [Authorize]
     public class ChatHub : Hub
     {
@@ -39,6 +39,7 @@ namespace IrzUccApi.Hubs
             return userId;
         }
 
+        [SignalRHidden]
         public override async Task OnConnectedAsync()
         {
             var userId = GetUserId();
@@ -53,6 +54,7 @@ namespace IrzUccApi.Hubs
             await base.OnConnectedAsync();
         }
 
+        [SignalRHidden]
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = GetUserId();
@@ -67,7 +69,8 @@ namespace IrzUccApi.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendMessage(PostMessageRequest request)
+        [SignalRMethod]
+        public async Task SendMessage([SignalRParam] PostMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
             {
@@ -152,7 +155,8 @@ namespace IrzUccApi.Hubs
                 .SendAsync(ChatHubMethodsNames.MessageReceived, messageDto);
         }
 
-        public async Task DeleteMessage(DeleteMessageRequest request)
+        [SignalRMethod]
+        public async Task DeleteMessage([SignalRParam] DeleteMessageRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(Context.User);
             if (currentUser == null)
