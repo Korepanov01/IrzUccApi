@@ -67,7 +67,7 @@ namespace IrzUccApi.Controllers.Users
             }
             catch (InvalidOperationException e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new RequestError(nameof(InvalidOperationException), e.Message));
             }
 
             return Ok();

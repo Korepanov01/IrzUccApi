@@ -86,6 +86,22 @@ namespace IrzUccApi.Controllers.Users
             return Ok();
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePositionAsync(Guid id)
+        {
+            var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
+            if (position == null)
+                return NotFound();
+
+            if (await _dbContext.UserPositions.Where(up => up.Position == position).AnyAsync())
+                return BadRequest(new[] { RequestErrorDescriber.ThereAreUsersWithThisPosition });
+
+            _dbContext.Remove(position);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
         [HttpPost("add_pos_to_user")]
         public async Task<IActionResult> AddPositionToUserAsync([FromBody] AddPositionToUserRequest request)
         {

@@ -121,7 +121,7 @@ namespace IrzUccApi.Controllers.Users
             user.IsActiveAccount = activation;
             var identityResult = await _userManager.UpdateAsync(user);
             if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
+                return BadRequest(identityResult.Errors.Select(e => new RequestError(e.Code, e.Description)));
 
             return Ok();
         }
