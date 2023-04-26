@@ -13,6 +13,7 @@ namespace IrzUccApi.Services
     public class JwtService
     {
         private readonly int _jwtLifeTimeMinutes = 20;
+        private readonly SymmetricSecurityKey _symmetricSecurityKey;
 
         private readonly JwtConfiguration _jwtConfiguration;
         private readonly UserManager<AppUser> _userManager;
@@ -23,42 +24,51 @@ namespace IrzUccApi.Services
         {
             _jwtConfiguration = jwtConfiguration;
             _userManager = userManager;
+            _symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.SecurityKey));
         }
 
-        public async Task<TokensDto> GenerateTokensAsync(string email)
+        public async Task<TokensDto> GenerateTokensAsync(AppUser user)
         {
-            var tokenKey = Encoding.UTF8.GetBytes(_jwtConfiguration.SecurityKey);
-
-            var user = await _userManager.FindByEmailAsync(email)
-                       ?? throw new ArgumentException("There is no such user!", nameof(email));
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity((await _userManager.GetRolesAsync(user))
-                    .Select(r => new Claim(ClaimTypes.Role, r))
-                    .Append(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()))),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtLifeTimeMinutes),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
-            };
+            var tokenDescriptor = await GetTokenDescriptorAsync(user);
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return new TokensDto(
-                tokenHandler.WriteToken(token),
-                Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)));
+            var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+
+            var jwt = tokenHandler.WriteToken(securityToken);
+            var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+            return new TokensDto(jwt, refreshToken);
         }
 
-        public string GetIdFromExpiredJwt(string jwt)
+        private async Task<SecurityTokenDescriptor> GetTokenDescriptorAsync(AppUser user)
         {
-            var tokenKey = Encoding.UTF8.GetBytes(_jwtConfiguration.SecurityKey);
+            var roles = await _userManager.GetRolesAsync(user);
+            var claims = roles.Select(r => new Claim(ClaimTypes.Role, r))
+                .Append(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
 
+            return new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtLifeTimeMinutes),
+                SigningCredentials = new SigningCredentials(
+                    _symmetricSecurityKey,
+                    SecurityAlgorithms.HmacSha256Signature),
+                IssuedAt = DateTime.UtcNow,
+                NotBefore = DateTime.UtcNow,
+                Audience = _jwtConfiguration.Audience,
+                Issuer = _jwtConfiguration.Issuer
+            };
+        }
+
+        public string ExtractUserIdFromExpiredJwt(string jwt)
+        {
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ValidateLifetime = false,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(tokenKey),
+                IssuerSigningKey = _symmetricSecurityKey,
                 ClockSkew = TimeSpan.Zero
             };
 

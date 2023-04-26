@@ -46,7 +46,7 @@ namespace IrzUccApi.Controllers.Authentication
             if (!user.IsActiveAccount)
                 return BadRequest(new[] { RequestErrorDescriber.AccountDeactivated });
 
-            var tokens = await _jwtManager.GenerateTokensAsync(user.Email);
+            var tokens = await _jwtManager.GenerateTokensAsync(user);
 
             user.RefreshToken = tokens.RefreshToken;
             var identityResult = await _userManager.UpdateAsync(user);
@@ -63,7 +63,7 @@ namespace IrzUccApi.Controllers.Authentication
             string userId;
             try
             {
-                userId = _jwtManager.GetIdFromExpiredJwt(request.Jwt);
+                userId = _jwtManager.ExtractUserIdFromExpiredJwt(request.Jwt);
             }
             catch (SecurityTokenException)
             {
@@ -77,7 +77,7 @@ namespace IrzUccApi.Controllers.Authentication
             if (user.RefreshToken != request.RefreshToken)
                 return BadRequest(new[] { RequestErrorDescriber.WrongRefreshToken });
 
-            var newTokens = await _jwtManager.GenerateTokensAsync(user.Email);
+            var newTokens = await _jwtManager.GenerateTokensAsync(user);
 
             user.RefreshToken = newTokens.RefreshToken;
             var identityResult = await _userManager.UpdateAsync(user);
