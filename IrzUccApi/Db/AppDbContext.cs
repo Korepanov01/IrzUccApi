@@ -32,6 +32,6 @@ namespace IrzUccApi.Db
             DbConfigurer.Configure(builder);
 
             DbSeeder.SeedData(builder);
-        }       
+        }
     }
 }

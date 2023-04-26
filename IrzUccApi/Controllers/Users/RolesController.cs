@@ -36,14 +36,14 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPost("add_to_user")]
-        public async Task<IActionResult> AddUserRole([FromBody] AddRemoveRoleRequest request)
-            => await AddRemoveUserRole(request);
+        public async Task<IActionResult> AddUserRoleAsync([FromBody] AddRemoveRoleRequest request)
+            => await AddRemoveUserRoleAsync(request);
 
         [HttpPost("remove_from_user")]
-        public async Task<IActionResult> RemoveUserRole([FromBody] AddRemoveRoleRequest request)
-            => await AddRemoveUserRole(request, true);
+        public async Task<IActionResult> RemoveUserRoleAsync([FromBody] AddRemoveRoleRequest request)
+            => await AddRemoveUserRoleAsync(request, true);
 
-        private async Task<IActionResult> AddRemoveUserRole(AddRemoveRoleRequest request, bool isRemoving = false)
+        private async Task<IActionResult> AddRemoveUserRoleAsync(AddRemoveRoleRequest request, bool isRemoving = false)
         {
             var isSuperAdmin = User.IsInRole(RolesNames.SuperAdmin);
 

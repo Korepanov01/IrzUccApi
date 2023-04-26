@@ -28,7 +28,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCabinets([FromQuery] CabinetsGetParameters parameters)
+        public async Task<IActionResult> GetCabinetsAsync([FromQuery] CabinetsGetParameters parameters)
         {
             var cabinets = _dbContext.Cabinets.AsQueryable();
 
@@ -60,7 +60,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpGet("{id}/events")]
-        public async Task<IActionResult> GetCabinetEvents(Guid id, [FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetCabinetEventsAsync(Guid id, [FromQuery] PagingParameters parameters)
         {
             var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
             if (cabinet == null)
@@ -80,7 +80,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostCabinet([FromBody] PostPutCabinetRequest request)
+        public async Task<IActionResult> PostCabinetAsync([FromBody] PostPutCabinetRequest request)
         {
             if (await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Name == request.Name) != null)
                 return BadRequest(new[] { RequestErrorDescriber.CabinetAlreadyExists });
@@ -97,7 +97,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCabinet(Guid id, [FromBody] PostPutCabinetRequest request)
+        public async Task<IActionResult> UpdateCabinetAsync(Guid id, [FromBody] PostPutCabinetRequest request)
         {
             var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
             if (cabinet == null)
@@ -115,7 +115,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCabinet(Guid id)
+        public async Task<IActionResult> DeleteCabinetAsync(Guid id)
         {
             var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
             if (cabinet == null)

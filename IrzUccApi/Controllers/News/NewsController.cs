@@ -4,12 +4,10 @@ using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.News;
-using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.News
@@ -30,7 +28,7 @@ namespace IrzUccApi.Controllers.News
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetNews([FromQuery] NewsSearchParameters parameters)
+        public async Task<IActionResult> GetNewsAsync([FromQuery] NewsSearchParameters parameters)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
@@ -76,7 +74,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostNewsEntry([FromBody] PostNewsEntryRequest request)
+        public async Task<IActionResult> PostNewsEntryAsync([FromBody] PostNewsEntryRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -121,7 +119,7 @@ namespace IrzUccApi.Controllers.News
 
         [HttpGet("{id}/full_text")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetNewsEntryText(Guid id)
+        public async Task<IActionResult> GetNewsEntryTextAsync(Guid id)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
             if (newsEntry == null)
@@ -135,7 +133,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetNewsEntry(Guid id)
+        public async Task<IActionResult> GetNewsEntryAsync(Guid id)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
             if (newsEntry == null)
@@ -165,7 +163,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteNewsEntry(Guid id)
+        public async Task<IActionResult> DeleteNewsEntryAsync(Guid id)
         {
             var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
             if (newsEntry == null)

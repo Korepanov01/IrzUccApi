@@ -21,13 +21,13 @@ namespace IrzUccApi.Hubs
         private readonly UserManager<AppUser> _userManager;
 
         public ChatHub(
-            AppDbContext dbContext, 
+            AppDbContext dbContext,
             UserManager<AppUser> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
         }
-        
+
         private string? GetUserId()
         {
             if (Context?.User?.Identity == null || !Context.User.Identity.IsAuthenticated)
@@ -71,7 +71,7 @@ namespace IrzUccApi.Hubs
         }
 
         [SignalRMethod]
-        public async Task SendMessage([SignalRParam] PostMessageRequest request)
+        public async Task SendMessageAsync([SignalRParam] PostMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
             {
@@ -157,7 +157,7 @@ namespace IrzUccApi.Hubs
         }
 
         [SignalRMethod]
-        public async Task DeleteMessage([SignalRParam] DeleteMessageRequest request)
+        public async Task DeleteMessageAsync([SignalRParam] DeleteMessageRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(Context.User);
             if (currentUser == null)
@@ -183,7 +183,7 @@ namespace IrzUccApi.Hubs
 
             _dbContext.Remove(message);
             await _dbContext.SaveChangesAsync();
-            
+
             await Clients
                 .Group(currentUser.Id.ToString())
                 .SendAsync(ChatHubMethodsNames.MessageDeleted, request.MessageId);

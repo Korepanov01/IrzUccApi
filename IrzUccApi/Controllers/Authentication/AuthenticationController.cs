@@ -1,5 +1,4 @@
-﻿using IrzUccApi.Enums;
-using IrzUccApi.ErrorDescribers;
+﻿using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Configurations;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Authentication;
@@ -35,7 +34,7 @@ namespace IrzUccApi.Controllers.Authentication
 
         [HttpPost]
         [Route("authenticate")]
-        public async Task<IActionResult> GetToken([FromBody] LoginRequest request)
+        public async Task<IActionResult> GetTokenAsync([FromBody] LoginRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -47,7 +46,7 @@ namespace IrzUccApi.Controllers.Authentication
             if (!user.IsActiveAccount)
                 return BadRequest(new[] { RequestErrorDescriber.AccountDeactivated });
 
-            var tokens = await _jwtManager.GenerateTokens(user.Email);
+            var tokens = await _jwtManager.GenerateTokensAsync(user.Email);
 
             user.RefreshToken = tokens.RefreshToken;
             var identityResult = await _userManager.UpdateAsync(user);
@@ -59,7 +58,7 @@ namespace IrzUccApi.Controllers.Authentication
 
         [HttpPost]
         [Route("refresh")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest request)
         {
             string userId;
             try
@@ -78,7 +77,7 @@ namespace IrzUccApi.Controllers.Authentication
             if (user.RefreshToken != request.RefreshToken)
                 return BadRequest(new[] { RequestErrorDescriber.WrongRefreshToken });
 
-            var newTokens = await _jwtManager.GenerateTokens(user.Email);
+            var newTokens = await _jwtManager.GenerateTokensAsync(user.Email);
 
             user.RefreshToken = newTokens.RefreshToken;
             var identityResult = await _userManager.UpdateAsync(user);
@@ -90,7 +89,7 @@ namespace IrzUccApi.Controllers.Authentication
 
         [HttpPut("change_password")]
         [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -104,7 +103,7 @@ namespace IrzUccApi.Controllers.Authentication
         }
 
         [HttpPost("send_reset_password_url")]
-        public async Task<IActionResult> SendResetPasswordUrl([FromBody] SendResetPasswordTokenRequest request)
+        public async Task<IActionResult> SendResetPasswordUrlAsync([FromBody] SendResetPasswordTokenRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -115,13 +114,13 @@ namespace IrzUccApi.Controllers.Authentication
                 return StatusCode(StatusCodes.Status500InternalServerError);
 
             var url = $"{Request.Scheme}://{Request.Host}/api/authentication/reset_password?Email={Uri.EscapeDataString(request.Email)}&Token={Uri.EscapeDataString(token)}";
-            await _emailService.SendResetPasswordMessage(request.Email, url);
+            await _emailService.SendResetPasswordMessageAsync(request.Email, url);
 
             return Ok();
         }
 
         [HttpGet("reset_password")]
-        public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request)
+        public async Task<IActionResult> ResetPasswordAsync([FromQuery] ResetPasswordRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -133,7 +132,7 @@ namespace IrzUccApi.Controllers.Authentication
             if (!result.Succeeded)
                 return BadRequest("Ссылка недействительна!");
 
-            await _emailService.SendNewPasswordMessage(request.Email, newPassword);
+            await _emailService.SendNewPasswordMessageAsync(request.Email, newPassword);
 
             return Ok("На вашу почту отправлен новый пароль.");
         }

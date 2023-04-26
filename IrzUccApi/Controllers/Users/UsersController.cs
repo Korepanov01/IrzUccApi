@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.Users;
@@ -31,7 +30,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUsers([FromQuery] UserSearchParameters parameters)
+    public async Task<IActionResult> GetUsersAsync([FromQuery] UserSearchParameters parameters)
     {
         var users = _dbContext.Users.AsQueryable();
 
@@ -80,25 +79,25 @@ public class UsersController : ControllerBase
                     u.UserPosition
                         .Where(up => up.End == null)
                         .Select(up => new PositionDto(
-                            up.Position.Id, 
+                            up.Position.Id,
                             up.Position.Name))))
             .ToArrayAsync());
     }
 
     [HttpGet("me")]
-    public async Task<IActionResult> GetCurrentUser()
+    public async Task<IActionResult> GetCurrentUserAsync()
     {
         var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         if (currentUserId == null)
             return Unauthorized();
-        return await GetUser(currentUserId);
+        return await GetUserAsync(currentUserId);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserById(Guid id)
-       => await GetUser(id.ToString());
+    public async Task<IActionResult> GetUserByIdAsync(Guid id)
+       => await GetUserAsync(id.ToString());
 
-    private async Task<IActionResult> GetUser(string userId)
+    private async Task<IActionResult> GetUserAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -121,7 +120,7 @@ public class UsersController : ControllerBase
             user.UserPosition
                 .Where(up => up.End == null)
                 .Select(up => new PositionDto(
-                    up.Position.Id, 
+                    up.Position.Id,
                     up.Position.Name)),
             user.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
             user.Subscribers.Count,
@@ -132,7 +131,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("me/update_photo")]
-    public async Task<IActionResult> UpdatePhoto([FromBody] ImageRequest request)
+    public async Task<IActionResult> UpdatePhotoAsync([FromBody] ImageRequest request)
     {
         var currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)
@@ -160,7 +159,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("me/delete_photo")]
-    public async Task<IActionResult> DeletePhoto()
+    public async Task<IActionResult> DeletePhotoAsync()
     {
         var currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)
@@ -175,7 +174,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("me/update_info")]
-    public async Task<IActionResult> UpdateExtraInfo([FromBody] UpdateExtraInfoRequest request)
+    public async Task<IActionResult> UpdateExtraInfoAsync([FromBody] UpdateExtraInfoRequest request)
     {
         var currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)

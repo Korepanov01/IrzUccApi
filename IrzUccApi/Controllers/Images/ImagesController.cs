@@ -22,14 +22,14 @@ namespace IrzUccApi.Controllers.Images
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
+        public async Task<IActionResult> GetAsync(Guid id)
         {
             var image = await _dbContext.Images.FirstOrDefaultAsync(i => i.Id == id);
             if (image == null)
                 return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
-            switch(image.Source)
+            switch (image.Source)
             {
                 case Enums.ImageSources.User:
                     if (currentUser == null)
@@ -37,7 +37,7 @@ namespace IrzUccApi.Controllers.Images
                     break;
                 case Enums.ImageSources.NewsEntry:
                     var newEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == image.SourceId);
-                    if (newEntry == null) 
+                    if (newEntry == null)
                         return NotFound();
                     if (currentUser == null && !newEntry.IsPublic)
                         return Unauthorized();

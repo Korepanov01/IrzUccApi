@@ -1,11 +1,11 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public record UserPositionDto
+    public class UserPositionDto
     {
         public UserPositionDto(
-            Guid id, 
-            DateTime start, 
-            DateTime? end, 
+            Guid id,
+            DateTime start,
+            DateTime? end,
             PositionDto position)
         {
             Id = id;

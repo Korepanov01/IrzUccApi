@@ -1,5 +1,4 @@
 ﻿using IrzUccApi.Db;
-using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
@@ -27,7 +26,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetNewsComments([Required] Guid newsEntryId, [FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetNewsCommentsAsync([Required] Guid newsEntryId, [FromQuery] PagingParameters parameters)
         {
             var newsEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == newsEntryId);
             if (newsEntry == null)
@@ -50,7 +49,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostComment([FromBody] PostCommentRequest request)
+        public async Task<IActionResult> PostCommentAsync([FromBody] PostCommentRequest request)
         {
             var newsEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == request.NewsEntryId);
             if (newsEntry == null)
@@ -85,7 +84,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(Guid id)
+        public async Task<IActionResult> DeleteCommentAsync(Guid id)
         {
             var comment = await _dbContext.Comments.FirstOrDefaultAsync(n => n.Id == id);
             if (comment == null)

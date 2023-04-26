@@ -25,7 +25,7 @@ namespace IrzUccApi.Services
             _userManager = userManager;
         }
 
-        public async Task<TokensDto> GenerateTokens(string email)
+        public async Task<TokensDto> GenerateTokensAsync(string email)
         {
             var tokenKey = Encoding.UTF8.GetBytes(_jwtConfiguration.SecurityKey);
 

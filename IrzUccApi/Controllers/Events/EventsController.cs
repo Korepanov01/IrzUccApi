@@ -27,7 +27,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpGet("my")]
-        public async Task<IActionResult> GetMyEvents([FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetMyEventsAsync([FromQuery] PagingParameters parameters)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -46,7 +46,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpGet("listenning")]
-        public async Task<IActionResult> GetListenningEvents([FromQuery] TimeRangeGetParameters parameters)
+        public async Task<IActionResult> GetListenningEventsAsync([FromQuery] TimeRangeGetParameters parameters)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -68,7 +68,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetEvent(Guid id)
+        public async Task<IActionResult> GetEventAsync(Guid id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -105,7 +105,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostEvent([FromBody] PostEventRequest request)
+        public async Task<IActionResult> PostEventAsync([FromBody] PostEventRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -165,7 +165,7 @@ namespace IrzUccApi.Controllers.Events
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(Guid id)
+        public async Task<IActionResult> DeleteEventAsync(Guid id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)

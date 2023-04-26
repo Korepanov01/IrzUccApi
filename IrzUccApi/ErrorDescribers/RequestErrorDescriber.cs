@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace IrzUccApi.ErrorDescribers
+﻿namespace IrzUccApi.ErrorDescribers
 {
     public record RequestError
     {

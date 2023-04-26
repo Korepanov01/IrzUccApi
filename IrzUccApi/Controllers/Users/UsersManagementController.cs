@@ -36,7 +36,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] RegUserRequest request)
+        public async Task<IActionResult> RegisterUserAsync([FromBody] RegUserRequest request)
         {
             if (await _userManager.FindByEmailAsync(request.Email) != null)
                 return BadRequest(new[] { RequestErrorDescriber.EmailAlreadyRegistered });
@@ -57,13 +57,13 @@ namespace IrzUccApi.Controllers.Users
             if (!identityResult.Succeeded)
                 return BadRequest(identityResult.Errors.Select(e => new RequestError(e.Code, e.Description)));
 
-            await _emailService.SendRegisterMessage(request.Email, password);
+            await _emailService.SendRegisterMessageAsync(request.Email, password);
 
             return Ok(user.Id);
         }
 
         [HttpPut("{id}/update_reg_info")]
-        public async Task<IActionResult> UpdateUserRegInfo(Guid id, [FromBody] UpdateRegInfoRequest request)
+        public async Task<IActionResult> UpdateUserRegInfoAsync(Guid id, [FromBody] UpdateRegInfoRequest request)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
@@ -85,7 +85,7 @@ namespace IrzUccApi.Controllers.Users
 
         [HttpDelete("{id}")]
         [Authorize(Roles = RolesNames.SuperAdmin)]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUserAsync(Guid id)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
@@ -102,14 +102,14 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPut("{id}/activate")]
-        public async Task<IActionResult> Acivate(Guid id)
-            => await ChangeActivation(id, true);
+        public async Task<IActionResult> AcivateAsync(Guid id)
+            => await ChangeActivationAsync(id, true);
 
         [HttpPut("{id}/deactivate")]
-        public async Task<IActionResult> Deactivate(Guid id)
-            => await ChangeActivation(id, false);
+        public async Task<IActionResult> DeactivateAsync(Guid id)
+            => await ChangeActivationAsync(id, false);
 
-        private async Task<IActionResult> ChangeActivation(Guid userId, bool activation)
+        private async Task<IActionResult> ChangeActivationAsync(Guid userId, bool activation)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)

@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Controllers.Users
 {
@@ -23,7 +22,7 @@ namespace IrzUccApi.Controllers.Users
         private readonly UserManager<AppUser> _userManager;
 
         public PositionsController(
-            AppDbContext dbContext, 
+            AppDbContext dbContext,
             UserManager<AppUser> userManager)
         {
             _dbContext = dbContext;
@@ -32,7 +31,7 @@ namespace IrzUccApi.Controllers.Users
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetPositions([FromQuery] SearchStringParameters parameters)
+        public async Task<IActionResult> GetPositionsAsync([FromQuery] SearchStringParameters parameters)
         {
             var positions = _dbContext.Positions.AsQueryable();
 
@@ -47,32 +46,32 @@ namespace IrzUccApi.Controllers.Users
                 .Skip(parameters.PageSize * (parameters.PageIndex - 1))
                 .Take(parameters.PageSize)
                 .Select(p => new PositionDto(
-                    p.Id, 
+                    p.Id,
                     p.Name))
                 .ToArrayAsync());
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddPosition([FromBody] AddUpdatePositionRequest request)
+        public async Task<IActionResult> AddPositionAsync([FromBody] AddUpdatePositionRequest request)
         {
             if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == request.Name) != null)
                 return BadRequest(new[] { RequestErrorDescriber.PositionAlreadyExists });
 
-            var position = new Position 
-            { 
-                Name = request.Name 
+            var position = new Position
+            {
+                Name = request.Name
             };
 
             await _dbContext.AddAsync(position);
             await _dbContext.SaveChangesAsync();
 
             return Ok(new PositionDto(
-                position.Id, 
+                position.Id,
                 position.Name));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePosition(Guid id, [FromBody] AddUpdatePositionRequest request)
+        public async Task<IActionResult> UpdatePositionAsync(Guid id, [FromBody] AddUpdatePositionRequest request)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
             if (position == null)
@@ -88,7 +87,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPost("add_pos_to_user")]
-        public async Task<IActionResult> AddPositionToUser([FromBody] AddPositionToUserRequest request)
+        public async Task<IActionResult> AddPositionToUserAsync([FromBody] AddPositionToUserRequest request)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
             if (position == null)
@@ -114,7 +113,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPost("remove_user_position")]
-        public async Task<IActionResult> RemoveUserPosition([FromBody] RemoveUserPositionRequest request)
+        public async Task<IActionResult> RemoveUserPositionAsync([FromBody] RemoveUserPositionRequest request)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
             if (position == null)

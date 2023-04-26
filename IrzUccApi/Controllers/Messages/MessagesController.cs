@@ -27,7 +27,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMessages([FromQuery] MessagesGetParameters parameters)
+        public async Task<IActionResult> GetMessagesAsync([FromQuery] MessagesGetParameters parameters)
         {
             var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Id == parameters.ChatId);
             if (chat == null)
@@ -76,7 +76,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostMessage([FromBody] PostMessageRequest request)
+        public async Task<IActionResult> PostMessageAsync([FromBody] PostMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
                 return BadRequest(new[] { RequestErrorDescriber.MessageCantBeEmpty });
@@ -144,7 +144,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMessage(Guid id)
+        public async Task<IActionResult> DeleteMessageAsync(Guid id)
         {
             var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.Id == id);
             if (message == null)

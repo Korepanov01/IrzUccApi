@@ -4,7 +4,6 @@ using IrzUccApi.Models.Db;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace IrzUccApi.Controllers
 {
@@ -16,17 +15,17 @@ namespace IrzUccApi.Controllers
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
 
-        public DevController(AppDbContext dbContext, UserManager<AppUser> userManager) 
+        public DevController(AppDbContext dbContext, UserManager<AppUser> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
         }
 
-        [HttpPost("seed")] 
-        public async Task Seed() 
+        [HttpPost("seed")]
+        public async Task SeedAsync()
         {
             var positions = await SeedPositionsAsync();
-            
+
             var users = await SeedUsersAsync();
 
             var appRoles = await _dbContext.Roles.ToDictionaryAsync(r => r.Name);
@@ -67,9 +66,9 @@ namespace IrzUccApi.Controllers
                 };
                 await _dbContext.AddAsync(randomNewsEntry);
 
-                foreach(var user in users)
+                foreach (var user in users)
                 {
-                    if(random.Next(3) == 0)
+                    if (random.Next(3) == 0)
                     {
                         randomNewsEntry.Likers.Add(user);
                     }
@@ -150,7 +149,7 @@ namespace IrzUccApi.Controllers
                     Birthday = new DateTime(1970, 7, 23).ToUniversalTime(),
                 },
             };
-                        
+
             foreach (var user in users)
             {
                 var result = await _userManager.CreateAsync(user, password);

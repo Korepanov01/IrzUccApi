@@ -20,19 +20,19 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserPositions(Guid userId)
-            => await GetUserPositionsByUserId(userId);
+        public async Task<IActionResult> GetUserPositionsAsync(Guid userId)
+            => await GetUserPositionsByUserIdAsync(userId);
 
         [HttpGet("my")]
-        public async Task<IActionResult> GetMyUserPositions()
+        public async Task<IActionResult> GetMyUserPositionsAsync()
         {
             var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (currentUserId == null)
                 return Unauthorized();
-            return await GetUserPositionsByUserId(new Guid(currentUserId));
+            return await GetUserPositionsByUserIdAsync(new Guid(currentUserId));
         }
 
-        private async Task<IActionResult> GetUserPositionsByUserId(Guid id)
+        private async Task<IActionResult> GetUserPositionsByUserIdAsync(Guid id)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
@@ -41,8 +41,8 @@ namespace IrzUccApi.Controllers.Users
             return Ok(user.UserPosition
                 .OrderBy(up => up.Start)
                 .Select(up => new UserPositionDto(
-                    up.Id, 
-                    up.Start, 
+                    up.Id,
+                    up.Start,
                     up.End,
                     new PositionDto(
                         up.Position.Id,

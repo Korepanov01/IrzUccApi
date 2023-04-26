@@ -1,5 +1,4 @@
 ﻿using IrzUccApi.Db;
-using IrzUccApi.Enums;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
@@ -24,7 +23,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetChats([FromQuery] PagingParameters parameters)
+        public async Task<IActionResult> GetChatsAsync([FromQuery] PagingParameters parameters)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
