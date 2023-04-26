@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace IrzUccApi.Overriding
+namespace IrzUccApi.ErrorDescribers
 {
     public class AppIdentityErrorDescriber : IdentityErrorDescriber
-    {        
+    {
         public override IdentityError DefaultError() { return new IdentityError { Code = nameof(DefaultError), Description = $"Произошла неизвестная ошибка." }; }
         public override IdentityError ConcurrencyFailure() { return new IdentityError { Code = nameof(ConcurrencyFailure), Description = "Оптимистичная конкурентная ошибка, объект был изменен." }; }
         public override IdentityError PasswordMismatch() { return new IdentityError { Code = nameof(PasswordMismatch), Description = "Неправильный пароль." }; }

@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
@@ -55,7 +56,7 @@ namespace IrzUccApi.Controllers.Users
         public async Task<IActionResult> AddPosition([FromBody] AddUpdatePositionRequest request)
         {
             if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == request.Name) != null)
-                return BadRequest(RequestErrorMessages.PositionAlreadyExistsMessage);
+                return BadRequest(new[] { RequestErrorDescriber.PositionAlreadyExists });
 
             var position = new Position 
             { 
@@ -78,7 +79,7 @@ namespace IrzUccApi.Controllers.Users
                 return NotFound();
 
             if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == request.Name) != null)
-                return BadRequest(RequestErrorMessages.PositionAlreadyExistsMessage);
+                return BadRequest(new[] { RequestErrorDescriber.PositionAlreadyExists });
 
             position.Name = request.Name;
             await _dbContext.SaveChangesAsync();
@@ -91,14 +92,14 @@ namespace IrzUccApi.Controllers.Users
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
             if (position == null)
-                return NotFound(RequestErrorMessages.PositionDoesntExistMessage);
+                return NotFound(new[] { RequestErrorDescriber.PositionDoesntExist });
 
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == request.UserId);
             if (user == null)
-                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
+                return NotFound(new[] { RequestErrorDescriber.UserDoesntExist });
 
             if (user.UserPosition.Where(up => up.End == null && up.Position.Id == request.PositionId).Any())
-                return BadRequest(RequestErrorMessages.UserAlreadyOnPosition);
+                return BadRequest(new[] { RequestErrorDescriber.UserAlreadyOnPosition });
 
             var userPosition = new UserPosition
             {
@@ -117,18 +118,18 @@ namespace IrzUccApi.Controllers.Users
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
             if (position == null)
-                return NotFound(RequestErrorMessages.PositionDoesntExistMessage);
+                return NotFound(new[] { RequestErrorDescriber.PositionDoesntExist });
 
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == request.UserId);
             if (user == null)
-                return NotFound(RequestErrorMessages.UserDoesntExistMessage);
+                return NotFound(new[] { RequestErrorDescriber.UserDoesntExist });
 
             var userPosition = user.UserPosition.FirstOrDefault(up => up.End == null && up.Position?.Id == request.PositionId);
             if (userPosition == null)
-                return BadRequest(RequestErrorMessages.UserIsNotInPosition);
+                return BadRequest(new[] { RequestErrorDescriber.UserIsNotInPosition });
 
             if (request.End < userPosition.Start)
-                return BadRequest(RequestErrorMessages.EndTimeIsLessThenStartTime);
+                return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
 
             userPosition.End = request.End;
             _dbContext.Update(userPosition);

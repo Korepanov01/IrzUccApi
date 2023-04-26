@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class ImageDto
+    public record ImageDto
     {
         public ImageDto(
             Guid id,

@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class TokensDto
+    public record TokensDto
     {
         public TokensDto(string jwt, string refreshToken)
         {

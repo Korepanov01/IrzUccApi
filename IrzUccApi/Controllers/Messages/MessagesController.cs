@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
@@ -78,7 +79,7 @@ namespace IrzUccApi.Controllers.Messages
         public async Task<IActionResult> PostMessage([FromBody] PostMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
-                return BadRequest(RequestErrorMessages.MessageCantBeEmpty);
+                return BadRequest(new[] { RequestErrorDescriber.MessageCantBeEmpty });
 
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -86,7 +87,7 @@ namespace IrzUccApi.Controllers.Messages
 
             var recipient = await _userManager.FindByIdAsync(request.UserId);
             if (recipient == null)
-                return BadRequest(RequestErrorMessages.UserDoesntExistMessage);
+                return BadRequest(new[] { RequestErrorDescriber.UserDoesntExist });
 
             var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Participants.Contains(currentUser) && c.Participants.Contains(recipient));
             if (chat == null)

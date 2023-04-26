@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
@@ -82,7 +83,7 @@ namespace IrzUccApi.Controllers.Events
         public async Task<IActionResult> PostCabinet([FromBody] PostPutCabinetRequest request)
         {
             if (await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Name == request.Name) != null)
-                return BadRequest(RequestErrorMessages.CabinetAlreadyExists);
+                return BadRequest(new[] { RequestErrorDescriber.CabinetAlreadyExists });
 
             var cabinet = new Cabinet
             {
@@ -103,7 +104,7 @@ namespace IrzUccApi.Controllers.Events
                 return NotFound();
 
             if (await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Name == request.Name) != null)
-                return BadRequest(RequestErrorMessages.CabinetAlreadyExists);
+                return BadRequest(new[] { RequestErrorDescriber.CabinetAlreadyExists });
 
             cabinet.Name = request.Name;
             _dbContext.Update(cabinet);
@@ -121,7 +122,7 @@ namespace IrzUccApi.Controllers.Events
                 return NotFound();
 
             if (cabinet.Events.Count != 0)
-                return BadRequest(RequestErrorMessages.CabinetIsBooked);
+                return BadRequest(new[] { RequestErrorDescriber.CabinetIsBooked });
 
             _dbContext.Cabinets.Remove(cabinet);
 

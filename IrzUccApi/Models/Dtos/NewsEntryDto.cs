@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class NewsEntryDto
+    public record NewsEntryDto
     {
         public NewsEntryDto(
             Guid id,

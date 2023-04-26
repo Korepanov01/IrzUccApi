@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class CabinetDto
+    public record CabinetDto
     {
         public CabinetDto(Guid id, string name)
         {

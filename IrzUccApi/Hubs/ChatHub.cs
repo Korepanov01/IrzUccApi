@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.Requests.Messages;
@@ -74,7 +75,7 @@ namespace IrzUccApi.Hubs
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
             {
-                await Clients.Caller.SendAsync(ChatHubMethodsNames.BadRequest, RequestErrorMessages.MessageCantBeEmpty);
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.BadRequest, new[] { RequestErrorDescriber.MessageCantBeEmpty });
                 return;
             }
 
@@ -88,7 +89,7 @@ namespace IrzUccApi.Hubs
             var recipient = await _userManager.FindByIdAsync(request.UserId);
             if (recipient == null)
             {
-                await Clients.Caller.SendAsync(ChatHubMethodsNames.BadRequest, RequestErrorMessages.UserDoesntExistMessage);
+                await Clients.Caller.SendAsync(ChatHubMethodsNames.BadRequest, new[] { RequestErrorDescriber.UserDoesntExist });
                 return;
             }
 

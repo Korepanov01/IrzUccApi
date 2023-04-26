@@ -1,6 +1,6 @@
 ﻿namespace IrzUccApi.Models.Dtos
 {
-    public class EventListItemDto
+    public record EventListItemDto
     {
         public EventListItemDto(
             Guid id,
