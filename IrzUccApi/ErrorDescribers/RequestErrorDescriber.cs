@@ -27,6 +27,11 @@
         public static readonly RequestError ThereAreUsersWithThisPosition = new(nameof(ThereAreUsersWithThisPosition), "Есть пользователи с этой должностью!");
         public static readonly RequestError UserIsNotInPosition = new(nameof(UserIsNotInPosition), "Пользователь не занимает данную должность!");
 
+        public static readonly RequestError ThereIsNoSuchRole = new(nameof(ThereIsNoSuchRole), "Роли с таким названием не существует!");
+        public static readonly RequestError UserAlreadyWithThisRole = new(nameof(UserAlreadyWithThisRole), "Пользователь уже находится в данной роли!");
+        public static readonly RequestError UserIsNotWithThisRole = new(nameof(UserIsNotWithThisRole), "Пользователь не имеет данной роли!");
+
+
         public static readonly RequestError EndTimeIsLessThenStartTime = new(nameof(EndTimeIsLessThenStartTime), "Время окончания не может быть меньше времени начала!");
 
         public static readonly RequestError MessageCantBeEmpty = new(nameof(MessageCantBeEmpty), "Сообщение не может быть пустым!");

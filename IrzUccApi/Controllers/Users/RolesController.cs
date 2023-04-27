@@ -1,10 +1,12 @@
-﻿using IrzUccApi.Enums;
+﻿using IrzUccApi.Db;
+using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Role;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Users
 {
@@ -14,10 +16,12 @@ namespace IrzUccApi.Controllers.Users
     public class RolesController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly AppDbContext _dbContext;
 
-        public RolesController(UserManager<AppUser> userManager)
+        public RolesController(UserManager<AppUser> userManager, AppDbContext dbContext)
         {
             _userManager = userManager;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
@@ -37,13 +41,6 @@ namespace IrzUccApi.Controllers.Users
 
         [HttpPost("add_to_user")]
         public async Task<IActionResult> AddUserRoleAsync([FromBody] AddRemoveRoleRequest request)
-            => await AddRemoveUserRoleAsync(request);
-
-        [HttpPost("remove_from_user")]
-        public async Task<IActionResult> RemoveUserRoleAsync([FromBody] AddRemoveRoleRequest request)
-            => await AddRemoveUserRoleAsync(request, true);
-
-        private async Task<IActionResult> AddRemoveUserRoleAsync(AddRemoveRoleRequest request, bool isRemoving = false)
         {
             var isSuperAdmin = User.IsInRole(RolesNames.SuperAdmin);
 
@@ -57,18 +54,50 @@ namespace IrzUccApi.Controllers.Users
             if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin) && (!isSuperAdmin || request.Role == RolesNames.Admin))
                 return Forbid();
 
-            try
+            var role = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == request.Role);
+            if (role == null)
+                return NotFound(new[] { RequestErrorDescriber.ThereIsNoSuchRole});
+
+            if (await _dbContext.UserRoles.AnyAsync(ur => ur.Role.Name == request.Role && ur.UserId == request.UserId))
             {
-                var identityResult = isRemoving
-                    ? await _userManager.RemoveFromRoleAsync(user, request.Role)
-                    : await _userManager.AddToRoleAsync(user, request.Role);
-                if (!identityResult.Succeeded)
-                    return BadRequest(identityResult.Errors);
+                return BadRequest(new[] { RequestErrorDescriber.UserAlreadyWithThisRole });
             }
-            catch (InvalidOperationException e)
+
+            var userRole = new AppUserRole
             {
-                return BadRequest(new RequestError(nameof(InvalidOperationException), e.Message));
+                User = user,
+                Role = role,
+            };
+
+            await _dbContext.AddAsync(userRole);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpPost("remove_from_user")]
+        public async Task<IActionResult> RemoveUserRoleAsync([FromBody] AddRemoveRoleRequest request)
+        {
+            var isSuperAdmin = User.IsInRole(RolesNames.SuperAdmin);
+
+            if (request.Role == RolesNames.SuperAdmin || request.Role == RolesNames.Admin && !isSuperAdmin)
+                return Forbid();
+
+            var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+            if (user == null)
+                return NotFound(new[] { RequestErrorDescriber.UserDoesntExist });
+
+            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin) && (!isSuperAdmin || request.Role == RolesNames.Admin))
+                return Forbid();
+
+            var userRole = await _dbContext.UserRoles.FirstOrDefaultAsync(ur => ur.Role.Name == request.Role && ur.UserId == request.UserId);
+            if (userRole == null)
+            {
+                return BadRequest(new[] { RequestErrorDescriber.UserIsNotWithThisRole });
             }
+
+            _dbContext.Remove(userRole);
+            await _dbContext.SaveChangesAsync();
 
             return Ok();
         }
