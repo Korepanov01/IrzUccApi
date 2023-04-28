@@ -15,7 +15,7 @@ namespace IrzUccApi.Controllers.Users
 {
     [Route("api/positions")]
     [ApiController]
-    [Authorize(Roles = RolesNames.Admin)]
+    [Authorize]
     public class PositionsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
@@ -30,7 +30,6 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetPositionsAsync([FromQuery] SearchStringParameters parameters)
         {
             var positions = _dbContext.Positions.AsQueryable();
@@ -52,6 +51,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPost]
+        [Authorize(Roles = RolesNames.Admin)]
         public async Task<IActionResult> AddPositionAsync([FromBody] AddUpdatePositionRequest request)
         {
             if (await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name == request.Name) != null)
@@ -71,6 +71,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = RolesNames.Admin)]
         public async Task<IActionResult> UpdatePositionAsync(Guid id, [FromBody] AddUpdatePositionRequest request)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
@@ -87,6 +88,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = RolesNames.Admin)]
         public async Task<IActionResult> DeletePositionAsync(Guid id)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == id);
@@ -103,6 +105,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPost("add_pos_to_user")]
+        [Authorize(Roles = RolesNames.Admin)]
         public async Task<IActionResult> AddPositionToUserAsync([FromBody] AddPositionToUserRequest request)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
@@ -129,6 +132,7 @@ namespace IrzUccApi.Controllers.Users
         }
 
         [HttpPost("remove_user_position")]
+        [Authorize(Roles = RolesNames.Admin)]
         public async Task<IActionResult> RemoveUserPositionAsync([FromBody] RemoveUserPositionRequest request)
         {
             var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Id == request.PositionId);
