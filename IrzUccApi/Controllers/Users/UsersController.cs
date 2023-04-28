@@ -51,10 +51,11 @@ public class UsersController : ControllerBase
 
         if (parameters.SearchString != null)
         {
-            var normalizedSearchString = parameters.SearchString.ToUpper();
-            users = users
-                .Where(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper()
-                    .Contains(normalizedSearchString));
+            var normalizedSearchWords = parameters.SearchString
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(sw => sw.ToUpper());
+            foreach (var word in normalizedSearchWords)
+                users = users.Where(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper().Contains(word));
         }
 
         if (parameters.Role != null)

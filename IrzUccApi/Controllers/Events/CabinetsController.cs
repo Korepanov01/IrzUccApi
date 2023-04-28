@@ -34,8 +34,11 @@ namespace IrzUccApi.Controllers.Events
 
             if (parameters.SearchString != null)
             {
-                var normalizedSearchString = parameters.SearchString.ToUpper();
-                cabinets = cabinets.Where(n => n.Name.ToUpper().Contains(normalizedSearchString));
+                var normalizedSearchWords = parameters.SearchString
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(sw => sw.ToUpper());
+                foreach (var word in normalizedSearchWords)
+                    cabinets = cabinets.Where(c => c.Name.ToUpper().Contains(word));
             }
 
             if (parameters.FreeOnly)

@@ -44,8 +44,11 @@ namespace IrzUccApi.Controllers.Messages
 
             if (parameters.SearchString != null && parameters.LastMessageId == null)
             {
-                var normalizedSearchString = parameters.SearchString.ToUpper();
-                messages = messages.Where(m => m.Text != null && m.Text.Contains(parameters.SearchString));
+                var normalizedSearchWords = parameters.SearchString
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(sw => sw.ToUpper());
+                foreach (var word in normalizedSearchWords)
+                    messages = messages.Where(m => m.Text != null && m.Text.ToUpper().Contains(word));
             }
 
             messages = parameters.LastMessageId == null

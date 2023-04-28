@@ -45,8 +45,11 @@ namespace IrzUccApi.Controllers.News
 
             if (parameters.SearchString != null)
             {
-                var normalizedSearchString = parameters.SearchString.ToUpper();
-                news = news.Where(n => (n.Title + n.Text).ToUpper().Contains(normalizedSearchString));
+                var normalizedSearchWords = parameters.SearchString
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(sw => sw.ToUpper());
+                foreach (var word in normalizedSearchWords)
+                    news = news.Where(n => (n.Title + n.Text).ToUpper().Contains(word));
             }
 
             return Ok(await news

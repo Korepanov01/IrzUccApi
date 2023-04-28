@@ -36,8 +36,11 @@ namespace IrzUccApi.Controllers.Users
 
             if (parameters.SearchString != null)
             {
-                var normalizedSearchString = parameters.SearchString.ToUpper();
-                positions = positions.Where(p => p.Name.ToUpper().Contains(normalizedSearchString));
+                var normalizedSearchWords = parameters.SearchString
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(sw => sw.ToUpper());
+                foreach (var word in normalizedSearchWords)
+                    positions = positions.Where(p => p.Name.ToUpper().Contains(word));
             }
 
             return Ok(await positions
