@@ -5,7 +5,9 @@ using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.Requests.Messages;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SignalRSwaggerGen.Attributes;
@@ -19,13 +21,16 @@ namespace IrzUccApi.Hubs
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public ChatHub(
             AppDbContext dbContext,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            IWebHostEnvironment webHostEnvironment)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         private string? GetUserId()
@@ -71,9 +76,9 @@ namespace IrzUccApi.Hubs
         }
 
         [SignalRMethod]
-        public async Task SendMessageAsync([SignalRParam] PostMessageRequest request)
+        public async Task SendMessageAsync([SignalRParam] PostMessageRequest request, [FromForm] IFormFile? image)
         {
-            if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
+            if (string.IsNullOrWhiteSpace(request.Text) && image == null)
             {
                 await Clients.Caller.SendAsync(ChatHubMethodsNames.BadRequest, new[] { RequestErrorDescriber.MessageCantBeEmpty });
                 return;
@@ -110,30 +115,27 @@ namespace IrzUccApi.Hubs
 
             var newMessageId = Guid.NewGuid();
 
-            Image? image = null;
-            if (request.Image != null)
-            {
-                image = new Image
-                {
-                    Name = request.Image.Name,
-                    Extension = request.Image.Extension,
-                    Data = request.Image.Data,
-                    Source = ImageSources.Message,
-                    SourceId = newMessageId
-                };
-                await _dbContext.Images.AddAsync(image);
-            }
-
             var message = new Message
             {
                 Id = newMessageId,
                 Text = request.Text,
-                Image = image,
                 IsReaded = false,
                 DateTime = DateTime.UtcNow,
                 Sender = currentUser,
                 Chat = chat
             };
+            if (image != null)
+            {
+                var path = "/Images/" + Guid.NewGuid().ToString();
+
+                using (var fileStream = new FileStream(_webHostEnvironment.WebRootPath + path, FileMode.Create))
+                {
+                    await image.CopyToAsync(fileStream);
+                }
+
+                message.ImagePath = path;
+            }
+
             await _dbContext.AddAsync(message);
             await _dbContext.SaveChangesAsync();
 
@@ -144,7 +146,7 @@ namespace IrzUccApi.Hubs
             var messageDto = new MessageDto(
                     message.Id,
                     message.Text,
-                    message.Image?.Id,
+                    message.ImagePath,
                     message.DateTime,
                     message.Sender.Id);
 
@@ -181,6 +183,12 @@ namespace IrzUccApi.Hubs
 
             var recipient = message.Chat.Participants.FirstOrDefault(u => u.Id != currentUser.Id);
 
+            if (message.ImagePath != null)
+            {
+                var file = new FileInfo(_webHostEnvironment.WebRootPath + message.ImagePath);
+                if (file.Exists)
+                    file.Delete();
+            }
             _dbContext.Remove(message);
             await _dbContext.SaveChangesAsync();
 

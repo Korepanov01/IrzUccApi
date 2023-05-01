@@ -39,5 +39,7 @@
 
         public static readonly RequestError CabinetAlreadyExists = new(nameof(CabinetAlreadyExists), "Кабинет уже существует!");
         public static readonly RequestError CabinetIsBooked = new(nameof(CabinetIsBooked), "Кабинет забронирован!");
+
+        public static readonly RequestError FileIsNull = new(nameof(FileIsNull), "Нет файла!");
     }
 }

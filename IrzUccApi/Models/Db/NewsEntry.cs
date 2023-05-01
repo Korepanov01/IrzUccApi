@@ -13,7 +13,7 @@ namespace IrzUccApi.Models.Db
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
         public bool IsPublic { get; set; } = false;
 
-        public virtual Image? Image { get; set; }
+        public virtual string? ImagePath { get; set; }
 
         public virtual AppUser Author { get; set; } = new AppUser();
         public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
