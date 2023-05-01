@@ -148,15 +148,20 @@ namespace IrzUccApi.Controllers.Events
             }
 
             if (request.ListenersIds != null && request.ListenersIds.Any())
+            {
                 if (!request.IsPublic)
+                {
                     foreach (var userId in request.ListenersIds)
                     {
                         var user = await _userManager.FindByIdAsync(userId);
                         if (user == null)
                             return BadRequest();
+                        newEvent.Listeners.Add(user);
                     }
+                }
                 else
                     return BadRequest();
+            }
 
             await _dbContext.AddAsync(newEvent);
             await _dbContext.SaveChangesAsync();
