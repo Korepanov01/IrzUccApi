@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IrzUccApi.Models.Db
 {
     [Table("Message")]
-    public class Message : BaseDbModel
+    public class Message : BaseDbModel, IEntity
     {
         [MaxLength(150)]
         public string? Text { get; set; } = string.Empty;
