@@ -4,6 +4,7 @@ using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace IrzUccApi.Db.Repositories
 {
@@ -47,6 +48,17 @@ namespace IrzUccApi.Db.Repositories
             => await ExistsAsync(c => c.Name == name);
 
         public async Task<bool> IsBookedAsync(Cabinet cabinet)
-            => await _dbContext.Events.Where(e => e.Cabinet != null && e.Id == cabinet.Id).AnyAsync();
+            => await IsBookedAsync(cabinet, DateTime.MinValue, DateTime.MaxValue);
+
+        public async Task<bool> IsBookedAsync(Cabinet cabinet, DateTime start, DateTime end)
+        {
+            start = start.ToUniversalTime();
+            end = end.ToUniversalTime();
+
+            return await _dbContext.Events
+                .Where(e => e.Cabinet != null && e.Id == cabinet.Id)
+                .Where(e => start < e.Start && end > e.Start || start > e.Start && end < e.End)
+                .AnyAsync();
+        }
     }
 }
