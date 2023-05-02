@@ -13,48 +13,23 @@ namespace IrzUccApi.Controllers.Messages
     [Authorize]
     public class ChatController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UnitOfWork _unitOfWork;
 
-        public ChatController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public ChatController(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
-            _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetChatsAsync([FromQuery] PagingParameters parameters)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await _unitOfWork.Users.GetByClaimsAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
-            return Ok(currentUser.Chats
-                .OrderByDescending(c => c.LastMessage != null ? c.LastMessage.DateTime : DateTime.MinValue)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize)
-                .Select(c =>
-                {
-                    var recipient = c.Participants.FirstOrDefault(u => u.Id != currentUser.Id) ?? currentUser;
-                    var recipientDto = new UserHeaderDto(
-                            recipient.Id,
-                            recipient.FirstName,
-                            recipient.Surname,
-                            recipient.Patronymic,
-                            recipient.Image?.Id);
-                    var lastMessageDto = c.LastMessage != null ? new MessageDto(
-                            c.LastMessage.Id,
-                            c.LastMessage.Text,
-                            c.LastMessage.Image?.Id,
-                            c.LastMessage.DateTime,
-                            c.LastMessage.Sender.Id) : null;
+            var chats = await _unitOfWork.Chats.GetByParticipantAsync(currentUser, parameters);
 
-                    return new ChatDto(
-                        c.Id,
-                        recipientDto,
-                        lastMessageDto,
-                        c.Messages.Where(m => m.Sender.Id != currentUser.Id && !m.IsReaded).Count());
-                }));
+            return Ok(chats);
         }
     }
 }
