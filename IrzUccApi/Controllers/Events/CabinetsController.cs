@@ -2,13 +2,11 @@
 using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
-using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Events;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Events
 {
@@ -17,82 +15,48 @@ namespace IrzUccApi.Controllers.Events
     [Authorize(Roles = RolesNames.CabinetsManager)]
     public class CabinetsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly UnitOfWork _unitOfWork;
 
-        public CabinetsController(AppDbContext dbContext)
+        public CabinetsController(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetCabinetsAsync([FromQuery] CabinetsGetParameters parameters)
         {
-            var cabinets = _dbContext.Cabinets.AsQueryable();
+            if (parameters.TimeRange != null && parameters.TimeRange.Start > parameters.TimeRange.End)
+                return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
 
-            if (parameters.SearchString != null)
-            {
-                var normalizedSearchWords = parameters.SearchString
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(sw => sw.ToUpper());
-                foreach (var word in normalizedSearchWords)
-                    cabinets = cabinets.Where(c => c.Name.ToUpper().Contains(word));
-            }
+            var cabinets = await _unitOfWork.Cabinets.GetAsync(parameters);
 
-            if (parameters.TimeRange != null)
-            {
-                var start = parameters.TimeRange.Start.ToUniversalTime();
-                var end = parameters.TimeRange.End.ToUniversalTime();
-
-                if (start > end)
-                    return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
-
-                cabinets = cabinets.Where(c => !c.Events.Where(e =>
-                    start < e.Start && end > e.Start || start > e.Start && end < e.End).Any());
-            }
-
-            return Ok(await cabinets
-                .OrderBy(c => c.Name)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize)
-                .Select(c => new CabinetDto(
-                    c.Id,
-                    c.Name))
-                .ToArrayAsync());
+            return Ok(cabinets);
         }
 
         [HttpGet("{id}/events")]
         public async Task<IActionResult> GetCabinetEventsAsync(Guid id, [FromQuery] PagingParameters parameters)
         {
-            var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
+            var cabinet = await _unitOfWork.Cabinets.GetByIdAsync(id);
             if (cabinet == null)
                 return NotFound();
 
-            return Ok(cabinet.Events
-                .OrderBy(e => e.Start)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize)
-                .Select(e => new EventListItemDto(
-                    e.Id,
-                    e.Title,
-                    e.Start,
-                    e.End,
-                    null))
-                .ToArray());
+            var events = await _unitOfWork.Events.GetByCabinetAsync(cabinet, parameters);
+
+            return Ok(events);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostCabinetAsync([FromBody] PostPutCabinetRequest request)
         {
-            if (await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Name == request.Name) != null)
+            if (await _unitOfWork.Cabinets.ExistsAsync(request.Name))
                 return BadRequest(new[] { RequestErrorDescriber.CabinetAlreadyExists });
-
+                
             var cabinet = new Cabinet
             {
                 Name = request.Name
             };
 
-            await _dbContext.AddAsync(cabinet);
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Cabinets.AddAsync(cabinet);
 
             return Ok(cabinet.Id);
         }
@@ -100,17 +64,16 @@ namespace IrzUccApi.Controllers.Events
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCabinetAsync(Guid id, [FromBody] PostPutCabinetRequest request)
         {
-            var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
+            var cabinet = await _unitOfWork.Cabinets.GetByIdAsync(id);
             if (cabinet == null)
                 return NotFound();
 
-            if (await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Name == request.Name) != null)
+            if (await _unitOfWork.Cabinets.ExistsAsync(request.Name))
                 return BadRequest(new[] { RequestErrorDescriber.CabinetAlreadyExists });
 
             cabinet.Name = request.Name;
-            _dbContext.Update(cabinet);
 
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Cabinets.UpdateAsync(cabinet);
 
             return Ok();
         }
@@ -118,16 +81,14 @@ namespace IrzUccApi.Controllers.Events
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCabinetAsync(Guid id)
         {
-            var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == id);
+            var cabinet = await _unitOfWork.Cabinets.GetByIdAsync(id);
             if (cabinet == null)
                 return NotFound();
 
-            if (cabinet.Events.Count != 0)
+            if (await _unitOfWork.Cabinets.IsBookedAsync(cabinet))
                 return BadRequest(new[] { RequestErrorDescriber.CabinetIsBooked });
 
-            _dbContext.Cabinets.Remove(cabinet);
-
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Cabinets.DeleteAsync(cabinet);
 
             return Ok();
         }

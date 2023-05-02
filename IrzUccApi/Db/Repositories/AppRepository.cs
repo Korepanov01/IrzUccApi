@@ -38,6 +38,11 @@ namespace IrzUccApi.Db.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<bool> ExistsAsync(Guid id)
+        {
+            return await ExistsAsync(e => e.Id == id);
+        }
+
         public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await _dbContext.Set<TEntity>().AnyAsync(predicate);
