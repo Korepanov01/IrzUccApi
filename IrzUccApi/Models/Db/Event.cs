@@ -16,6 +16,6 @@ namespace IrzUccApi.Models.Db
         public bool IsPublic { get; set; } = false;
 
         public virtual AppUser Creator { get; set; } = new AppUser();
-        public virtual ICollection<AppUser> Listeners { get; set; } = new HashSet<AppUser>();
+        public virtual ISet<AppUser> Listeners { get; set; } = new HashSet<AppUser>();
     }
 }

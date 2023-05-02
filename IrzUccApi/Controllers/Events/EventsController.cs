@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
@@ -52,19 +53,26 @@ namespace IrzUccApi.Controllers.Events
             if (currentUser == null)
                 return Unauthorized();
 
-            if (parameters.Start > parameters.End || (parameters.End - parameters.Start).Days > 40)
-                return BadRequest();
+            var start = parameters.Start.ToUniversalTime();
+            var end = parameters.End.ToUniversalTime();
 
-            return Ok(currentUser.ListeningEvents
+            if (start > end)
+                return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
+            if ((end - start).Days > 40)
+                return BadRequest(new[] { RequestErrorDescriber.TooLongPeriod });
+
+            return Ok(await _dbContext.Events
                 .OrderBy(e => e.Start)
-                .Where(e => parameters.Start < e.Start && parameters.End > e.Start
-                    || parameters.Start > e.Start && parameters.End < e.End)
+                .Where(e => e.IsPublic || e.Listeners.Contains(currentUser) || e.Creator.Id == currentUser.Id)
+                .Where(e => start < e.Start && end > e.Start
+                    || start > e.Start && end < e.End)
                 .Select(e => new EventListItemDto(
                     e.Id,
                     e.Title,
                     e.Start,
                     e.End,
-                    e.Cabinet?.Name)));
+                    e.Cabinet != null ? e.Cabinet.Name : null))
+                .ToArrayAsync());
         }
 
         [HttpGet("{id}")]
@@ -80,7 +88,7 @@ namespace IrzUccApi.Controllers.Events
 
             if (!resEvent.IsPublic && !resEvent.Listeners.Contains(currentUser) && resEvent.Creator.Id != currentUser.Id)
                 return Forbid();
-
+            
             return Ok(new EventDto(
                 resEvent.Id,
                 resEvent.Title,
@@ -95,7 +103,7 @@ namespace IrzUccApi.Controllers.Events
                     resEvent.Creator.Surname,
                     resEvent.Creator.Patronymic,
                     resEvent?.Creator?.Image?.Id),
-                resEvent.Listeners
+                resEvent!.Listeners
                     .Select(u => new UserHeaderDto(
                         u.Id,
                         u.FirstName,
@@ -126,16 +134,16 @@ namespace IrzUccApi.Controllers.Events
                     return Forbid();
 
                 if (request.Start > request.End)
-                    return BadRequest();
+                    return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
 
                 var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == request.CabinetId);
                 if (cabinet == null)
-                    return BadRequest();
+                    return BadRequest(new[] { RequestErrorDescriber.CabinetNotFound });
 
                 if (cabinet.Events
                     .Where(e => request.Start < e.Start && request.End > e.Start
                         || request.Start > e.Start && request.End < e.End).Any())
-                    return BadRequest();
+                    return BadRequest(new[] { RequestErrorDescriber.CabinetIsBooked });
 
                 newEvent.Cabinet = cabinet;
             }
@@ -147,16 +155,24 @@ namespace IrzUccApi.Controllers.Events
                 newEvent.IsPublic = true;
             }
 
-            if (request.ListenersIds != null && request.ListenersIds.Any())
-                if (!request.IsPublic)
+            if (request.ListenersIds != null)
+            {
+                request.ListenersIds.Remove(currentUser.Id);
+
+                if (request.ListenersIds.Any())
+                {
+                    if (request.IsPublic)
+                        return BadRequest(new[] { RequestErrorDescriber.PublicEventHasNotListeners });
+
                     foreach (var userId in request.ListenersIds)
                     {
-                        var user = await _userManager.FindByIdAsync(userId);
+                        var user = await _userManager.FindByIdAsync(userId.ToString());
                         if (user == null)
-                            return BadRequest();
+                            return BadRequest(new[] { RequestErrorDescriber.UserDoesntExist });
+                        newEvent.Listeners.Add(user);
                     }
-                else
-                    return BadRequest();
+                }
+            }
 
             await _dbContext.AddAsync(newEvent);
             await _dbContext.SaveChangesAsync();
