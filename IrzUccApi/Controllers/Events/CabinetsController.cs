@@ -19,12 +19,10 @@ namespace IrzUccApi.Controllers.Events
     public class CabinetsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
-        private readonly UserManager<AppUser> _userManager;
 
-        public CabinetsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public CabinetsController(AppDbContext dbContext)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
         }
 
         [HttpGet]
@@ -41,15 +39,16 @@ namespace IrzUccApi.Controllers.Events
                     cabinets = cabinets.Where(c => c.Name.ToUpper().Contains(word));
             }
 
-            if (parameters.FreeOnly)
+            if (parameters.TimeRange != null)
             {
-                if (parameters.Start == null || parameters.End == null)
-                    return BadRequest();
-                if (parameters.Start > parameters.End)
-                    return BadRequest();
-                cabinets = cabinets.Where(c => c.Events.Where(e =>
-                    parameters.Start < e.Start && parameters.End > e.Start
-                        || parameters.Start > e.Start && parameters.End < e.End).Count() == 0);
+                var start = parameters.TimeRange.Start.ToUniversalTime();
+                var end = parameters.TimeRange.End.ToUniversalTime();
+
+                if (start > end)
+                    return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
+
+                cabinets = cabinets.Where(c => !c.Events.Where(e =>
+                    start < e.Start && end > e.Start || start > e.Start && end < e.End).Any());
             }
 
             return Ok(await cabinets

@@ -31,7 +31,6 @@
         public static readonly RequestError UserAlreadyWithThisRole = new(nameof(UserAlreadyWithThisRole), "Пользователь уже находится в данной роли!");
         public static readonly RequestError UserIsNotWithThisRole = new(nameof(UserIsNotWithThisRole), "Пользователь не имеет данной роли!");
 
-
         public static readonly RequestError EndTimeIsLessThenStartTime = new(nameof(EndTimeIsLessThenStartTime), "Время окончания не может быть меньше времени начала!");
 
         public static readonly RequestError MessageCantBeEmpty = new(nameof(MessageCantBeEmpty), "Сообщение не может быть пустым!");
@@ -39,5 +38,9 @@
 
         public static readonly RequestError CabinetAlreadyExists = new(nameof(CabinetAlreadyExists), "Кабинет уже существует!");
         public static readonly RequestError CabinetIsBooked = new(nameof(CabinetIsBooked), "Кабинет забронирован!");
+
+        public static readonly RequestError TooLongPeriod = new(nameof(TooLongPeriod), "Период просмотра событий не может быть дольше 40 дней!");
+        public static readonly RequestError CabinetNotFound = new(nameof(CabinetNotFound), "Не существует такого кабинета!");
+        public static readonly RequestError PublicEventHasNotListeners = new(nameof(PublicEventHasNotListeners), "Публичное событие не может иметь слушателей!");
     }
 }

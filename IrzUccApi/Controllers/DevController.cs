@@ -41,6 +41,10 @@ namespace IrzUccApi.Controllers
             await SeedLikesAsync(users, news);
 
             await SeedCommentsAsync(users, news);
+
+            var cabinets = await SeedCabinetsAsync();
+
+            await SeedEventsAsync(users, cabinets);
         }
 
         [HttpPost("seed_random_news")]
@@ -334,6 +338,111 @@ namespace IrzUccApi.Controllers
             };
 
             await _dbContext.AddRangeAsync(comments);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        private async Task<Dictionary<string, Cabinet>> SeedCabinetsAsync()
+        {
+            var cabinets = new[]
+            {
+                new Cabinet
+                {
+                    Name = "100",
+                },
+                new Cabinet
+                {
+                    Name = "101",
+                },
+                new Cabinet
+                {
+                    Name = "102",
+                },
+                new Cabinet
+                {
+                    Name = "103",
+                },
+                new Cabinet
+                {
+                    Name = "104",
+                },
+                new Cabinet
+                {
+                    Name = "105",
+                }
+            };
+
+            await _dbContext.AddRangeAsync(cabinets);
+            await _dbContext.SaveChangesAsync();
+
+            return cabinets.ToDictionary(n => n.Name);
+        }
+        private async Task SeedEventsAsync(Dictionary<string, AppUser> users, Dictionary<string, Cabinet> cabinets)
+        {
+            var events = new[]
+            {
+                new Event
+                {
+                    Title = "День ИРЗ",
+                    Start = new DateTime(2023, 5, 10, 10, 0, 0).ToUniversalTime(),
+                    End = new DateTime(2023, 5, 10, 12, 0, 0).ToUniversalTime(),
+                    Cabinet = null,
+                    IsPublic = true,
+                    Creator = users["sergey@irz.ru"],
+                },
+                new Event
+                {
+                    Title = "День станка!",
+                    Start = new DateTime(2023, 5, 18, 14, 0, 0).ToUniversalTime(),
+                    End = new DateTime(2023, 5, 18, 16, 0, 0).ToUniversalTime(),
+                    Description = "Все работники будут примерять станки!",
+                    Cabinet = null,
+                    IsPublic = true,
+                    Creator = users["sergey@irz.ru"],
+                },
+
+                new Event
+                {
+                    Title = "Антифашисткое собрание!",
+                    Start = new DateTime(2023, 5, 17, 13, 0, 0).ToUniversalTime(),
+                    End = new DateTime(2023, 5, 17, 15, 0, 0).ToUniversalTime(),
+                    Cabinet = cabinets["100"],
+                    IsPublic = false,
+                    Creator = users["ostalf@irz.ru"],
+                    Listeners = new HashSet<AppUser>()
+                    {
+                        users["sergey@irz.ru"],
+                        users["ivan@irz.ru"],
+                    }
+                },
+
+                new Event
+                {
+                    Title = "Не забыть [ДАННЫЕ УДАЛЕНЫ]",
+                    Start = new DateTime(2023, 5, 15, 13, 0, 0).ToUniversalTime(),
+                    End = new DateTime(2023, 5, 15, 15, 0, 0).ToUniversalTime(),
+                    Description = "Не забыть примерить [ДАННЫЕ УДАЛЕНЫ] себе на [ДАННЫЕ УДАЛЕНЫ]",
+                    Cabinet = null,
+                    IsPublic = false,
+                    Creator = users["ostalf@irz.ru"],
+                },
+
+                new Event
+                {
+                    Title = "Шашлык на двоих",
+                    Start = new DateTime(2023, 5, 25, 11, 0, 0).ToUniversalTime(),
+                    End = new DateTime(2023, 5, 25, 13, 0, 0).ToUniversalTime(),
+                    Description = null,
+                    Cabinet = null,
+                    IsPublic = false,
+                    Creator = users["ostalf@irz.ru"],
+                    Listeners = new HashSet<AppUser>()
+                    {
+                        users["ivan@irz.ru"]
+                    }
+                }
+            };
+
+            await _dbContext.AddRangeAsync(events);
             await _dbContext.SaveChangesAsync();
         }
     }
