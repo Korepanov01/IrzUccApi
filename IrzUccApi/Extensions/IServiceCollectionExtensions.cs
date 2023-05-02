@@ -1,4 +1,5 @@
-﻿using IrzUccApi.Models.Configurations;
+﻿using IrzUccApi.Db.Repositories;
+using IrzUccApi.Models.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -115,6 +116,15 @@ namespace IrzUccApi.Extensions
 
                 options.User.RequireUniqueEmail = true;
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddRepositories(this IServiceCollection services)
+        {
+            services.AddScoped<PositionRepository>();
+            services.AddScoped<UserPositionRepository>();
+            services.AddScoped<UserRepository>();
 
             return services;
         }
