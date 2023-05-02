@@ -14,7 +14,7 @@ namespace IrzUccApi.Services
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var delayPeriod = new TimeSpan(0, 0, 0, 0);
+            var delayPeriod = new TimeSpan(1, 0, 0, 0);
 
             while (!cancellationToken.IsCancellationRequested)
             {
