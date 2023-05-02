@@ -1,6 +1,6 @@
-﻿using IrzUccApi.ErrorDescribers;
+﻿using IrzUccApi.Db.Models;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Configurations;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Authentication;
 using IrzUccApi.Models.Requests.Users;
 using IrzUccApi.Services;

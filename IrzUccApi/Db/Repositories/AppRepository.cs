@@ -1,4 +1,4 @@
-﻿using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -9,10 +9,12 @@ namespace IrzUccApi.Db.Repositories
         where TDbContext : DbContext
     {
         protected readonly TDbContext _dbContext;
+
         public AppRepository(TDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+
         public async Task AddAsync(TEntity entity)
         {
             _dbContext.Set<TEntity>().Add(entity);

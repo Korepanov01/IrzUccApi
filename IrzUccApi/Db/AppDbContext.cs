@@ -1,4 +1,4 @@
-﻿using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

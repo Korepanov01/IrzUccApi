@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace IrzUccApi.Models.Db
+namespace IrzUccApi.Db.Models
 {
     [Table("NewsEntry")]
     public class NewsEntry : BaseDbModel, IEntity

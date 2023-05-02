@@ -1,4 +1,4 @@
-﻿using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db.Models;
 
 namespace IrzUccApi.Db.Repositories
 {

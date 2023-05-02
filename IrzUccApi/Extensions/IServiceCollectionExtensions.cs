@@ -119,14 +119,5 @@ namespace IrzUccApi.Extensions
 
             return services;
         }
-
-        public static IServiceCollection AddRepositories(this IServiceCollection services)
-        {
-            services.AddScoped<PositionRepository>();
-            services.AddScoped<UserPositionRepository>();
-            services.AddScoped<UserRepository>();
-
-            return services;
-        }
     }
 }

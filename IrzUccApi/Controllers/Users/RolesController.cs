@@ -1,7 +1,7 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Role;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -56,7 +56,7 @@ namespace IrzUccApi.Controllers.Users
 
             var role = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == request.Role);
             if (role == null)
-                return NotFound(new[] { RequestErrorDescriber.ThereIsNoSuchRole});
+                return NotFound(new[] { RequestErrorDescriber.ThereIsNoSuchRole });
 
             if (await _dbContext.UserRoles.AnyAsync(ur => ur.Role.Name == request.Role && ur.UserId == request.UserId))
             {

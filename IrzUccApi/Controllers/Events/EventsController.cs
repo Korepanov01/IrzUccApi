@@ -1,7 +1,7 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
@@ -88,7 +88,7 @@ namespace IrzUccApi.Controllers.Events
 
             if (!resEvent.IsPublic && !resEvent.Listeners.Contains(currentUser) && resEvent.Creator.Id != currentUser.Id)
                 return Forbid();
-            
+
             return Ok(new EventDto(
                 resEvent.Id,
                 resEvent.Title,

@@ -1,5 +1,5 @@
 ﻿using IrzUccApi.Db;
-using IrzUccApi.Models.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Services;
 using Microsoft.AspNetCore.Identity;

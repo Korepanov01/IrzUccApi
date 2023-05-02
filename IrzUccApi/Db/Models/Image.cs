@@ -1,7 +1,7 @@
 ﻿using IrzUccApi.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace IrzUccApi.Models.Db
+namespace IrzUccApi.Db.Models
 {
     public class Image : BaseDbModel, IEntity
     {

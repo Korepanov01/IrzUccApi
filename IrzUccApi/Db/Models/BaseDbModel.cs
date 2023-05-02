@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace IrzUccApi.Models.Db
+namespace IrzUccApi.Db.Models
 {
-    public interface IEntity
+    public class BaseDbModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

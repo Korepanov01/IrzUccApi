@@ -1,5 +1,5 @@
 ﻿using IrzUccApi.Db;
-using IrzUccApi.Models.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.News;
