@@ -34,6 +34,13 @@ namespace IrzUccApi.Services
             await SendEmailAsync(email, subject, message);
         }
 
+        public async Task SendEventNotification(string email, string eventTitle)
+        {
+            var subject = eventTitle;
+            var message = $"Не забудте про событие: \"{eventTitle}\"";
+            await SendEmailAsync(email, subject, message);
+        }
+
         private async Task SendEmailAsync(string email, string subject, string message)
         {
             using var emailMessage = new MimeMessage();

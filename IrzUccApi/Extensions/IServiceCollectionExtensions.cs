@@ -1,4 +1,5 @@
 ﻿using IrzUccApi.Models.Configurations;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -115,6 +116,14 @@ namespace IrzUccApi.Extensions
 
                 options.User.RequireUniqueEmail = true;
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddBackgroundServices(this IServiceCollection services)
+        {
+            services.AddHostedService<EventsNotifier>();
+            services.AddHostedService<MemoryСleaner>();
 
             return services;
         }

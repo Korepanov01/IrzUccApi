@@ -26,6 +26,11 @@ builder.Services.AddJwtAuthentication(jwtConfiguration);
 builder.Services.AddAuthorization();
 builder.Services.AddTransient<JwtService>();
 
+var backgroundServicesConfiguration = new MemoryCleanerConfiguration();
+builder.Configuration.Bind("MemoryCleanerConfiguration", backgroundServicesConfiguration);
+builder.Services.AddSingleton(backgroundServicesConfiguration);
+builder.Services.AddBackgroundServices();
+
 var emailConfiguration = new EmailConfiguration();
 builder.Configuration.Bind("EmailService", emailConfiguration);
 builder.Services.AddSingleton(emailConfiguration);
