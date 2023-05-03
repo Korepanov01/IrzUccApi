@@ -48,7 +48,7 @@ namespace IrzUccApi.Controllers.Users
                 Patronymic = request.Patronymic,
                 UserName = request.Email,
                 Email = request.Email,
-                Birthday = request.Birthday
+                Birthday = request.Birthday.ToUniversalTime(),
             };
 
             var password = PasswordGenerator.GenerateRandomPassword(_passwordConfiguration);
@@ -83,23 +83,23 @@ namespace IrzUccApi.Controllers.Users
             return Ok();
         }
 
-        [HttpDelete("{id}")]
-        [Authorize(Roles = RolesNames.SuperAdmin)]
-        public async Task<IActionResult> DeleteUserAsync(Guid id)
-        {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
-                return NotFound();
+        //[HttpDelete("{id}")]
+        //[Authorize(Roles = RolesNames.SuperAdmin)]
+        //public async Task<IActionResult> DeleteUserAsync(Guid id)
+        //{
+        //    var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        //    if (user == null)
+        //        return NotFound();
 
-            if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-                return Forbid();
+        //    if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
+        //        return Forbid();
 
-            var identityResult = await _userManager.DeleteAsync(user);
-            if (!identityResult.Succeeded)
-                return BadRequest(identityResult.Errors);
+        //    var identityResult = await _userManager.DeleteAsync(user);
+        //    if (!identityResult.Succeeded)
+        //        return BadRequest(identityResult.Errors);
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         [HttpPut("{id}/activate")]
         public async Task<IActionResult> AcivateAsync(Guid id)

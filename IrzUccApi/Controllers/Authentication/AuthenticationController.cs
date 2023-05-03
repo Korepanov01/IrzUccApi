@@ -40,11 +40,11 @@ namespace IrzUccApi.Controllers.Authentication
             if (user == null)
                 return NotFound(new[] { RequestErrorDescriber.UserDoesntExist });
 
-            if (!await _userManager.CheckPasswordAsync(user, request.Password))
-                return BadRequest(new[] { RequestErrorDescriber.WrongPassword });
-
             if (!user.IsActiveAccount)
                 return BadRequest(new[] { RequestErrorDescriber.AccountDeactivated });
+
+            if (!await _userManager.CheckPasswordAsync(user, request.Password))
+                return BadRequest(new[] { RequestErrorDescriber.WrongPassword });
 
             var tokens = await _jwtManager.GenerateTokensAsync(user);
 
