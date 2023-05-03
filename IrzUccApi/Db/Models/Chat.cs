@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace IrzUccApi.Models.Db
+namespace IrzUccApi.Db.Models
 {
     [Table("Chat")]
     public class Chat : BaseDbModel

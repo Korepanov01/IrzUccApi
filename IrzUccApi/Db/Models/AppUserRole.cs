@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace IrzUccApi.Models.Db
+namespace IrzUccApi.Db.Models
 {
     public class AppUserRole : IdentityUserRole<Guid>
     {

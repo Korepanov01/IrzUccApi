@@ -1,9 +1,9 @@
 using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Extensions;
 using IrzUccApi.Hubs;
 using IrzUccApi.Models.Configurations;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

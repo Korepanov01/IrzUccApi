@@ -1,5 +1,5 @@
-﻿using IrzUccApi.Enums;
-using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db.Models;
+using IrzUccApi.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

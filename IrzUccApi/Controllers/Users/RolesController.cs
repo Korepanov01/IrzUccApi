@@ -1,7 +1,7 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.Role;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
