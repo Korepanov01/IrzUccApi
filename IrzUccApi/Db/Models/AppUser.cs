@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IrzUccApi.Db.Models
 {
     [Table("User")]
-    public class AppUser : IdentityUser<Guid>
+    public class AppUser : IdentityUser<Guid>, IEntity
     {
         [MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;

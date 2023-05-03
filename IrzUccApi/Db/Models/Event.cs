@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IrzUccApi.Db.Models
 {
     [Table("Event")]
-    public class Event : BaseDbModel
+    public class Event : BaseDbModel, IEntity
     {
         [MaxLength(100)]
         public string Title { get; set; } = string.Empty;

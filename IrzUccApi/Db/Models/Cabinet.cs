@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace IrzUccApi.Db.Models
 {
     [Index(nameof(Name), IsUnique = true)]
-    public class Cabinet : BaseDbModel
+    public class Cabinet : BaseDbModel, IEntity
     {
         [Required(AllowEmptyStrings = false)]
         public string Name { get; set; } = string.Empty;

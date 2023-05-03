@@ -19,6 +19,8 @@ builder.Services
     .AddDefaultTokenProviders()
     .AddErrorDescriber<AppIdentityErrorDescriber>();
 
+builder.Services.AddScoped<UnitOfWork>();
+
 var jwtConfiguration = new JwtConfiguration();
 builder.Configuration.Bind("Jwt", jwtConfiguration);
 builder.Services.AddSingleton(jwtConfiguration);

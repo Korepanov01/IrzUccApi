@@ -3,7 +3,7 @@
 namespace IrzUccApi.Db.Models
 {
     [Table("UserPosition")]
-    public class UserPosition : BaseDbModel
+    public class UserPosition : BaseDbModel, IEntity
     {
         public DateTime Start { get; set; }
         public DateTime? End { get; set; }

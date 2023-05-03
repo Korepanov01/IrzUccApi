@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Db.Models
 {
-    public class Image : BaseDbModel
+    public class Image : BaseDbModel, IEntity
     {
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;

@@ -3,7 +3,7 @@
 namespace IrzUccApi.Db.Models
 {
     [Table("Chat")]
-    public class Chat : BaseDbModel
+    public class Chat : BaseDbModel, IEntity
     {
         public virtual ICollection<AppUser> Participants { get; set; } = new HashSet<AppUser>();
         [ForeignKey("LastMessageId")]
