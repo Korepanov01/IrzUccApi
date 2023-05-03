@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
@@ -9,6 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.Users;
@@ -20,13 +24,16 @@ public class UsersController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
     public UsersController(
         AppDbContext dbContext,
-        UserManager<AppUser> userManager)
+        UserManager<AppUser> userManager,
+        IWebHostEnvironment webHostEnvironment)
     {
         _dbContext = dbContext;
         _userManager = userManager;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     [HttpGet]
@@ -75,7 +82,7 @@ public class UsersController : ControllerBase
                     u.Patronymic,
                     u.Email,
                     u.IsActiveAccount,
-                    u.Image != null ? u.Image.Id : null,
+                    u.ImagePath,
                     u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
                     u.UserPosition
                         .Where(up => up.End == null)
@@ -114,7 +121,7 @@ public class UsersController : ControllerBase
             user.Surname,
             user.Patronymic,
             user.Birthday,
-            user.Image?.Id,
+            user.ImagePath,
             user.AboutMyself,
             user.MyDoings,
             user.Skills,
@@ -132,31 +139,24 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("me/update_photo")]
-    public async Task<IActionResult> UpdatePhotoAsync([FromBody] ImageRequest request)
+    public async Task<IActionResult> UpdatePhotoAsync([FromForm]IFormFile image)
     {
         var currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)
             return Unauthorized();
 
-        var image = new Image
+        var path = currentUser.ImagePath ?? "/Images/" + Guid.NewGuid().ToString();
+
+        using (var fileStream = new FileStream(_webHostEnvironment.WebRootPath + path, FileMode.Create))
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Extension = request.Extension,
-            Data = request.Data,
-            Source = ImageSources.User,
-            SourceId = currentUser.Id,
-        };
-        await _dbContext.Images.AddAsync(image);
+            await image.CopyToAsync(fileStream);
+        }
 
-        if (currentUser.Image != null)
-            _dbContext.Remove(currentUser.Image);
-        currentUser.Image = image;
-
+        currentUser.ImagePath = path;
         _dbContext.Update(currentUser);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(image.Id);
+        return Ok(path);
     }
 
     [HttpPut("me/delete_photo")]
@@ -166,9 +166,15 @@ public class UsersController : ControllerBase
         if (currentUser == null)
             return Unauthorized();
 
-        if (currentUser.Image != null)
-            _dbContext.Remove(currentUser.Image);
+        if (currentUser.ImagePath != null)
+        {
+            var file = new FileInfo(_webHostEnvironment.WebRootPath + currentUser.ImagePath);
+            if (file.Exists)
+                file.Delete();
+        }
+        currentUser.ImagePath = null;
 
+        _dbContext.Update(currentUser);
         await _dbContext.SaveChangesAsync();
 
         return Ok();

@@ -11,7 +11,6 @@ namespace IrzUccApi.Models.Requests.News
         [Required(AllowEmptyStrings = false)]
         [MaxLength(5000)]
         public string Text { get; set; } = string.Empty;
-        public ImageRequest? Image { get; set; }
         public bool IsPublic { get; set; }
     }
 }

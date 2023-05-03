@@ -11,7 +11,7 @@ namespace IrzUccApi.Models.Db
         public bool IsReaded { get; set; }
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
-        public virtual Image? Image { get; set; }
+        public virtual string? ImagePath { get; set; }
 
         public virtual AppUser Sender { get; set; } = new AppUser();
         public virtual Chat Chat { get; set; } = new Chat();

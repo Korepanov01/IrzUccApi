@@ -20,7 +20,7 @@ namespace IrzUccApi.Models.Db
         public string? Skills { get; set; }
         public string? RefreshToken { get; set; }
 
-        public virtual Image? Image { get; set; }
+        public virtual string? ImagePath { get; set; }
 
         public virtual ICollection<Chat> Chats { get; set; } = new HashSet<Chat>();
         public virtual ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();

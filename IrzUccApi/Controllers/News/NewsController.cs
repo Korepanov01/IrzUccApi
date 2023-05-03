@@ -5,9 +5,11 @@ using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.News;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.News
@@ -19,11 +21,16 @@ namespace IrzUccApi.Controllers.News
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public NewsController(
+            AppDbContext dbContext, 
+            UserManager<AppUser> userManager, 
+            IWebHostEnvironment webHostEnvironment)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -60,7 +67,7 @@ namespace IrzUccApi.Controllers.News
                     n.Id,
                     n.Title,
                     n.Text.Substring(0, Math.Min(200, n.Text.Length)),
-                    n.Image != null ? n.Image.Id : null,
+                    n.ImagePath ?? null,
                     n.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(n),
                     n.Likers.Count,
@@ -69,7 +76,7 @@ namespace IrzUccApi.Controllers.News
                         n.Author.FirstName,
                         n.Author.Surname,
                         n.Author.Patronymic,
-                        n.Author.Image != null ? n.Author.Image.Id : null),
+                        n.Author.ImagePath ?? null),
                     n.IsPublic,
                     n.Comments.Count,
                     n.Text.Length > 200))
@@ -77,7 +84,9 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostNewsEntryAsync([FromBody] PostNewsEntryRequest request)
+        public async Task<IActionResult> PostNewsEntryAsync(
+            [FromBody] PostNewsEntryRequest request,
+            [FromForm] IFormFile? image)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -88,31 +97,26 @@ namespace IrzUccApi.Controllers.News
 
             var newNewsEntryId = Guid.NewGuid();
 
-            Image? image = null;
-            if (request.Image != null)
-            {
-                image = new Image
-                {
-                    Id = Guid.NewGuid(),
-                    Name = request.Image.Name,
-                    Extension = request.Image.Extension,
-                    Data = request.Image.Data,
-                    Source = ImageSources.NewsEntry,
-                    SourceId = newNewsEntryId
-                };
-                await _dbContext.Images.AddAsync(image);
-            }
-
             var newsEntry = new NewsEntry
             {
                 Id = newNewsEntryId,
                 Title = request.Title,
                 Text = request.Text,
-                Image = image,
                 DateTime = DateTime.UtcNow,
                 Author = currentUser,
                 IsPublic = request.IsPublic
             };
+            if (image != null)
+            {
+                var path = "/Images/" + Guid.NewGuid().ToString();
+
+                using (var fileStream = new FileStream(_webHostEnvironment.WebRootPath + path, FileMode.Create))
+                {
+                    await image.CopyToAsync(fileStream);
+                }
+                newsEntry.ImagePath = path;
+            }
+
             await _dbContext.AddAsync(newsEntry);
 
             await _dbContext.SaveChangesAsync();
@@ -150,7 +154,7 @@ namespace IrzUccApi.Controllers.News
                     newsEntry.Id,
                     newsEntry.Title,
                     newsEntry.Text,
-                    newsEntry.Image?.Id,
+                    newsEntry.ImagePath,
                     newsEntry.DateTime,
                     currentUser != null && currentUser.LikedNewsEntries.Contains(newsEntry),
                     newsEntry.Likers.Count,
@@ -159,7 +163,7 @@ namespace IrzUccApi.Controllers.News
                         newsEntry.Author.FirstName,
                         newsEntry.Author.Surname,
                         newsEntry.Author.Patronymic,
-                        newsEntry.Author.Image?.Id),
+                        newsEntry.Author.ImagePath),
                     newsEntry.IsPublic,
                     newsEntry.Comments.Count,
                     false));

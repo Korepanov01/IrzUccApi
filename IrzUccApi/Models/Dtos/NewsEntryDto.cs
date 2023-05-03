@@ -6,7 +6,7 @@
             Guid id,
             string title,
             string text,
-            Guid? imageId,
+            string? imagePath,
             DateTime dateTime,
             bool isLiked,
             int likesCount,
@@ -18,7 +18,7 @@
             Id = id;
             Title = title;
             Text = text;
-            ImageId = imageId;
+            ImagePath = imagePath;
             DateTime = dateTime;
             IsLiked = isLiked;
             LikesCount = likesCount;
@@ -31,7 +31,7 @@
         public Guid Id { get; }
         public string Title { get; }
         public string Text { get; }
-        public Guid? ImageId { get; }
+        public string? ImagePath { get; }
         public DateTime DateTime { get; }
         public bool IsLiked { get; }
         public int LikesCount { get; }

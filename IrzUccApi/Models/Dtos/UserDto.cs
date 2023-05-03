@@ -8,7 +8,7 @@
             string surname,
             string? patronymic,
             DateTime birthday,
-            Guid? imageId,
+            string? imagePath,
             string? aboutMyself,
             string? myDoings,
             string? skills,
@@ -25,7 +25,7 @@
                 patronymic,
                 email,
                 isActiveAccount,
-                imageId, roles,
+                imagePath, roles,
                 positions)
         {
             Birthday = birthday;

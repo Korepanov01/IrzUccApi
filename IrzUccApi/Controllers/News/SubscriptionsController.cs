@@ -69,7 +69,7 @@ namespace IrzUccApi.Controllers.News
                         u.Patronymic,
                         u.Email,
                         u.IsActiveAccount,
-                        u.Image?.Id,
+                        u.ImagePath,
                         u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
                         u.UserPosition.Where(up => up.End == null).Select(up => new PositionDto(up.Position.Id, up.Position.Name)))));
         }

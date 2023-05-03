@@ -9,7 +9,6 @@ namespace IrzUccApi.Db
         IdentityUserClaim<Guid>, AppUserRole, IdentityUserLogin<Guid>,
         IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
     {
-        public DbSet<Image> Images { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Cabinet> Cabinets { get; set; }

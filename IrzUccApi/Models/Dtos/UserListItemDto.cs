@@ -9,9 +9,9 @@
             string? patronymic,
             string email,
             bool? isActiveAccount,
-            Guid? imageId,
+            string? imagePath,
             IEnumerable<string>? roles,
-            IEnumerable<PositionDto> positions) : base(id, firstName, surname, patronymic, imageId)
+            IEnumerable<PositionDto> positions) : base(id, firstName, surname, patronymic, imagePath)
         {
             IsActiveAccount = isActiveAccount;
             Roles = roles;

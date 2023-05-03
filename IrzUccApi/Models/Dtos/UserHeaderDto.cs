@@ -7,19 +7,19 @@
             string firstName,
             string surname,
             string? patronymic,
-            Guid? imageId)
+            string? imagePath)
         {
             Id = id;
             FirstName = firstName;
             Surname = surname;
             Patronymic = patronymic;
-            ImageId = imageId;
+            ImagePath = imagePath;
         }
 
         public Guid Id { get; }
         public string FirstName { get; }
         public string Surname { get; }
         public string? Patronymic { get; }
-        public Guid? ImageId { get; }
+        public string? ImagePath { get; }
     }
 }

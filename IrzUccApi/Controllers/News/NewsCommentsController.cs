@@ -45,7 +45,7 @@ namespace IrzUccApi.Controllers.News
                         c.Author.FirstName,
                         c.Author.Surname,
                         c.Author.Patronymic,
-                        c?.Author?.Image?.Id))));
+                        c?.Author?.ImagePath))));
         }
 
         [HttpPost]
@@ -80,7 +80,7 @@ namespace IrzUccApi.Controllers.News
                         comment.Author.FirstName,
                         comment.Author.Surname,
                         comment.Author.Patronymic,
-                        comment?.Author?.Image?.Id)));
+                        comment?.Author?.ImagePath)));
         }
 
         [HttpDelete("{id}")]

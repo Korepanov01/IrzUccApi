@@ -65,7 +65,7 @@ namespace IrzUccApi.Controllers.Messages
                 .Select(m => new MessageDto(
                     m.Id,
                     m.Text,
-                    m.Image != null ? m.Image.Id : null,
+                    m.ImagePath ?? null,
                     m.DateTime,
                     m.Sender.Id))
                 .ToArray();
@@ -76,94 +76,6 @@ namespace IrzUccApi.Controllers.Messages
             await _dbContext.SaveChangesAsync();
 
             return Ok(result);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PostMessageAsync([FromBody] PostMessageRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
-                return BadRequest(new[] { RequestErrorDescriber.MessageCantBeEmpty });
-
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-                return Unauthorized();
-
-            var recipient = await _userManager.FindByIdAsync(request.UserId);
-            if (recipient == null)
-                return BadRequest(new[] { RequestErrorDescriber.UserDoesntExist });
-
-            var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Participants.Contains(currentUser) && c.Participants.Contains(recipient));
-            if (chat == null)
-            {
-                chat = new Chat
-                {
-                    Participants = currentUser.Id != recipient.Id
-                        ? new[] { currentUser, recipient }
-                        : new[] { currentUser }
-                };
-                await _dbContext.AddAsync(chat);
-                await _dbContext.SaveChangesAsync();
-            }
-
-            var newMessageId = Guid.NewGuid();
-
-            Image? image = null;
-            if (request.Image != null)
-            {
-                image = new Image
-                {
-                    Name = request.Image.Name,
-                    Extension = request.Image.Extension,
-                    Data = request.Image.Data,
-                    Source = ImageSources.Message,
-                    SourceId = newMessageId
-                };
-                await _dbContext.Images.AddAsync(image);
-            }
-
-            var message = new Message
-            {
-                Id = newMessageId,
-                Text = request.Text,
-                Image = image,
-                IsReaded = false,
-                DateTime = DateTime.UtcNow,
-                Sender = currentUser,
-                Chat = chat
-            };
-            await _dbContext.AddAsync(message);
-            await _dbContext.SaveChangesAsync();
-
-            chat.LastMessage = message;
-            _dbContext.Update(chat);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok(new MessageDto(
-                message.Id,
-                message.Text,
-                message.Image?.Id,
-                message.DateTime,
-                message.Sender.Id));
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMessageAsync(Guid id)
-        {
-            var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.Id == id);
-            if (message == null)
-                return NotFound();
-
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-                return Unauthorized();
-
-            if (message.Sender.Id != currentUser.Id)
-                return Forbid();
-
-            _dbContext.Remove(message);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok();
         }
     }
 }
