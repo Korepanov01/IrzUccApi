@@ -1,10 +1,6 @@
 ﻿using IrzUccApi.Db;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
-using IrzUccApi.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Images
 {
@@ -12,23 +8,21 @@ namespace IrzUccApi.Controllers.Images
     [ApiController]
     public class ImagesController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UnitOfWork _unitOfWork;
 
-        public ImagesController(AppDbContext dbContext, UserManager<AppUser> userManager, EmailService emailService)
+        public ImagesController(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
-            _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(Guid id)
         {
-            var image = await _dbContext.Images.FirstOrDefaultAsync(i => i.Id == id);
+            var image = await _unitOfWork.Images.GetByIdAsync(id);
             if (image == null)
                 return NotFound();
 
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await _unitOfWork.Users.GetByClaimsAsync(User);
             switch (image.Source)
             {
                 case Enums.ImageSources.User:
@@ -36,7 +30,7 @@ namespace IrzUccApi.Controllers.Images
                         return Unauthorized();
                     break;
                 case Enums.ImageSources.NewsEntry:
-                    var newEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == image.SourceId);
+                    var newEntry = await _unitOfWork.NewsEntries.GetByIdAsync(image.SourceId);
                     if (newEntry == null)
                         return NotFound();
                     if (currentUser == null && !newEntry.IsPublic)
@@ -45,7 +39,7 @@ namespace IrzUccApi.Controllers.Images
                 case Enums.ImageSources.Message:
                     if (currentUser == null)
                         return Unauthorized();
-                    var message = await _dbContext.Messages.FirstOrDefaultAsync(m => m.Id == image.SourceId);
+                    var message = await _unitOfWork.Messages.GetByIdAsync(image.SourceId);
                     if (message == null)
                         return NotFound();
                     if (!message.Chat.Participants.Contains(currentUser))

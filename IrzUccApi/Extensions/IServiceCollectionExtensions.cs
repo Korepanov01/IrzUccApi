@@ -1,4 +1,4 @@
-﻿using IrzUccApi.Models.Configurations;
+using IrzUccApi.Models.Configurations;
 using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

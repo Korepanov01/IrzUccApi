@@ -1,5 +1,5 @@
-﻿using IrzUccApi.Enums;
-using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db.Models;
+using IrzUccApi.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +43,7 @@ namespace IrzUccApi.Db
 
             var superAdminUserRoles = appRoles.Select(r => new
             {
+                Id = Guid.NewGuid(),
                 RoleId = r.Value.Id,
                 UserId = superAdmin.Id,
             });

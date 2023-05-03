@@ -1,15 +1,14 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Events;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Events
 {
@@ -18,77 +17,56 @@ namespace IrzUccApi.Controllers.Events
     [Authorize]
     public class EventsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UnitOfWork _unitOfWork;
 
-        public EventsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public EventsController(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
-            _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet("my")]
         public async Task<IActionResult> GetMyEventsAsync([FromQuery] PagingParameters parameters)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
+            var currentUserId = ClaimsExtractor.GetNameIdentifier(User);
+            if (currentUserId == null)
                 return Unauthorized();
 
-            return Ok(currentUser.Events
-                .OrderBy(e => e.Start)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize)
-                .Select(e => new EventListItemDto(
-                    e.Id,
-                    e.Title,
-                    e.Start,
-                    e.End,
-                    e.Cabinet?.Name)));
+            var userEvent = await _unitOfWork.Events.GetByCreatorIdAsync(Guid.Parse(currentUserId), parameters);
+
+            return Ok(userEvent);
         }
 
         [HttpGet("listenning")]
         public async Task<IActionResult> GetListenningEventsAsync([FromQuery] TimeRangeGetParameters parameters)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await _unitOfWork.Users.GetByClaimsAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
-            var start = parameters.Start.ToUniversalTime();
-            var end = parameters.End.ToUniversalTime();
-
-            if (start > end)
+            if (parameters.Start > parameters.End)
                 return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
-            if ((end - start).Days > 40)
+            if ((parameters.End - parameters.Start).Days > 40)
                 return BadRequest(new[] { RequestErrorDescriber.TooLongPeriod });
 
-            return Ok(await _dbContext.Events
-                .OrderBy(e => e.Start)
-                .Where(e => e.IsPublic || e.Listeners.Contains(currentUser) || e.Creator.Id == currentUser.Id)
-                .Where(e => start < e.Start && end > e.Start
-                    || start > e.Start && end < e.End)
-                .Select(e => new EventListItemDto(
-                    e.Id,
-                    e.Title,
-                    e.Start,
-                    e.End,
-                    e.Cabinet != null ? e.Cabinet.Name : null))
-                .ToArrayAsync());
+            var events = await _unitOfWork.Events.GetByListenerAsync(currentUser, parameters);
+
+            return Ok(events);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEventAsync(Guid id)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await _unitOfWork.Users.GetByClaimsAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
-            var resEvent = await _dbContext.Events.FirstOrDefaultAsync(e => e.Id == id);
+            var resEvent = await _unitOfWork.Events.GetByIdAsync(id);
             if (resEvent == null)
                 return NotFound();
 
             if (!resEvent.IsPublic && !resEvent.Listeners.Contains(currentUser) && resEvent.Creator.Id != currentUser.Id)
                 return Forbid();
-            
+
             return Ok(new EventDto(
                 resEvent.Id,
                 resEvent.Title,
@@ -115,7 +93,7 @@ namespace IrzUccApi.Controllers.Events
         [HttpPost]
         public async Task<IActionResult> PostEventAsync([FromBody] PostEventRequest request)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await _unitOfWork.Users.GetByClaimsAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
@@ -136,13 +114,11 @@ namespace IrzUccApi.Controllers.Events
                 if (request.Start > request.End)
                     return BadRequest(new[] { RequestErrorDescriber.EndTimeIsLessThenStartTime });
 
-                var cabinet = await _dbContext.Cabinets.FirstOrDefaultAsync(c => c.Id == request.CabinetId);
+                var cabinet = await _unitOfWork.Cabinets.GetByIdAsync((Guid)request.CabinetId);
                 if (cabinet == null)
                     return BadRequest(new[] { RequestErrorDescriber.CabinetNotFound });
 
-                if (cabinet.Events
-                    .Where(e => request.Start < e.Start && request.End > e.Start
-                        || request.Start > e.Start && request.End < e.End).Any())
+                if (await _unitOfWork.Cabinets.IsBookedAsync(cabinet, request.End, request.Start))
                     return BadRequest(new[] { RequestErrorDescriber.CabinetIsBooked });
 
                 newEvent.Cabinet = cabinet;
@@ -166,7 +142,7 @@ namespace IrzUccApi.Controllers.Events
 
                     foreach (var userId in request.ListenersIds)
                     {
-                        var user = await _userManager.FindByIdAsync(userId.ToString());
+                        var user = await _unitOfWork.Users.GetByIdAsync(userId);
                         if (user == null)
                             return BadRequest(new[] { RequestErrorDescriber.UserDoesntExist });
                         newEvent.Listeners.Add(user);
@@ -174,8 +150,7 @@ namespace IrzUccApi.Controllers.Events
                 }
             }
 
-            await _dbContext.AddAsync(newEvent);
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Events.AddAsync(newEvent);
 
             return Ok(newEvent.Id);
         }
@@ -183,19 +158,18 @@ namespace IrzUccApi.Controllers.Events
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEventAsync(Guid id)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
+            var currentUserId = ClaimsExtractor.GetNameIdentifier(User);
+            if (currentUserId == null)
                 return Unauthorized();
 
-            var resEvent = await _dbContext.Events.FirstOrDefaultAsync(e => e.Id == id);
+            var resEvent = await _unitOfWork.Events.GetByIdAsync(id);
             if (resEvent == null)
                 return NotFound();
 
-            if (!(resEvent.IsPublic && User.IsInRole(RolesNames.Support) || resEvent.Creator.Id == currentUser.Id))
+            if (!(resEvent.IsPublic && User.IsInRole(RolesNames.Support) || resEvent.Creator.Id.ToString() == currentUserId))
                 return Forbid();
 
-            _dbContext.Events.Remove(resEvent);
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Events.DeleteAsync(resEvent);
 
             return Ok();
         }

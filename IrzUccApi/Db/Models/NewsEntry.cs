@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace IrzUccApi.Models.Db
+namespace IrzUccApi.Db.Models
 {
     [Table("NewsEntry")]
-    public class NewsEntry : BaseDbModel
+    public class NewsEntry : BaseDbModel, IEntity
     {
         [MaxLength(200)]
         public string Title { get; set; } = string.Empty;
