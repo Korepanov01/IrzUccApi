@@ -17,7 +17,6 @@ namespace IrzUccApi.Db
         private RoleRepository? _roleRepository;
         private UserPositionRepository? _userPositionRepository;
         private UserRepository? _userRepository;
-        private UserRoleRepository? _userRoleRepository;
 
         public CabinetRepository Cabinets
         {
@@ -105,14 +104,6 @@ namespace IrzUccApi.Db
             {
                 _userRepository ??= new UserRepository(_dbContext);
                 return _userRepository;
-            }
-        }
-        public UserRoleRepository UserRoles
-        {
-            get
-            {
-                _userRoleRepository ??= new UserRoleRepository(_dbContext);
-                return _userRoleRepository;
             }
         }
 

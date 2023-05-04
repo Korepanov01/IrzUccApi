@@ -21,7 +21,6 @@ namespace IrzUccApi.Controllers.Users
         private readonly UserManager<AppUser> _userManager;
         private readonly PasswordConfiguration _passwordConfiguration;
         private readonly EmailService _emailService;
-        private readonly AppDbContext _dbContext;
 
         public UsersManagementController(
             UserManager<AppUser> userManager,
@@ -32,7 +31,6 @@ namespace IrzUccApi.Controllers.Users
             _userManager = userManager;
             _passwordConfiguration = passwordConfiguration;
             _emailService = emailService;
-            _dbContext = dbContext;
         }
 
         [HttpPost("register")]
@@ -65,7 +63,7 @@ namespace IrzUccApi.Controllers.Users
         [HttpPut("{id}/update_reg_info")]
         public async Task<IActionResult> UpdateUserRegInfoAsync(Guid id, [FromBody] UpdateRegInfoRequest request)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return NotFound();
             if (!User.IsInRole(RolesNames.SuperAdmin) && await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
@@ -83,24 +81,6 @@ namespace IrzUccApi.Controllers.Users
             return Ok();
         }
 
-        //[HttpDelete("{id}")]
-        //[Authorize(Roles = RolesNames.SuperAdmin)]
-        //public async Task<IActionResult> DeleteUserAsync(Guid id)
-        //{
-        //    var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-        //    if (user == null)
-        //        return NotFound();
-
-        //    if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-        //        return Forbid();
-
-        //    var identityResult = await _userManager.DeleteAsync(user);
-        //    if (!identityResult.Succeeded)
-        //        return BadRequest(identityResult.Errors);
-
-        //    return Ok();
-        //}
-
         [HttpPut("{id}/activate")]
         public async Task<IActionResult> AcivateAsync(Guid id)
             => await ChangeActivationAsync(id, true);
@@ -111,7 +91,7 @@ namespace IrzUccApi.Controllers.Users
 
         private async Task<IActionResult> ChangeActivationAsync(Guid userId, bool activation)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
                 return NotFound();
 

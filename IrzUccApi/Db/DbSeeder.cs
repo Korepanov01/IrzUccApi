@@ -43,6 +43,7 @@ namespace IrzUccApi.Db
 
             var superAdminUserRoles = appRoles.Select(r => new
             {
+                Id = Guid.NewGuid(),
                 RoleId = r.Value.Id,
                 UserId = superAdmin.Id,
             });
