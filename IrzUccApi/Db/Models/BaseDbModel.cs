@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IrzUccApi.Db.Models
 {
-    public class BaseDbModel
+    public abstract class BaseDbModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
