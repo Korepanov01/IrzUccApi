@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Org.BouncyCastle.Cms;
 
 namespace IrzUccApi.Controllers.Messages
 {
@@ -68,7 +66,7 @@ namespace IrzUccApi.Controllers.Messages
             return Ok(messages);
         }
 
-        [HttpPost("send_message")]
+        [HttpPost("messages")]
         public async Task<IActionResult> PostMessageAsync([FromBody] SendMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
@@ -127,7 +125,7 @@ namespace IrzUccApi.Controllers.Messages
             return Ok();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("messages/{id}")]
         public async Task<IActionResult> DeleteMessageAsync(Guid id)
         {
             var message = await _unitOfWork.Messages.GetByIdAsync(id);
