@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Models.Requests.Messages
 {
-    public class PostMessageRequest
+    public class SendMessageRequest
     {
         [Required(AllowEmptyStrings = false)]
         public string UserId { get; set; } = string.Empty;

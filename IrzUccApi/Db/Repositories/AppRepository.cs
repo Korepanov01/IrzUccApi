@@ -21,7 +21,7 @@ namespace IrzUccApi.Db.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(TEntity entity)
+        public async Task RemoveAsync(TEntity entity)
         {
             _dbContext.Set<TEntity>().Remove(entity);
             await _dbContext.SaveChangesAsync();
