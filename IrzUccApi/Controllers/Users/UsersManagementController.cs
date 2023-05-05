@@ -9,7 +9,6 @@ using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Users
 {
@@ -25,8 +24,7 @@ namespace IrzUccApi.Controllers.Users
         public UsersManagementController(
             UserManager<AppUser> userManager,
             EmailService emailService,
-            PasswordConfiguration passwordConfiguration,
-            AppDbContext dbContext)
+            PasswordConfiguration passwordConfiguration)
         {
             _userManager = userManager;
             _passwordConfiguration = passwordConfiguration;
@@ -72,7 +70,7 @@ namespace IrzUccApi.Controllers.Users
             user.FirstName = request.FirstName;
             user.Surname = request.Surname;
             user.Patronymic = request.Patronymic;
-            user.Birthday = request.Birthday;
+            user.Birthday = request.Birthday.ToUniversalTime();
 
             var identityResult = await _userManager.UpdateAsync(user);
             if (!identityResult.Succeeded)
