@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Messages
 {
@@ -43,6 +44,23 @@ namespace IrzUccApi.Controllers.Messages
             var chats = _unitOfWork.Chats.GetChatDtos(currentUser, parameters);
 
             return Ok(chats);
+        }
+
+        [HttpGet("chat_by_participant")]
+        public async Task<IActionResult> GetChatIdByRecipientIdAsync([FromQuery] Guid participantId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return Unauthorized();
+
+            var participant = await _userManager.FindByIdAsync(participantId.ToString());
+            if (participant == null)
+                return NotFound();
+
+            var chatId = await _unitOfWork.Chats
+                .GetOrCreateByParticipantsAsync(currentUser, participant);
+
+            return Ok(chatId.Id);
         }
 
         [HttpGet("messages")]
