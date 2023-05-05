@@ -46,7 +46,7 @@ namespace IrzUccApi.Controllers.Messages
             return Ok(chats);
         }
 
-        [HttpGet("chat_by_participant")]
+        [HttpGet("chats/by_participant")]
         public async Task<IActionResult> GetChatIdByRecipientIdAsync([FromQuery] Guid participantId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
