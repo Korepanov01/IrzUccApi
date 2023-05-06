@@ -53,8 +53,6 @@ namespace IrzUccApi.Extensions
         {
             services.AddSwaggerGen(options =>
             {
-                options.AddSignalRSwaggerGen();
-
                 var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
                     BearerFormat = "JWT",

@@ -77,7 +77,7 @@ namespace IrzUccApi.Controllers.Users
             if (await _unitOfWork.Positions.OwnedByAnyUserAsync(position))
                 return BadRequest(new[] { RequestErrorDescriber.ThereAreUsersWithThisPosition });
 
-            await _unitOfWork.Positions.DeleteAsync(position);
+            await _unitOfWork.Positions.RemoveAsync(position);
 
             return Ok();
         }
