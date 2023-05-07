@@ -1,6 +1,6 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
-using IrzUccApi.Models.Db;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -93,7 +93,6 @@ namespace IrzUccApi.Controllers
             }
             await _dbContext.SaveChangesAsync();
         }
-
 
         private async Task<Dictionary<string, Position>> SeedPositionsAsync()
         {
@@ -445,5 +444,6 @@ namespace IrzUccApi.Controllers
             await _dbContext.AddRangeAsync(events);
             await _dbContext.SaveChangesAsync();
         }
+        
     }
 }

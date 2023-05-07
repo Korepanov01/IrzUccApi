@@ -1,13 +1,12 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.Events;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

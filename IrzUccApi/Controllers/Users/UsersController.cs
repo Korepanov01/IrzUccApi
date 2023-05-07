@@ -1,15 +1,14 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.Images;
 using IrzUccApi.Models.Requests.User;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.Users;
 
@@ -18,77 +17,29 @@ namespace IrzUccApi.Controllers.Users;
 [Authorize]
 public class UsersController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly UnitOfWork _unitOfWork;
     private readonly UserManager<AppUser> _userManager;
 
     public UsersController(
-        AppDbContext dbContext,
+        UnitOfWork unitOfWork,
         UserManager<AppUser> userManager)
     {
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _userManager = userManager;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetUsersAsync([FromQuery] UserSearchParameters parameters)
     {
-        var users = _dbContext.Users.AsQueryable();
+        var users = await _unitOfWork.Users.GetDtoListAsync(parameters, User);
 
-        users = parameters.IsActive != null && User.IsInRole(RolesNames.Admin)
-            ? users.Where(u => u.IsActiveAccount == parameters.IsActive)
-            : users.Where(u => u.IsActiveAccount);
-
-        if (parameters.PositionId != null)
-        {
-            if (parameters.PositionId == Guid.Empty)
-                users = users.Where(u => !u.UserPosition.Where(up => up.End == null).Any());
-            else
-                users = users.Where(u => u.UserPosition
-                    .Where(up => up.End == null)
-                    .Select(up => up.Position.Id)
-                    .Contains((Guid)parameters.PositionId));
-        }
-
-        if (parameters.SearchString != null)
-        {
-            var normalizedSearchWords = parameters.SearchString
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Select(sw => sw.ToUpper());
-            foreach (var word in normalizedSearchWords)
-                users = users.Where(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper().Contains(word));
-        }
-
-        if (parameters.Role != null)
-            users = users
-                .Where(u => u.UserRoles
-                    .Select(ur => ur.Role != null ? ur.Role.Name : "")
-                    .Contains(parameters.Role));
-
-        return Ok(await users
-            .OrderBy(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper())
-            .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-            .Take(parameters.PageSize)
-            .Select(u => new UserListItemDto(
-                    u.Id,
-                    u.FirstName,
-                    u.Surname,
-                    u.Patronymic,
-                    u.Email,
-                    u.IsActiveAccount,
-                    u.Image != null ? u.Image.Id : null,
-                    u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
-                    u.UserPosition
-                        .Where(up => up.End == null)
-                        .Select(up => new PositionDto(
-                            up.Position.Id,
-                            up.Position.Name))))
-            .ToArrayAsync());
+        return Ok(users);
     }
 
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUserAsync()
     {
-        var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        var currentUserId = ClaimsExtractor.ExtractId(User);
         if (currentUserId == null)
             return Unauthorized();
         return await GetUserAsync(currentUserId);
@@ -108,27 +59,7 @@ public class UsersController : ControllerBase
         if (currentUser == null)
             return Unauthorized();
 
-        return Ok(new UserDto(
-            user.Id,
-            user.FirstName,
-            user.Surname,
-            user.Patronymic,
-            user.Birthday,
-            user.Image?.Id,
-            user.AboutMyself,
-            user.MyDoings,
-            user.Skills,
-            user.UserPosition
-                .Where(up => up.End == null)
-                .Select(up => new PositionDto(
-                    up.Position.Id,
-                    up.Position.Name)),
-            user.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
-            user.Subscribers.Count,
-            user.Subscriptions.Count,
-            user.Email,
-            user.IsActiveAccount,
-            user.Subscribers.Contains(currentUser)));
+        return Ok(new UserDto(user, currentUser));
     }
 
     [HttpPut("me/update_photo")]
@@ -147,14 +78,13 @@ public class UsersController : ControllerBase
             Source = ImageSources.User,
             SourceId = currentUser.Id,
         };
-        await _dbContext.Images.AddAsync(image);
+        await _unitOfWork.Images.AddAsync(image);
 
         if (currentUser.Image != null)
-            _dbContext.Remove(currentUser.Image);
+            await _unitOfWork.Images.RemoveAsync(currentUser.Image);
         currentUser.Image = image;
 
-        _dbContext.Update(currentUser);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.Users.UpdateAsync(currentUser);
 
         return Ok(image.Id);
     }
@@ -167,9 +97,7 @@ public class UsersController : ControllerBase
             return Unauthorized();
 
         if (currentUser.Image != null)
-            _dbContext.Remove(currentUser.Image);
-
-        await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Images.RemoveAsync(currentUser.Image);
 
         return Ok();
     }

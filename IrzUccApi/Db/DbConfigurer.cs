@@ -1,4 +1,4 @@
-﻿using IrzUccApi.Models.Db;
+﻿using IrzUccApi.Db.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Db

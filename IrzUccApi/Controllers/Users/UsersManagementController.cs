@@ -1,15 +1,14 @@
 ﻿using IrzUccApi.Db;
+using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Configurations;
-using IrzUccApi.Models.Db;
 using IrzUccApi.Models.Requests.User;
 using IrzUccApi.Models.Requests.Users;
 using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Users
 {
@@ -21,18 +20,15 @@ namespace IrzUccApi.Controllers.Users
         private readonly UserManager<AppUser> _userManager;
         private readonly PasswordConfiguration _passwordConfiguration;
         private readonly EmailService _emailService;
-        private readonly AppDbContext _dbContext;
 
         public UsersManagementController(
             UserManager<AppUser> userManager,
             EmailService emailService,
-            PasswordConfiguration passwordConfiguration,
-            AppDbContext dbContext)
+            PasswordConfiguration passwordConfiguration)
         {
             _userManager = userManager;
             _passwordConfiguration = passwordConfiguration;
             _emailService = emailService;
-            _dbContext = dbContext;
         }
 
         [HttpPost("register")]
@@ -65,7 +61,7 @@ namespace IrzUccApi.Controllers.Users
         [HttpPut("{id}/update_reg_info")]
         public async Task<IActionResult> UpdateUserRegInfoAsync(Guid id, [FromBody] UpdateRegInfoRequest request)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return NotFound();
             if (!User.IsInRole(RolesNames.SuperAdmin) && await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
@@ -74,7 +70,7 @@ namespace IrzUccApi.Controllers.Users
             user.FirstName = request.FirstName;
             user.Surname = request.Surname;
             user.Patronymic = request.Patronymic;
-            user.Birthday = request.Birthday;
+            user.Birthday = request.Birthday.ToUniversalTime();
 
             var identityResult = await _userManager.UpdateAsync(user);
             if (!identityResult.Succeeded)
@@ -82,24 +78,6 @@ namespace IrzUccApi.Controllers.Users
 
             return Ok();
         }
-
-        //[HttpDelete("{id}")]
-        //[Authorize(Roles = RolesNames.SuperAdmin)]
-        //public async Task<IActionResult> DeleteUserAsync(Guid id)
-        //{
-        //    var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-        //    if (user == null)
-        //        return NotFound();
-
-        //    if (await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin))
-        //        return Forbid();
-
-        //    var identityResult = await _userManager.DeleteAsync(user);
-        //    if (!identityResult.Succeeded)
-        //        return BadRequest(identityResult.Errors);
-
-        //    return Ok();
-        //}
 
         [HttpPut("{id}/activate")]
         public async Task<IActionResult> AcivateAsync(Guid id)
@@ -111,7 +89,7 @@ namespace IrzUccApi.Controllers.Users
 
         private async Task<IActionResult> ChangeActivationAsync(Guid userId, bool activation)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
                 return NotFound();
 
