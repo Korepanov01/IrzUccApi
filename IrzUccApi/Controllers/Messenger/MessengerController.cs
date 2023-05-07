@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Messages
 {
@@ -66,13 +65,13 @@ namespace IrzUccApi.Controllers.Messages
         [HttpGet("messages")]
         public async Task<IActionResult> GetMessagesAsync([FromQuery] MessagesGetParameters parameters)
         {
-            var chat = await _unitOfWork.Chats.GetByIdAsync(parameters.ChatId);
-            if (chat == null)
-                return NotFound();
-
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
+
+            var chat = await _unitOfWork.Chats.GetByIdAsync(parameters.ChatId);
+            if (chat == null)
+                return NotFound();
 
             if (!chat.Participants.Contains(currentUser))
                 return Forbid();
@@ -156,11 +155,17 @@ namespace IrzUccApi.Controllers.Messages
 
             if (message.Sender.Id != currentUser.Id)
                 return Forbid();
-
-            var recipientId = _unitOfWork.Messages.GetRecipientIdByMessage(currentUser, message);
+            
+            var chat = message.Chat;
+            if (chat.LastMessage?.Id == message.Id)
+            {
+                chat.LastMessage = _unitOfWork.Messages.GetPenultimateMessage(chat);
+                await _unitOfWork.Chats.UpdateAsync(chat);
+            }
 
             await _unitOfWork.Messages.RemoveAsync(message);
 
+            var recipientId = _unitOfWork.Chats.GetRecipientId(currentUser, chat);
             await _chatHub.Clients
                 .Group(currentUser.Id.ToString())
                 .SendAsync(ChatHubMethodsNames.MessageDeleted, id);

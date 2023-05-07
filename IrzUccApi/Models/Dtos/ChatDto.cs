@@ -4,9 +4,9 @@ namespace IrzUccApi.Models.Dtos
 {
     public record ChatDto
     {
-        public ChatDto(Chat chat, AppUser user)
+        public ChatDto(Chat chat, AppUser currentUser)
         {
-            var recipient = chat.Participants.FirstOrDefault(u => u.Id != user.Id) ?? user;
+            var recipient = chat.Participants.FirstOrDefault(u => u.Id != currentUser.Id) ?? currentUser;
             var recipientDto = new UserHeaderDto(
                     recipient.Id,
                     recipient.FirstName,
@@ -22,7 +22,7 @@ namespace IrzUccApi.Models.Dtos
             Id = chat.Id;
             Recipient = recipientDto;
             LastMessage = lastMessageDto;
-            UnreadedCount = chat.Messages.Where(m => m.Sender.Id != user.Id && !m.IsReaded).Count();
+            UnreadedCount = chat.Messages.Where(m => m.Sender.Id != currentUser.Id && !m.IsReaded).Count();
         }
 
         public ChatDto(

@@ -57,5 +57,8 @@ namespace IrzUccApi.Db.Repositories
 
             return chat;
         }
+
+        public Guid? GetRecipientId(AppUser currentUser, Chat chat)
+            => chat.Participants.FirstOrDefault(u => u.Id != currentUser.Id)?.Id;
     }
 }

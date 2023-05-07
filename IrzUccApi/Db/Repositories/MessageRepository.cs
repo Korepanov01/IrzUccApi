@@ -2,7 +2,6 @@
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace IrzUccApi.Db.Repositories
 {
@@ -53,7 +52,7 @@ namespace IrzUccApi.Db.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public Guid? GetRecipientIdByMessage(AppUser currentUser, Message message)
-            => message.Chat.Participants.FirstOrDefault(u => u.Id != currentUser.Id)?.Id;
+        public Message? GetPenultimateMessage(Chat chat)
+            => chat.Messages.OrderByDescending(m => m.DateTime).Skip(1).FirstOrDefault();
     }
 }

@@ -94,7 +94,6 @@ namespace IrzUccApi.Controllers
             await _dbContext.SaveChangesAsync();
         }
 
-
         private async Task<Dictionary<string, Position>> SeedPositionsAsync()
         {
             var positionsNames = new[]
@@ -445,5 +444,6 @@ namespace IrzUccApi.Controllers
             await _dbContext.AddRangeAsync(events);
             await _dbContext.SaveChangesAsync();
         }
+        
     }
 }
