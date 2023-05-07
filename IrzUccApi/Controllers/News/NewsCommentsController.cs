@@ -6,7 +6,6 @@ using IrzUccApi.Models.Requests.News;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Controllers.News
@@ -16,42 +15,31 @@ namespace IrzUccApi.Controllers.News
     [Authorize]
     public class NewsCommentsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public NewsCommentsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public NewsCommentsController(UserManager<AppUser> userManager, UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
             _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetNewsCommentsAsync([Required] Guid newsEntryId, [FromQuery] PagingParameters parameters)
         {
-            var newsEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == newsEntryId);
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(newsEntryId);
             if (newsEntry == null)
                 return NotFound();
 
-            return Ok(newsEntry.Comments
-                .OrderByDescending(c => c.DateTime)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize)
-                .Select(c => new CommentDto(
-                    c.Id,
-                    c.Text,
-                    c.DateTime,
-                    new UserHeaderDto(
-                        c.Author.Id,
-                        c.Author.FirstName,
-                        c.Author.Surname,
-                        c.Author.Patronymic,
-                        c?.Author?.Image?.Id))));
+            var comments = await _unitOfWork.Comments.GetCommentDtosAsync(newsEntryId, parameters);
+
+            return Ok(comments);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostCommentAsync([FromBody] PostCommentRequest request)
         {
-            var newsEntry = await _dbContext.NewsEntries.FirstOrDefaultAsync(n => n.Id == request.NewsEntryId);
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(request.NewsEntryId);
             if (newsEntry == null)
                 return NotFound();
 
@@ -67,26 +55,15 @@ namespace IrzUccApi.Controllers.News
                 Author = currentUser
             };
 
-            await _dbContext.AddAsync(comment);
+            await _unitOfWork.Comments.AddAsync(comment);
 
-            await _dbContext.SaveChangesAsync();
-
-            return Ok(new CommentDto(
-                comment.Id,
-                comment.Text,
-                comment.DateTime,
-                new UserHeaderDto(
-                        comment.Author.Id,
-                        comment.Author.FirstName,
-                        comment.Author.Surname,
-                        comment.Author.Patronymic,
-                        comment?.Author?.Image?.Id)));
+            return Ok(new CommentDto(comment));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCommentAsync(Guid id)
         {
-            var comment = await _dbContext.Comments.FirstOrDefaultAsync(n => n.Id == id);
+            var comment = await _unitOfWork.Comments.GetByIdAsync(id);
             if (comment == null)
                 return NotFound();
 
@@ -97,9 +74,7 @@ namespace IrzUccApi.Controllers.News
             if (comment.Author.Id != currentUser.Id)
                 return Forbid();
 
-            _dbContext.Remove(comment);
-
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Comments.RemoveAsync(comment);
 
             return Ok();
         }
