@@ -59,7 +59,7 @@ namespace IrzUccApi.Controllers.News
             var resultUsers = isSubscriptions ? user.Subscriptions : user.Subscribers;
             return Ok(resultUsers
                 .OrderBy(u => u.FirstName + u.Surname + u.Patronymic + u.Email)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(u => new UserListItemDto(
                         u.Id,

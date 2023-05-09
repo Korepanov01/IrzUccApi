@@ -33,7 +33,7 @@ namespace IrzUccApi.Db.Repositories
 
             return await news
                 .OrderByDescending(n => n.DateTime)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(n => new NewsEntryDto(
                     n.Id,

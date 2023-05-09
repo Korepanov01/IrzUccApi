@@ -24,7 +24,7 @@ namespace IrzUccApi.Db.Repositories
 
             return await positions
                 .OrderBy(p => p.Name)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(p => new PositionDto(
                     p.Id,

@@ -26,7 +26,7 @@ namespace IrzUccApi.Db.Repositories
             messages = parameters.LastMessageId == null
                 ? messages
                     .OrderByDescending(m => m.DateTime)
-                    .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                    .Skip(parameters.PageSize * parameters.PageIndex)
                 : messages
                     .OrderBy(m => m.DateTime)
                     .SkipWhile(m => m.Id != parameters.LastMessageId)

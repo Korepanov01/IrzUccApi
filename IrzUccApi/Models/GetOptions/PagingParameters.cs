@@ -2,13 +2,13 @@
 {
     public class PagingParameters
     {
-        private int _pageIndex = 1;
+        private int _pageIndex = 0;
         private int _pageSize = 10;
 
         public int PageIndex
         {
             get => _pageIndex;
-            set => _pageIndex = value < 1 ? 1 : value;
+            set => _pageIndex = value < 0 ? 0 : value;
         }
 
         public int PageSize

@@ -13,7 +13,7 @@ namespace IrzUccApi.Db.Repositories
         {
             return currentUser.Chats
                 .OrderByDescending(c => c.LastMessage != null ? c.LastMessage.DateTime : DateTime.MinValue)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(c =>
                 {

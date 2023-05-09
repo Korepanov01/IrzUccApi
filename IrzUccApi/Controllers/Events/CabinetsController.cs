@@ -52,7 +52,7 @@ namespace IrzUccApi.Controllers.Events
 
             return Ok(await cabinets
                 .OrderBy(c => c.Name)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(c => new CabinetDto(
                     c.Id,
@@ -69,7 +69,7 @@ namespace IrzUccApi.Controllers.Events
 
             return Ok(cabinet.Events
                 .OrderBy(e => e.Start)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(e => new EventListItemDto(
                     e.Id,

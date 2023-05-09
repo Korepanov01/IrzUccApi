@@ -47,7 +47,7 @@ namespace IrzUccApi.Db.Repositories
 
             return await users
                 .OrderBy(u => (u.FirstName + u.Surname + u.Patronymic + u.Email).ToUpper())
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(u => new UserListItemDto(
                         u.Id,

@@ -36,7 +36,7 @@ namespace IrzUccApi.Controllers.Events
 
             return Ok(currentUser.Events
                 .OrderBy(e => e.Start)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+                .Skip(parameters.PageSize * parameters.PageIndex)
                 .Take(parameters.PageSize)
                 .Select(e => new EventListItemDto(
                     e.Id,

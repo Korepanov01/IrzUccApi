@@ -13,7 +13,7 @@ namespace IrzUccApi.Db.Repositories
             => await _dbContext.Comments
             .Where(c => c.NewsEntry.Id == newsEntrId)
             .OrderByDescending(c => c.DateTime)
-            .Skip(parameters.PageSize * (parameters.PageIndex - 1))
+            .Skip(parameters.PageSize * parameters.PageIndex)
             .Take(parameters.PageSize)
             .Select(c => new CommentDto(
                 c.Id,
