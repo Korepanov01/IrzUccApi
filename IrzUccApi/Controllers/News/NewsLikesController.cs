@@ -12,13 +12,13 @@ namespace IrzUccApi.Controllers.News
     [Authorize]
     public class NewsLikesController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public NewsLikesController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public NewsLikesController(UserManager<AppUser> userManager, UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
             _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpPost("like_news_entry")]
@@ -31,7 +31,7 @@ namespace IrzUccApi.Controllers.News
 
         private async Task<IActionResult> LikeUnlikeNewsEntryAsync(Guid newsEntryId, bool isLike)
         {
-            var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == newsEntryId);
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(newsEntryId);
             if (newsEntry == null)
                 return NotFound();
 
@@ -50,7 +50,7 @@ namespace IrzUccApi.Controllers.News
                     newsEntry.Likers.Remove(currentUser);
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.NewsEntries.UpdateAsync(newsEntry);
 
             return Ok();
         }

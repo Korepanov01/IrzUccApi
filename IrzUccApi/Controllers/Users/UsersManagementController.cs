@@ -1,5 +1,4 @@
-﻿using IrzUccApi.Db;
-using IrzUccApi.Db.Models;
+﻿using IrzUccApi.Db.Models;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Configurations;

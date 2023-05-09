@@ -5,7 +5,6 @@ using IrzUccApi.Models.PagingOptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -16,13 +15,13 @@ namespace IrzUccApi.Controllers.News
     [Authorize]
     public class SubscriptionsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public SubscriptionsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public SubscriptionsController(UserManager<AppUser> userManager, UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
             _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet("user_subscribers")]
@@ -53,7 +52,7 @@ namespace IrzUccApi.Controllers.News
 
         private async Task<IActionResult> GetSubscriptionsOrSubscribersAsync(Guid userId, PagingParameters parameters, bool isSubscriptions)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
                 return NotFound();
 
@@ -84,7 +83,7 @@ namespace IrzUccApi.Controllers.News
 
         private async Task<IActionResult> SubscribeOrUnsubscribeAsync(Guid userId, bool isSubscribe)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
                 return NotFound();
 
@@ -106,7 +105,7 @@ namespace IrzUccApi.Controllers.News
                     user.Subscribers.Remove(currentUser);
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.Users.UpdateAsync(user);
 
             return Ok();
         }

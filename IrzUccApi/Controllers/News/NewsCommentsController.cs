@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Db.Models;
+using IrzUccApi.Enums;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
 using IrzUccApi.Models.Requests.News;
@@ -39,13 +40,13 @@ namespace IrzUccApi.Controllers.News
         [HttpPost]
         public async Task<IActionResult> PostCommentAsync([FromBody] PostCommentRequest request)
         {
-            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(request.NewsEntryId);
-            if (newsEntry == null)
-                return NotFound();
-
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
+
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(request.NewsEntryId);
+            if (newsEntry == null)
+                return NotFound();
 
             var comment = new Comment
             {
@@ -63,13 +64,13 @@ namespace IrzUccApi.Controllers.News
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCommentAsync(Guid id)
         {
-            var comment = await _unitOfWork.Comments.GetByIdAsync(id);
-            if (comment == null)
-                return NotFound();
-
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
+
+            var comment = await _unitOfWork.Comments.GetByIdAsync(id);
+            if (comment == null)
+                return NotFound();
 
             if (comment.Author.Id != currentUser.Id)
                 return Forbid();

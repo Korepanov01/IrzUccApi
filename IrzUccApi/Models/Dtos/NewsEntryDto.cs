@@ -1,7 +1,29 @@
-﻿namespace IrzUccApi.Models.Dtos
+﻿using IrzUccApi.Db.Models;
+
+namespace IrzUccApi.Models.Dtos
 {
     public record NewsEntryDto
     {
+        public NewsEntryDto(NewsEntry newsEntry, AppUser currentUser) : this(
+            newsEntry.Id,
+            newsEntry.Title,
+            newsEntry.Text,
+            newsEntry.Image?.Id,
+            newsEntry.DateTime,
+            currentUser != null && currentUser.LikedNewsEntries.Contains(newsEntry),
+            newsEntry.Likers.Count,
+            new UserHeaderDto(
+                newsEntry.Author.Id,
+                newsEntry.Author.FirstName,
+                newsEntry.Author.Surname,
+                newsEntry.Author.Patronymic,
+                newsEntry.Author.Image?.Id),
+            newsEntry.IsPublic,
+            newsEntry.Comments.Count,
+            false)
+        { }
+
+
         public NewsEntryDto(
             Guid id,
             string title,

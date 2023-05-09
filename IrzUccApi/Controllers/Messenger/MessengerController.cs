@@ -56,10 +56,10 @@ namespace IrzUccApi.Controllers.Messages
             if (participant == null)
                 return NotFound();
 
-            var chatId = await _unitOfWork.Chats
+            var chat = await _unitOfWork.Chats
                 .GetOrCreateByParticipantsAsync(currentUser, participant);
 
-            return Ok(chatId.Id);
+            return Ok(chat.Id);
         }
 
         [HttpGet("messages")]
@@ -84,7 +84,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpPost("messages")]
-        public async Task<IActionResult> PostMessageAsync([FromBody] SendMessageRequest request)
+        public async Task<IActionResult> SendMessageAsync([FromBody] SendMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
                 return BadRequest(new[] { RequestErrorDescriber.MessageCantBeEmpty });
@@ -145,13 +145,13 @@ namespace IrzUccApi.Controllers.Messages
         [HttpDelete("messages/{id}")]
         public async Task<IActionResult> DeleteMessageAsync(Guid id)
         {
-            var message = await _unitOfWork.Messages.GetByIdAsync(id);
-            if (message == null)
-                return NotFound();
-
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
+
+            var message = await _unitOfWork.Messages.GetByIdAsync(id);
+            if (message == null)
+                return NotFound();
 
             if (message.Sender.Id != currentUser.Id)
                 return Forbid();

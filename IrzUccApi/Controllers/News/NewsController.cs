@@ -4,10 +4,10 @@ using IrzUccApi.Enums;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.News;
+using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.News
@@ -17,13 +17,13 @@ namespace IrzUccApi.Controllers.News
     [Authorize]
     public class NewsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public NewsController(AppDbContext dbContext, UserManager<AppUser> userManager)
+        public NewsController(UserManager<AppUser> userManager, UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
             _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -32,48 +32,9 @@ namespace IrzUccApi.Controllers.News
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            var news = _dbContext.NewsEntries.AsQueryable();
+            var news = await _unitOfWork.NewsEntries.GetNewsEntryDtosAsync(currentUser, parameters);
 
-            if (currentUser != null && parameters.AuthorId != null)
-                news = news.Where(n => n.Author.Id == parameters.AuthorId);
-            if (currentUser == null || parameters.PublicOnly)
-                news = news.Where(n => n.IsPublic);
-            if (currentUser != null && parameters.AuthorId == null)
-                news = news.Where(n => n.IsPublic || currentUser.Subscriptions.Contains(n.Author) || n.Author.Id == currentUser.Id);
-            if (currentUser != null && parameters.LikedOnly)
-                news = news.Where(n => n.Likers.Contains(currentUser));
-
-            if (parameters.SearchString != null)
-            {
-                var normalizedSearchWords = parameters.SearchString
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(sw => sw.ToUpper());
-                foreach (var word in normalizedSearchWords)
-                    news = news.Where(n => (n.Title + n.Text).ToUpper().Contains(word));
-            }
-
-            return Ok(await news
-                .OrderByDescending(n => n.DateTime)
-                .Skip(parameters.PageSize * (parameters.PageIndex - 1))
-                .Take(parameters.PageSize)
-                .Select(n => new NewsEntryDto(
-                    n.Id,
-                    n.Title,
-                    n.Text.Substring(0, Math.Min(200, n.Text.Length)),
-                    n.Image != null ? n.Image.Id : null,
-                    n.DateTime,
-                    currentUser != null && currentUser.LikedNewsEntries.Contains(n),
-                    n.Likers.Count,
-                    new UserHeaderDto(
-                        n.Author.Id,
-                        n.Author.FirstName,
-                        n.Author.Surname,
-                        n.Author.Patronymic,
-                        n.Author.Image != null ? n.Author.Image.Id : null),
-                    n.IsPublic,
-                    n.Comments.Count,
-                    n.Text.Length > 200))
-                .ToArrayAsync());
+            return Ok(news);
         }
 
         [HttpPost]
@@ -100,7 +61,7 @@ namespace IrzUccApi.Controllers.News
                     Source = ImageSources.NewsEntry,
                     SourceId = newNewsEntryId
                 };
-                await _dbContext.Images.AddAsync(image);
+                await _unitOfWork.Images.AddAsync(image);
             }
 
             var newsEntry = new NewsEntry
@@ -113,9 +74,7 @@ namespace IrzUccApi.Controllers.News
                 Author = currentUser,
                 IsPublic = request.IsPublic
             };
-            await _dbContext.AddAsync(newsEntry);
-
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.NewsEntries.AddAsync(newsEntry);
 
             return Ok(newsEntry.Id);
         }
@@ -124,7 +83,7 @@ namespace IrzUccApi.Controllers.News
         [AllowAnonymous]
         public async Task<IActionResult> GetNewsEntryTextAsync(Guid id)
         {
-            var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(id);
             if (newsEntry == null)
                 return NotFound();
 
@@ -138,7 +97,7 @@ namespace IrzUccApi.Controllers.News
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNewsEntryAsync(Guid id)
         {
-            var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(id);
             if (newsEntry == null)
                 return NotFound();
 
@@ -146,40 +105,24 @@ namespace IrzUccApi.Controllers.News
             if (!newsEntry.IsPublic && currentUser == null)
                 return Forbid();
 
-            return Ok(new NewsEntryDto(
-                    newsEntry.Id,
-                    newsEntry.Title,
-                    newsEntry.Text,
-                    newsEntry.Image?.Id,
-                    newsEntry.DateTime,
-                    currentUser != null && currentUser.LikedNewsEntries.Contains(newsEntry),
-                    newsEntry.Likers.Count,
-                    new UserHeaderDto(
-                        newsEntry.Author.Id,
-                        newsEntry.Author.FirstName,
-                        newsEntry.Author.Surname,
-                        newsEntry.Author.Patronymic,
-                        newsEntry.Author.Image?.Id),
-                    newsEntry.IsPublic,
-                    newsEntry.Comments.Count,
-                    false));
+            return Ok(new NewsEntryDto(newsEntry, currentUser));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNewsEntryAsync(Guid id)
         {
-            var newsEntry = _dbContext.NewsEntries.FirstOrDefault(n => n.Id == id);
-            if (newsEntry == null)
-                return NotFound();
-
-            var currentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var currentUserId = ClaimsExtractor.ExtractId(User);
             if (currentUserId == null)
                 return Unauthorized();
+
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(id);
+            if (newsEntry == null)
+                return NotFound();
+                        
             if (newsEntry.Author.Id != new Guid(currentUserId) && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Support) && newsEntry.IsPublic)
                 return Forbid();
 
-            _dbContext.Remove(newsEntry);
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.NewsEntries.RemoveAsync(newsEntry);
 
             return Ok();
         }
