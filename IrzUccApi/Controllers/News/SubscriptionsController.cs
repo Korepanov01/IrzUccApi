@@ -56,21 +56,9 @@ namespace IrzUccApi.Controllers.News
             if (user == null)
                 return NotFound();
 
-            var resultUsers = isSubscriptions ? user.Subscriptions : user.Subscribers;
-            return Ok(resultUsers
-                .OrderBy(u => u.FirstName + u.Surname + u.Patronymic + u.Email)
-                .Skip(parameters.PageSize * parameters.PageIndex)
-                .Take(parameters.PageSize)
-                .Select(u => new UserListItemDto(
-                        u.Id,
-                        u.FirstName,
-                        u.Surname,
-                        u.Patronymic,
-                        u.Email,
-                        u.IsActiveAccount,
-                        u.Image?.Id,
-                        u.UserRoles.Select(ur => ur.Role != null ? ur.Role.Name : ""),
-                        u.UserPosition.Where(up => up.End == null).Select(up => new PositionDto(up.Position.Id, up.Position.Name)))));
+            var result = _unitOfWork.Users.GetSubscriptionsOrSubscribers(user, parameters, isSubscriptions);
+
+            return Ok(result);
         }
 
         [HttpPost("subcribe")]

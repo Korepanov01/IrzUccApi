@@ -31,13 +31,13 @@ namespace IrzUccApi.Controllers.News
 
         private async Task<IActionResult> LikeUnlikeNewsEntryAsync(Guid newsEntryId, bool isLike)
         {
-            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(newsEntryId);
-            if (newsEntry == null)
-                return NotFound();
-
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
+
+            var newsEntry = await _unitOfWork.NewsEntries.GetByIdAsync(newsEntryId);
+            if (newsEntry == null)
+                return NotFound();
 
             if (isLike)
             {
