@@ -23,13 +23,8 @@ namespace IrzUccApi.Extensions
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.SecurityKey)),
-
                     ValidateIssuer = false,
-                    ValidIssuer = jwtConfiguration.Issuer,
-
                     ValidateAudience = false,
-                    ValidAudience = jwtConfiguration.Audience,
-
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };

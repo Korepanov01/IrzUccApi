@@ -54,9 +54,7 @@ namespace IrzUccApi.Services
                     _symmetricSecurityKey,
                     SecurityAlgorithms.HmacSha256Signature),
                 IssuedAt = DateTime.UtcNow,
-                NotBefore = DateTime.UtcNow,
-                Audience = _jwtConfiguration.Audience,
-                Issuer = _jwtConfiguration.Issuer
+                NotBefore = DateTime.UtcNow
             };
         }
 
