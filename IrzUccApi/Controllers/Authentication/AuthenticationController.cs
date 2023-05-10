@@ -74,6 +74,9 @@ namespace IrzUccApi.Controllers.Authentication
             if (user == null)
                 return BadRequest(new[] { RequestErrorDescriber.WrongJwt });
 
+            if (!user.IsActiveAccount)
+                return BadRequest(new[] { RequestErrorDescriber.AccountDeactivated });
+
             if (user.RefreshToken != request.RefreshToken)
                 return BadRequest(new[] { RequestErrorDescriber.WrongRefreshToken });
 

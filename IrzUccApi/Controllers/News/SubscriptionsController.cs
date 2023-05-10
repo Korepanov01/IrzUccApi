@@ -71,13 +71,13 @@ namespace IrzUccApi.Controllers.News
 
         private async Task<IActionResult> SubscribeOrUnsubscribeAsync(Guid userId, bool isSubscribe)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                return NotFound();
-
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
+
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null)
+                return NotFound();
 
             if (user.Id == currentUser.Id)
                 return BadRequest();
