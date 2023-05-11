@@ -40,7 +40,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostNewsEntryAsync([FromBody] PostNewsEntryRequest request)
+        public async Task<IActionResult> PostNewsEntryAsync([FromForm] PostNewsEntryRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)

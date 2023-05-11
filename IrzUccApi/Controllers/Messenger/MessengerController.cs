@@ -85,7 +85,7 @@ namespace IrzUccApi.Controllers.Messages
         }
 
         [HttpPost("messages")]
-        public async Task<IActionResult> SendMessageAsync([FromBody] SendMessageRequest request)
+        public async Task<IActionResult> SendMessageAsync([FromForm] SendMessageRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) && request.Image == null)
                 return BadRequest(new[] { RequestErrorDescriber.MessageCantBeEmpty });
