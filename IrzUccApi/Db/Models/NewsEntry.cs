@@ -16,7 +16,7 @@ namespace IrzUccApi.Db.Models
         public virtual Image? Image { get; set; }
 
         public virtual AppUser Author { get; set; } = new AppUser();
-        public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
-        public virtual ICollection<AppUser> Likers { get; set; } = new HashSet<AppUser>();
+        public virtual ISet<Comment> Comments { get; set; } = new HashSet<Comment>();
+        public virtual ISet<AppUser> Likers { get; set; } = new HashSet<AppUser>();
     }
 }
