@@ -1,5 +1,6 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Db.Models;
+using IrzUccApi.Db.Repositories;
 using IrzUccApi.Enums;
 using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Hubs;
@@ -104,15 +105,18 @@ namespace IrzUccApi.Controllers.Messages
             Image? image = null;
             if (request.Image != null)
             {
-                image = new Image
+                try
                 {
-                    Name = request.Image.Name,
-                    Extension = request.Image.Extension,
-                    Data = request.Image.Data,
-                    Source = ImageSources.Message,
-                    SourceId = newMessageId
-                };
-                await _unitOfWork.Images.AddAsync(image);
+                    image = await _unitOfWork.Images.AddAsync(request.Image);
+                }
+                catch (FileTooBigException)
+                {
+                    return BadRequest(RequestErrorDescriber.FileTooBig);
+                }
+                catch (ForbiddenFileExtensionException)
+                {
+                    return BadRequest(RequestErrorDescriber.ForbiddenExtention);
+                }
             }
 
             var message = new Message

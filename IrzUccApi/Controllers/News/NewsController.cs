@@ -1,6 +1,8 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Db.Models;
+using IrzUccApi.Db.Repositories;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.News;
@@ -52,16 +54,18 @@ namespace IrzUccApi.Controllers.News
             Image? image = null;
             if (request.Image != null)
             {
-                image = new Image
+                try
                 {
-                    Id = Guid.NewGuid(),
-                    Name = request.Image.Name,
-                    Extension = request.Image.Extension,
-                    Data = request.Image.Data,
-                    Source = ImageSources.NewsEntry,
-                    SourceId = newNewsEntryId
-                };
-                await _unitOfWork.Images.AddAsync(image);
+                    image = await _unitOfWork.Images.AddAsync(request.Image);
+                }
+                catch (FileTooBigException)
+                {
+                    return BadRequest(RequestErrorDescriber.FileTooBig);
+                }
+                catch (ForbiddenFileExtensionException)
+                {
+                    return BadRequest(RequestErrorDescriber.ForbiddenExtention);
+                }
             }
 
             var newsEntry = new NewsEntry

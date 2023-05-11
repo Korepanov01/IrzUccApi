@@ -1,9 +1,9 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Db.Models;
-using IrzUccApi.Enums;
+using IrzUccApi.Db.Repositories;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
-using IrzUccApi.Models.Requests.Images;
 using IrzUccApi.Models.Requests.User;
 using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -63,30 +63,32 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("me/update_photo")]
-    public async Task<IActionResult> UpdatePhotoAsync([FromBody] ImageRequest request)
+    public async Task<IActionResult> UpdatePhotoAsync(IFormFile file)
     {
         var currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)
             return Unauthorized();
 
-        var image = new Image
+        try
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Extension = request.Extension,
-            Data = request.Data,
-            Source = ImageSources.User,
-            SourceId = currentUser.Id,
-        };
-        await _unitOfWork.Images.AddAsync(image);
+            var image = await _unitOfWork.Images.AddAsync(file);
 
-        if (currentUser.Image != null)
-            await _unitOfWork.Images.RemoveAsync(currentUser.Image);
-        currentUser.Image = image;
+            if (currentUser.Image != null)
+                await _unitOfWork.Images.RemoveAsync(currentUser.Image);
+            currentUser.Image = image;
 
-        await _unitOfWork.Users.UpdateAsync(currentUser);
+            await _unitOfWork.Users.UpdateAsync(currentUser);
 
-        return Ok(image.Id);
+            return Ok(image.Id);
+        }
+        catch (FileTooBigException)
+        {
+            return BadRequest(RequestErrorDescriber.FileTooBig);
+        }
+        catch (ForbiddenFileExtensionException)
+        {
+            return BadRequest(RequestErrorDescriber.ForbiddenExtention);
+        }
     }
 
     [HttpPut("me/delete_photo")]

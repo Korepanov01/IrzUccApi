@@ -1,5 +1,4 @@
-﻿using IrzUccApi.Models.Requests.Images;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IrzUccApi.Models.Requests.News
 {
@@ -11,7 +10,7 @@ namespace IrzUccApi.Models.Requests.News
         [Required(AllowEmptyStrings = false)]
         [MaxLength(5000)]
         public string Text { get; set; } = string.Empty;
-        public ImageRequest? Image { get; set; }
+        public IFormFile? Image { get; set; }
         public bool IsPublic { get; set; }
     }
 }
