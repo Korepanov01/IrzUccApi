@@ -48,8 +48,8 @@ namespace IrzUccApi.Db.Repositories
                 chat = new Chat
                 {
                     Participants = currentUser.Id != recipient.Id
-                        ? new[] { currentUser, recipient }
-                        : new[] { currentUser }
+                        ? new HashSet<AppUser>() { currentUser, recipient }
+                        : new HashSet<AppUser> { currentUser }
                 };
                 await _dbContext.AddAsync(chat);
                 await _dbContext.SaveChangesAsync();
