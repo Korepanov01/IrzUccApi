@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Cms;
 
 namespace IrzUccApi.Controllers.Messages
 {
@@ -58,7 +60,19 @@ namespace IrzUccApi.Controllers.Messages
                 return NotFound();
 
             var chat = await _unitOfWork.Chats
-                .GetOrCreateByParticipantsAsync(currentUser, participant);
+                .GetByParticipantsAsync(currentUser, participant);
+
+            if (chat == null)
+            {
+                chat = new Chat
+                {
+                    Participants = currentUser.Id != participant.Id
+                        ? new HashSet<AppUser>() { currentUser, participant }
+                        : new HashSet<AppUser> { currentUser }
+                };
+                _unitOfWork.Chats.Add(chat);
+                await _unitOfWork.SaveAsync();
+            }
 
             return Ok(chat.Id);
         }
@@ -94,13 +108,23 @@ namespace IrzUccApi.Controllers.Messages
             if (currentUser == null)
                 return Unauthorized();
 
-            var recipient = await _userManager.FindByIdAsync(request.UserId);
-            if (recipient == null)
+            var participant = await _userManager.FindByIdAsync(request.UserId);
+            if (participant == null)
                 return BadRequest(new[] { RequestErrorDescriber.UserDoesntExist });
 
-            var chat = await _unitOfWork.Chats.GetOrCreateByParticipantsAsync(currentUser, recipient);
-
-            var newMessageId = Guid.NewGuid();
+            var chat = await _unitOfWork.Chats
+                .GetByParticipantsAsync(currentUser, participant);
+            if (chat == null)
+            {
+                chat = new Chat
+                {
+                    Participants = currentUser.Id != participant.Id
+                        ? new HashSet<AppUser>() { currentUser, participant }
+                        : new HashSet<AppUser> { currentUser }
+                };
+                _unitOfWork.Chats.Add(chat);
+                await _unitOfWork.SaveAsync();
+            }
 
             Image? image = null;
             if (request.Image != null)
@@ -121,7 +145,6 @@ namespace IrzUccApi.Controllers.Messages
 
             var message = new Message
             {
-                Id = newMessageId,
                 Text = request.Text,
                 Image = image,
                 IsReaded = false,
@@ -129,10 +152,12 @@ namespace IrzUccApi.Controllers.Messages
                 Sender = currentUser,
                 Chat = chat
             };
-            await _unitOfWork.Messages.AddAsync(message);
+            _unitOfWork.Messages.Add(message);
 
             chat.LastMessage = message;
-            await _unitOfWork.Chats.UpdateAsync(chat);
+            _unitOfWork.Chats.Update(chat);
+
+            await _unitOfWork.SaveAsync();
 
             var messageDto = new MessageDto(message);
             await _chatHub.Clients
@@ -163,11 +188,13 @@ namespace IrzUccApi.Controllers.Messages
             var chat = message.Chat;
             if (chat.LastMessage?.Id == message.Id)
             {
-                chat.LastMessage = _unitOfWork.Messages.GetPenultimateMessage(chat);
-                await _unitOfWork.Chats.UpdateAsync(chat);
+                chat.LastMessage = await _unitOfWork.Messages.GetPenultimateMessageAsync(chat);
+                _unitOfWork.Chats.Update(chat);
             }
 
-            await _unitOfWork.Messages.RemoveAsync(message);
+            _unitOfWork.Messages.Remove(message);
+
+            await _unitOfWork.SaveAsync();
 
             var recipientId = _unitOfWork.Chats.GetRecipientId(currentUser, chat);
             await _chatHub.Clients

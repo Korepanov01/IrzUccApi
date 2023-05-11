@@ -42,17 +42,5 @@ namespace IrzUccApi.Db.Repositories
             => await _dbContext.UserPositions
             .Where(up => up.End == null && up.Position.Id == position.Id && up.User.Id == user.Id)
             .AnyAsync();
-
-        public async Task AddPositionToUserAsync(Position position, AppUser user, DateTime start)
-        {
-            var userPosition = new UserPosition
-            {
-                Start = start.ToUniversalTime(),
-                Position = position,
-                User = user
-            };
-            await _dbContext.AddAsync(userPosition);
-            await _dbContext.SaveChangesAsync();
-        }
     }
 }

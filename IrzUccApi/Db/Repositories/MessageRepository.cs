@@ -49,10 +49,13 @@ namespace IrzUccApi.Db.Repositories
                 .Where(m => m.Chat.Id == chatId)
                 .Where(m => m.Sender.Id != currentUserId && !m.IsReaded)
                 .ForEachAsync(m => m.IsReaded = true);
-            await _dbContext.SaveChangesAsync();
         }
 
-        public Message? GetPenultimateMessage(Chat chat)
-            => chat.Messages.OrderByDescending(m => m.DateTime).Skip(1).FirstOrDefault();
+        public async Task<Message?> GetPenultimateMessageAsync(Chat chat)
+            => await _dbContext.Messages
+            .Where(m => m.Chat.Id == chat.Id)
+            .OrderByDescending(m => m.DateTime)
+            .Skip(1)
+            .FirstOrDefaultAsync();
     }
 }

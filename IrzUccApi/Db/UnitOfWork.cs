@@ -17,6 +17,7 @@ namespace IrzUccApi.Db
         private RoleRepository? _roleRepository;
         private UserPositionRepository? _userPositionRepository;
         private UserRepository? _userRepository;
+        private UserRoleRepository? _userRoleRepository;
 
         public CabinetRepository Cabinets
         {
@@ -107,9 +108,21 @@ namespace IrzUccApi.Db
             }
         }
 
+        public UserRoleRepository UserRole
+        {
+            get
+            {
+                _userRoleRepository ??= new UserRoleRepository(_dbContext);
+                return _userRoleRepository;
+            }
+        }
+
         public UnitOfWork(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+
+        public async Task SaveAsync()
+            => await _dbContext.SaveChangesAsync();
     }
 }

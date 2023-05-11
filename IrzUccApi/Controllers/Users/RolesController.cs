@@ -59,24 +59,33 @@ namespace IrzUccApi.Controllers.Users
                 || !isSuperAdmin && (request.Role == RolesNames.Admin || await _userManager.IsInRoleAsync(user, RolesNames.SuperAdmin)))
                 return Forbid();
 
+            var role = await _unitOfWork.Roles.GetByNameAsync(request.Role);
+            if (role == null)
+                return NotFound(new[] { RequestErrorDescriber.ThereIsNoSuchRole });
+
             if (isAdding)
             {
-                var role = await _unitOfWork.Roles.GetByNameAsync(request.Role);
-                if (role == null)
-                    return NotFound(new[] { RequestErrorDescriber.ThereIsNoSuchRole });
-
                 if (await _userManager.IsInRoleAsync(user, request.Role))
                     return BadRequest(new[] { RequestErrorDescriber.UserAlreadyWithThisRole });
 
-                await _unitOfWork.Roles.AddRoleToUserAsync(role, user);
+                var userRole = new AppUserRole
+                {
+                    User = user,
+                    Role = role,
+                };
+
+                _unitOfWork.UserRole.Add(userRole);
             }
             else
             {
-                if (!await _userManager.IsInRoleAsync(user, request.Role))
+                var userRole = await _unitOfWork.UserRole.GetByRoleAndUserAsync(role, user);
+                if (userRole == null)
                     return BadRequest(new[] { RequestErrorDescriber.UserIsNotWithThisRole });
 
-                await _unitOfWork.Roles.RemoveRoleFromUserAsync(request.Role, request.UserId);
+                _unitOfWork.UserRole.Remove(userRole);
             }
+
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

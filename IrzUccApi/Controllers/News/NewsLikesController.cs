@@ -48,7 +48,8 @@ namespace IrzUccApi.Controllers.News
                 newsEntry.Likers.Remove(currentUser);
             }
 
-            await _unitOfWork.NewsEntries.UpdateAsync(newsEntry);
+            _unitOfWork.NewsEntries.Update(newsEntry);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

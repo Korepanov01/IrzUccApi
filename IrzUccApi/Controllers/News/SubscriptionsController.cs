@@ -91,7 +91,8 @@ namespace IrzUccApi.Controllers.News
                 user.Subscribers.Remove(currentUser);
             }
 
-            await _unitOfWork.Users.UpdateAsync(user);
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

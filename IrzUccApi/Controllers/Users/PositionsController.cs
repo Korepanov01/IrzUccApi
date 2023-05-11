@@ -8,6 +8,7 @@ using IrzUccApi.Models.Requests.Position;
 using IrzUccApi.Models.Requests.Positions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace IrzUccApi.Controllers.Users
 {
@@ -43,7 +44,8 @@ namespace IrzUccApi.Controllers.Users
                 Name = request.Name
             };
 
-            await _unitOfWork.Positions.AddAsync(position);
+            _unitOfWork.Positions.Add(position);
+            await _unitOfWork.SaveAsync();
 
             return Ok(new PositionDto(position));
         }
@@ -61,7 +63,8 @@ namespace IrzUccApi.Controllers.Users
 
             position.Name = request.Name;
 
-            await _unitOfWork.Positions.UpdateAsync(position);
+            _unitOfWork.Positions.Update(position);
+            await _unitOfWork.SaveAsync(); 
 
             return Ok();
         }
@@ -77,7 +80,8 @@ namespace IrzUccApi.Controllers.Users
             if (await _unitOfWork.Positions.OwnedByAnyUserAsync(position))
                 return BadRequest(new[] { RequestErrorDescriber.ThereAreUsersWithThisPosition });
 
-            await _unitOfWork.Positions.RemoveAsync(position);
+            _unitOfWork.Positions.Remove(position);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }
@@ -97,7 +101,14 @@ namespace IrzUccApi.Controllers.Users
             if (await _unitOfWork.Positions.OwnedByUserAsync(position, user))
                 return BadRequest(new[] { RequestErrorDescriber.UserAlreadyOnPosition });
 
-            await _unitOfWork.Positions.AddPositionToUserAsync(position, user, request.Start);
+            var userPosition = new UserPosition
+            {
+                Start = request.Start.ToUniversalTime(),
+                Position = position,
+                User = user
+            };
+            _unitOfWork.UserPositions.Add(userPosition);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }
@@ -114,7 +125,7 @@ namespace IrzUccApi.Controllers.Users
             if (user == null)
                 return NotFound(new[] { RequestErrorDescriber.UserDoesntExist });
 
-            var userPosition = await _unitOfWork.UserPositions.GetByPositionAndUserAsunc(position, user);
+            var userPosition = await _unitOfWork.UserPositions.GetByPositionAndUserAsync(position, user);
             if (userPosition == null)
                 return BadRequest(new[] { RequestErrorDescriber.UserIsNotInPosition });
 
@@ -123,7 +134,8 @@ namespace IrzUccApi.Controllers.Users
             
             userPosition.End = request.End.ToUniversalTime();
 
-            await _unitOfWork.UserPositions.UpdateAsync(userPosition);
+            _unitOfWork.UserPositions.Update(userPosition);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

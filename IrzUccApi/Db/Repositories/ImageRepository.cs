@@ -32,7 +32,7 @@ namespace IrzUccApi.Db.Repositories
                 ContentType = file.ContentType
             };
 
-            await AddAsync(image);
+            Add(image);
 
             return image;
         }

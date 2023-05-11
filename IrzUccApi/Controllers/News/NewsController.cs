@@ -10,7 +10,6 @@ using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.News
 {
@@ -78,7 +77,9 @@ namespace IrzUccApi.Controllers.News
                 Author = currentUser,
                 IsPublic = request.IsPublic
             };
-            await _unitOfWork.NewsEntries.AddAsync(newsEntry);
+            _unitOfWork.NewsEntries.Add(newsEntry);
+
+            await _unitOfWork.SaveAsync();
 
             return Ok(newsEntry.Id);
         }
@@ -126,7 +127,8 @@ namespace IrzUccApi.Controllers.News
             if (newsEntry.Author.Id != new Guid(currentUserId) && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Support) && newsEntry.IsPublic)
                 return Forbid();
 
-            await _unitOfWork.NewsEntries.RemoveAsync(newsEntry);
+            _unitOfWork.NewsEntries.Remove(newsEntry);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

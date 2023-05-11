@@ -1,7 +1,4 @@
 ﻿using IrzUccApi.Db;
-using IrzUccApi.Db.Models;
-using IrzUccApi.Db.Repositories;
-using IrzUccApi.ErrorDescribers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IrzUccApi.Controllers.Images

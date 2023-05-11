@@ -74,10 +74,12 @@ public class UsersController : ControllerBase
             var image = await _unitOfWork.Images.AddAsync(file);
 
             if (currentUser.Image != null)
-                await _unitOfWork.Images.RemoveAsync(currentUser.Image);
+                _unitOfWork.Images.Remove(currentUser.Image);
             currentUser.Image = image;
 
-            await _unitOfWork.Users.UpdateAsync(currentUser);
+            _unitOfWork.Users.Update(currentUser);
+
+            await _unitOfWork.SaveAsync();
 
             return Ok(image.Id);
         }
@@ -99,7 +101,10 @@ public class UsersController : ControllerBase
             return Unauthorized();
 
         if (currentUser.Image != null)
-            await _unitOfWork.Images.RemoveAsync(currentUser.Image);
+        {
+            _unitOfWork.Images.Remove(currentUser.Image);
+            await _unitOfWork.SaveAsync();
+        }
 
         return Ok();
     }

@@ -56,7 +56,8 @@ namespace IrzUccApi.Controllers.News
                 Author = currentUser
             };
 
-            await _unitOfWork.Comments.AddAsync(comment);
+            _unitOfWork.Comments.Add(comment);
+            await _unitOfWork.SaveAsync();
 
             return Ok(new CommentDto(comment));
         }
@@ -75,7 +76,9 @@ namespace IrzUccApi.Controllers.News
             if (comment.Author.Id != currentUser.Id)
                 return Forbid();
 
-            await _unitOfWork.Comments.RemoveAsync(comment);
+            _unitOfWork.Comments.Remove(comment);
+
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }
