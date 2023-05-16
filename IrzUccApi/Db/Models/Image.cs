@@ -10,8 +10,5 @@ namespace IrzUccApi.Db.Models
         [MaxLength(10)]
         public string ContentType { get; set; } = string.Empty;
         public byte[] Content { get; set; } = Array.Empty<byte>();
-
-        public ImageSources Source { get; set; }
-        public Guid SourceId { get; set; }
     }
 }
