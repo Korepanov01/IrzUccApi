@@ -42,5 +42,8 @@
         public static readonly RequestError TooLongPeriod = new(nameof(TooLongPeriod), "Период просмотра событий не может быть дольше 40 дней!");
         public static readonly RequestError CabinetNotFound = new(nameof(CabinetNotFound), "Не существует такого кабинета!");
         public static readonly RequestError PublicEventHasNotListeners = new(nameof(PublicEventHasNotListeners), "Публичное событие не может иметь слушателей!");
+
+        public static readonly RequestError ForbiddenExtention = new(nameof(ForbiddenExtention), "Расширение файла не поддерживается!");
+        public static readonly RequestError FileTooBig = new(nameof(FileTooBig), "Слишком большой файл!");
     }
 }

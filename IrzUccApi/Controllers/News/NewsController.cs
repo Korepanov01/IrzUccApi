@@ -1,6 +1,8 @@
 ﻿using IrzUccApi.Db;
 using IrzUccApi.Db.Models;
+using IrzUccApi.Db.Repositories;
 using IrzUccApi.Enums;
+using IrzUccApi.ErrorDescribers;
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.GetOptions;
 using IrzUccApi.Models.Requests.News;
@@ -8,7 +10,6 @@ using IrzUccApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.News
 {
@@ -38,7 +39,7 @@ namespace IrzUccApi.Controllers.News
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostNewsEntryAsync([FromBody] PostNewsEntryRequest request)
+        public async Task<IActionResult> PostNewsEntryAsync([FromForm] PostNewsEntryRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -52,16 +53,18 @@ namespace IrzUccApi.Controllers.News
             Image? image = null;
             if (request.Image != null)
             {
-                image = new Image
+                try
                 {
-                    Id = Guid.NewGuid(),
-                    Name = request.Image.Name,
-                    Extension = request.Image.Extension,
-                    Data = request.Image.Data,
-                    Source = ImageSources.NewsEntry,
-                    SourceId = newNewsEntryId
-                };
-                await _unitOfWork.Images.AddAsync(image);
+                    image = await _unitOfWork.Images.AddAsync(request.Image);
+                }
+                catch (FileTooBigException)
+                {
+                    return BadRequest(RequestErrorDescriber.FileTooBig);
+                }
+                catch (ForbiddenFileExtensionException)
+                {
+                    return BadRequest(RequestErrorDescriber.ForbiddenExtention);
+                }
             }
 
             var newsEntry = new NewsEntry
@@ -74,7 +77,9 @@ namespace IrzUccApi.Controllers.News
                 Author = currentUser,
                 IsPublic = request.IsPublic
             };
-            await _unitOfWork.NewsEntries.AddAsync(newsEntry);
+            _unitOfWork.NewsEntries.Add(newsEntry);
+
+            await _unitOfWork.SaveAsync();
 
             return Ok(newsEntry.Id);
         }
@@ -122,7 +127,8 @@ namespace IrzUccApi.Controllers.News
             if (newsEntry.Author.Id != new Guid(currentUserId) && !newsEntry.IsPublic || !User.IsInRole(RolesNames.Support) && newsEntry.IsPublic)
                 return Forbid();
 
-            await _unitOfWork.NewsEntries.RemoveAsync(newsEntry);
+            _unitOfWork.NewsEntries.Remove(newsEntry);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

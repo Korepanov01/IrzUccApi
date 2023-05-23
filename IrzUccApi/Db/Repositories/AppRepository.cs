@@ -15,37 +15,26 @@ namespace IrzUccApi.Db.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddAsync(TEntity entity)
+        public void Add(TEntity entity)
         {
+            if (entity.Id == Guid.Empty)
+                entity.Id = Guid.NewGuid();
             _dbContext.Set<TEntity>().Add(entity);
-            await _dbContext.SaveChangesAsync();
         }
 
-        public async Task RemoveAsync(TEntity entity)
-        {
-            _dbContext.Set<TEntity>().Remove(entity);
-            await _dbContext.SaveChangesAsync();
-        }
+        public void Remove(TEntity entity)
+            => _dbContext.Set<TEntity>().Remove(entity);
 
         public async Task<TEntity?> GetByIdAsync(Guid id)
-        {
-            return await _dbContext.Set<TEntity>().FindAsync(id);
-        }
+            => await _dbContext.Set<TEntity>().FindAsync(id);
 
-        public async Task UpdateAsync(TEntity entity)
-        {
-            _dbContext.Set<TEntity>().Update(entity);
-            await _dbContext.SaveChangesAsync();
-        }
+        public void Update(TEntity entity)
+            => _dbContext.Entry(entity).State = EntityState.Modified;
 
         public async Task<bool> ExistsAsync(Guid id)
-        {
-            return await ExistsAsync(e => e.Id == id);
-        }
+            => await ExistsAsync(e => e.Id == id);
 
         public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await _dbContext.Set<TEntity>().AnyAsync(predicate);
-        }
+            => await _dbContext.Set<TEntity>().AnyAsync(predicate);
     }
 }

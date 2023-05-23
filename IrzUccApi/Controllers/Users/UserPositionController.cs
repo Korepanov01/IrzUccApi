@@ -1,8 +1,6 @@
 ﻿using IrzUccApi.Db;
-using IrzUccApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace IrzUccApi.Controllers.Users
@@ -12,11 +10,11 @@ namespace IrzUccApi.Controllers.Users
     [Authorize]
     public class UserPositionController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly UnitOfWork _unitOfWork;
 
-        public UserPositionController(AppDbContext dbContext)
+        public UserPositionController(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -34,20 +32,13 @@ namespace IrzUccApi.Controllers.Users
 
         private async Task<IActionResult> GetUserPositionsByUserIdAsync(Guid id)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _unitOfWork.Users.GetByIdAsync(id);
             if (user == null)
                 return NotFound();
 
-            return Ok(user.UserPosition
-                .OrderBy(up => up.Start)
-                .Select(up => new UserPositionDto(
-                    up.Id,
-                    up.Start,
-                    up.End,
-                    new PositionDto(
-                        up.Position.Id,
-                        up.Position.Name)))
-                .ToArray());
+            var userPositions = await _unitOfWork.UserPositions.GetDtosAsync(user);
+
+            return Ok(userPositions);
         }
     }
 }

@@ -84,16 +84,15 @@ namespace IrzUccApi.Controllers.News
 
             if (isSubscribe)
             {
-                if (!user.Subscribers.Contains(currentUser))
-                    user.Subscribers.Add(currentUser);
+                user.Subscribers.Add(currentUser);
             }
             else
             {
-                if (user.Subscribers.Contains(currentUser))
-                    user.Subscribers.Remove(currentUser);
+                user.Subscribers.Remove(currentUser);
             }
 
-            await _unitOfWork.Users.UpdateAsync(user);
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

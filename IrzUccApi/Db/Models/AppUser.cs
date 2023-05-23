@@ -22,15 +22,15 @@ namespace IrzUccApi.Db.Models
 
         public virtual Image? Image { get; set; }
 
-        public virtual ICollection<Chat> Chats { get; set; } = new HashSet<Chat>();
-        public virtual ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();
-        public virtual ICollection<AppUser> Subscriptions { get; set; } = new HashSet<AppUser>();
-        public virtual ICollection<AppUser> Subscribers { get; set; } = new HashSet<AppUser>();
-        public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
-        public virtual ICollection<Event> Events { get; set; } = new HashSet<Event>();
-        public virtual ICollection<Event> ListeningEvents { get; set; } = new HashSet<Event>();
-        public virtual ICollection<NewsEntry> LikedNewsEntries { get; set; } = new HashSet<NewsEntry>();
-        public virtual ICollection<NewsEntry> NewsEntries { get; set; } = new HashSet<NewsEntry>();
-        public virtual ICollection<UserPosition> UserPosition { get; set; } = new HashSet<UserPosition>();
+        public virtual ISet<Chat> Chats { get; set; } = new HashSet<Chat>();
+        public virtual ISet<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();
+        public virtual ISet<AppUser> Subscriptions { get; set; } = new HashSet<AppUser>();
+        public virtual ISet<AppUser> Subscribers { get; set; } = new HashSet<AppUser>();
+        public virtual ISet<Comment> Comments { get; set; } = new HashSet<Comment>();
+        public virtual ISet<Event> Events { get; set; } = new HashSet<Event>();
+        public virtual ISet<Event> ListeningEvents { get; set; } = new HashSet<Event>();
+        public virtual ISet<NewsEntry> LikedNewsEntries { get; set; } = new HashSet<NewsEntry>();
+        public virtual ISet<NewsEntry> NewsEntries { get; set; } = new HashSet<NewsEntry>();
+        public virtual ISet<UserPosition> UserPosition { get; set; } = new HashSet<UserPosition>();
     }
 }

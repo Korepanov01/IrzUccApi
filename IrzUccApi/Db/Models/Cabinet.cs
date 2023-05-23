@@ -9,6 +9,6 @@ namespace IrzUccApi.Db.Models
         [Required(AllowEmptyStrings = false)]
         public string Name { get; set; } = string.Empty;
 
-        public virtual ICollection<Event> Events { get; set; } = new HashSet<Event>();
+        public virtual ISet<Event> Events { get; set; } = new HashSet<Event>();
     }
 }

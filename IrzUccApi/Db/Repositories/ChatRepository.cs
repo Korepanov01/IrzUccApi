@@ -2,6 +2,7 @@
 using IrzUccApi.Models.Dtos;
 using IrzUccApi.Models.PagingOptions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace IrzUccApi.Db.Repositories
 {
@@ -40,22 +41,13 @@ namespace IrzUccApi.Db.Repositories
                 .ToArray();
         }
 
-        public async Task<Chat> GetOrCreateByParticipantsAsync(AppUser currentUser, AppUser recipient)
+        public async Task<Chat?> GetByParticipantsAsync(AppUser currentUser, AppUser recipient)
         {
-            var chat = await _dbContext.Chats.FirstOrDefaultAsync(c => c.Participants.Contains(currentUser) && c.Participants.Contains(recipient));
-            if (chat == null)
-            {
-                chat = new Chat
-                {
-                    Participants = currentUser.Id != recipient.Id
-                        ? new[] { currentUser, recipient }
-                        : new[] { currentUser }
-                };
-                await _dbContext.AddAsync(chat);
-                await _dbContext.SaveChangesAsync();
-            }
-
-            return chat;
+            Expression<Func<Chat, bool>> filter = currentUser.Id != recipient.Id 
+                ? c => c.Participants.Contains(currentUser) && c.Participants.Contains(recipient)
+                : c => c.Participants.Contains(currentUser) && c.Participants.Count == 1;
+        
+            return await _dbContext.Chats.FirstOrDefaultAsync(filter);
         }
 
         public Guid? GetRecipientId(AppUser currentUser, Chat chat)

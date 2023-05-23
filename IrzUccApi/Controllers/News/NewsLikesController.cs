@@ -41,16 +41,15 @@ namespace IrzUccApi.Controllers.News
 
             if (isLike)
             {
-                if (!newsEntry.Likers.Contains(currentUser))
-                    newsEntry.Likers.Add(currentUser);
+                newsEntry.Likers.Add(currentUser);
             }
             else
             {
-                if (newsEntry.Likers.Contains(currentUser))
-                    newsEntry.Likers.Remove(currentUser);
+                newsEntry.Likers.Remove(currentUser);
             }
 
-            await _unitOfWork.NewsEntries.UpdateAsync(newsEntry);
+            _unitOfWork.NewsEntries.Update(newsEntry);
+            await _unitOfWork.SaveAsync();
 
             return Ok();
         }

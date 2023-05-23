@@ -12,6 +12,6 @@ namespace IrzUccApi.Db.Models
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        public virtual ICollection<AppUser> Users { get; set; } = new HashSet<AppUser>();
+        public virtual ISet<AppUser> Users { get; set; } = new HashSet<AppUser>();
     }
 }
